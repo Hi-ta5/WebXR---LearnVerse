@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WebXR Queue Visualization</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+
+    body{
+      margin:0;
+      overflow:hidden;
+      font-family:Arial;
+    }
+
+    .ui{
+      position:absolute;
+      top:20px;
+      left:20px;
+      width:300px;
+      background:rgba(0,0,0,0.85);
+      color:white;
+      padding:15px;
+      border-radius:12px;
+      z-index:999;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .ui h2{
+      margin-top:0;
+      color:#00ffff;
+    }
+
+    input, select{
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      border:none;
+      border-radius:8px;
+      box-sizing:border-box;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    
+    option {
+      background: #111827;
+      color: white;
+    }
+
+    button{
+      width:100%;
+      margin-top:10px;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:bold;
+      background:#00ffff;
+      color:black;
+      transition: background 0.2s;
+    }
+
+    button:hover{
+      background: #00cccc;
+    }
+
+    #info{
+      margin-top:10px;
+      color:#22c55e;
+      font-weight:bold;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="ui">
+
+  <h2>QUEUE VR LAB</h2>
+
+  <select id="queueType">
+    <option value="normal">Normal Queue</option>
+    <option value="circular">Circular Queue</option>
+    <option value="priority">Priority Queue</option>
+  </select>
+
+  <input
+    type="number"
+    id="valueInput"
+    placeholder="Enter Value">
+
+  <button onclick="enqueue()">Enqueue</button>
+
+  <button onclick="dequeue()">Dequeue</button>
+
+  <button onclick="peekQueue()">Peek Front</button>
+
+  <div id="info">Front Element: None</div>
+
+</div>
+
+<a-scene background="color:#020617" vr-mode-ui="enabled:true">
+
+  <!-- Assets -->
+  <a-assets>
+
+    <a-asset-item
+      id="robotModel"
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+    </a-asset-item>
+
+  </a-assets>
+
+  <!-- Camera -->
+  <a-camera position="0 3 14"></a-camera>
+
+  <!-- Lights -->
+  <a-light type="ambient" intensity="1"></a-light>
+
+  <a-light
+    type="point"
+    intensity="2"
+    position="0 10 5">
+  </a-light>
+
+  <!-- Ground -->
+  <a-plane
+    rotation="-90 0 0"
+    width="60"
+    height="60"
+    color="#111827">
+  </a-plane>
+
+  <!-- Sky -->
+  <a-sky color="#020617"></a-sky>
+
+  <!-- Header -->
+  <a-text
+    value="WEBXR QUEUE VISUALIZATION"
+    position="-6 7 -14"
+    scale="3 3 3"
+    color="#00ffff">
+  </a-text>
+
+  <!-- Decorative Robots -->
+
+  <a-gltf-model
+    src="#robotModel"
+    position="-10 0 -10"
+    scale="0.8 0.8 0.8"
+    animation="
+      property: rotation;
+      to: 0 360 0;
+      loop: true;
+      dur: 20000">
+  </a-gltf-model>
+
+  <a-gltf-model
+    src="#robotModel"
+    position="10 0 -10"
+    scale="0.8 0.8 0.8"
+    animation="
+      property: rotation;
+      to: 0 -360 0;
+      loop: true;
+      dur: 20000">
+  </a-gltf-model>
+
+  <!-- Queue Path -->
+  <a-cylinder
+    position="0 0.1 -8"
+    radius="5"
+    height="0.2"
+    color="#1f2937">
+  </a-cylinder>
+
+  <!-- Queue Container -->
+  <a-entity id="queueContainer"></a-entity>
+
+</a-scene>
+
+<script>
+
+let queue = [10, 20, 30];
+
+const container =
+  document.querySelector('#queueContainer');
+
+function renderQueue(highlightFront = false){
+
+  container.innerHTML = '';
+
+  const type =
+    document.getElementById('queueType').value;
+
+  // NORMAL + PRIORITY QUEUE
+  if(type === 'normal' || type === 'priority'){
+
+    queue.forEach((value, index) => {
+
+      let color = '#3b82f6';
+
+      if(highlightFront && index === 0){
+        color = '#22c55e';
+      }
+
+      // PERSON BLOCK
+      const block = document.createElement('a-box');
+
+      block.setAttribute(
+        'position',
+        `${index * 2.5 - 4} 1.5 -8`
+      );
+
+      block.setAttribute('width', '1.5');
+      block.setAttribute('height', '2');
+      block.setAttribute('depth', '1.5');
+
+      block.setAttribute('color', color);
+
+      // Glow
+      block.setAttribute(
+        'material',
+        'emissive: #00ffff; emissiveIntensity: 0.4'
+      );
+
+      // Floating animation
+      block.setAttribute(
+        'animation',
+        `property: position;
+         dir: alternate;
+         dur: 1200;
+         loop: true;
+         to: ${index * 2.5 - 4} 1.8 -8`
+      );
+
+      // VALUE TEXT
+      const text = document.createElement('a-text');
+
+      text.setAttribute('value', value);
+
+      text.setAttribute('align', 'center');
+
+      text.setAttribute('color', 'white');
+
+      text.setAttribute('position', '0 1.5 0.8');
+
+      text.setAttribute('scale', '2 2 2');
+
+      block.appendChild(text);
+
+      container.appendChild(block);
+
+      // FLOW ARROW
+      if(index < queue.length - 1){
+
+        const arrow =
+          document.createElement('a-cylinder');
+
+        arrow.setAttribute(
+          'position',
+          `${index * 2.5 - 2.8} 1.5 -8`
+        );
+
+        arrow.setAttribute('radius', '0.05');
+
+        arrow.setAttribute('height', '1.5');
+
+        arrow.setAttribute('rotation', '0 0 90');
+
+        arrow.setAttribute('color', '#00ffff');
+
+        container.appendChild(arrow);
+      }
+    });
+  }
+
+  // CIRCULAR QUEUE
+  if(type === 'circular'){
+
+    const radius = 5;
+
+    queue.forEach((value, index) => {
+
+      const angle =
+        (index / queue.length) * Math.PI * 2;
+
+      const x = Math.cos(angle) * radius;
+
+      const z = Math.sin(angle) * radius - 8;
+
+      let color = '#3b82f6';
+
+      if(highlightFront && index === 0){
+        color = '#22c55e';
+      }
+
+      const block = document.createElement('a-box');
+
+      block.setAttribute(
+        'position',
+        `${x} 1.5 ${z}`
+      );
+
+      block.setAttribute('width', '1.5');
+
+      block.setAttribute('height', '2');
+
+      block.setAttribute('depth', '1.5');
+
+      block.setAttribute('color', color);
+
+      block.setAttribute(
+        'material',
+        'emissive: #00ffff; emissiveIntensity: 0.4'
+      );
+
+      // Rotation animation
+      block.setAttribute(
+        'animation',
+        `
+        property: rotation;
+        to: 0 360 0;
+        loop: true;
+        dur: 8000
+        `
+      );
+
+      const text = document.createElement('a-text');
+
+      text.setAttribute('value', value);
+
+      text.setAttribute('align', 'center');
+
+      text.setAttribute('color', 'white');
+
+      text.setAttribute('position', '0 1.5 0.8');
+
+      text.setAttribute('scale', '2 2 2');
+
+      block.appendChild(text);
+
+      container.appendChild(block);
+    });
+  }
+}
+
+function enqueue(){
+
+  const value = parseInt(
+    document.getElementById('valueInput').value
+  );
+
+  if(!isNaN(value)){
+
+    const type =
+      document.getElementById('queueType').value;
+
+    if(type === 'priority'){
+
+      queue.push(value);
+
+      queue.sort((a,b) => a-b);
+    }
+    else{
+
+      queue.push(value);
+    }
+
+    renderQueue();
+  }
+}
+
+function dequeue(){
+
+  if(queue.length > 0){
+
+    queue.shift();
+
+    renderQueue();
+
+    document.getElementById('info').innerHTML =
+      'Front Element: None';
+  }
+}
+
+function peekQueue(){
+
+  if(queue.length > 0){
+
+    renderQueue(true);
+
+    document.getElementById('info').innerHTML =
+      'Front Element: ' + queue[0];
+  }
+}
+
+renderQueue();
+
+document
+  .getElementById('queueType')
+  .addEventListener('change', renderQueue);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CyberOSI — WebXR Networking Layer-Lab</title>
+  <!-- Modern Font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- A-Frame Library -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #060814;
+      --bg-panel: rgba(10, 15, 36, 0.75);
+      --border-glow: rgba(0, 242, 254, 0.25);
+      --cyan: #00f2fe;
+      --magenta: #ff007f;
+      --gold: #ffaa00;
+      --green: #00ff87;
+      --glass-blur: blur(16px);
+      --shadow-glow: 0 0 20px rgba(0, 242, 254, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+    }
+
+    /* 2D HUD UI Overlay */
+    .hud-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none; /* Let clicks pass through to A-Frame unless on UI panels */
+      display: grid;
+      grid-template-columns: 320px 1fr 360px;
+      grid-template-rows: auto 1fr auto;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .ui-panel {
+      background: var(--bg-panel);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 20px;
+      pointer-events: auto; /* Enable interaction with controls */
+      box-shadow: var(--shadow-glow);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ui-panel:hover {
+      border-color: rgba(0, 242, 254, 0.4);
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.25);
+    }
+
+    /* Header Panel */
+    .header-panel {
+      grid-column: 1 / span 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      height: 70px;
+    }
+
+    .header-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--cyan), #4facfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0,242,254,0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title span {
+      font-size: 11px;
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      background: rgba(0, 242, 254, 0.1);
+    }
+
+    .header-stats {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #94a3b8;
+      display: flex;
+      gap: 20px;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    .stat-dot.receiver {
+      background-color: var(--magenta);
+      box-shadow: 0 0 8px var(--magenta);
+    }
+
+    /* Left Sidebar: Layer Stack Comparison */
+    .stack-panel {
+      grid-column: 1;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .panel-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 5px;
+    }
+
+    .layer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .layer-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      align-items: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .layer-item:hover {
+      background: rgba(0, 242, 254, 0.07);
+      border-color: rgba(0, 242, 254, 0.3);
+      transform: translateX(4px);
+    }
+
+    .layer-item.active {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.15);
+    }
+
+    .layer-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--cyan);
+    }
+
+    .layer-name-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .layer-name-osi {
+      font-weight: 600;
+      font-size: 14px;
+      color: #f1f5f9;
+    }
+
+    .layer-name-tcp {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .layer-pdu {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #94a3b8;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.2);
+    }
+
+    /* Right Sidebar: Inspection Matrix */
+    .inspect-panel {
+      grid-column: 3;
+      height: 100%;
+      overflow-y: auto;
+      border-color: rgba(255, 0, 127, 0.15);
+    }
+
+    .inspect-panel:hover {
+      border-color: rgba(255, 0, 127, 0.35);
+      box-shadow: 0 0 25px rgba(255, 0, 127, 0.15);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0 0 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .badge-pdu-detail {
+      color: var(--magenta);
+      font-weight: 600;
+    }
+
+    .detail-section {
+      margin-bottom: 18px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      border-left: 3px solid var(--cyan);
+    }
+
+    .detail-section.receiver-side {
+      border-left-color: var(--magenta);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .section-content {
+      font-size: 13.5px;
+      color: #e2e8f0;
+      line-height: 1.4;
+    }
+
+    .protocol-tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .protocol-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      padding: 2px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    /* Live Packet Assembly Map in right panel */
+    .packet-map-container {
+      margin-top: 15px;
+      padding: 12px;
+      background: rgba(5, 5, 10, 0.5);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .packet-map-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .visual-pdu-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .pdu-chunk {
+      padding: 4px;
+      border-radius: 4px;
+      color: #000;
+      font-weight: bold;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .pdu-chunk.data { background-color: var(--cyan); }
+    .pdu-chunk.encrypt { background-color: #60efff; color: #111; }
+    .pdu-chunk.session { background-color: #a18cd1; color: white; }
+    .pdu-chunk.tcp { background-color: #3b82f6; color: white; }
+    .pdu-chunk.ip { background-color: var(--green); }
+    .pdu-chunk.mac { background-color: #ef4444; color: white; }
+    .pdu-chunk.crc { background-color: #991b1b; color: white; }
+
+    /* Bottom Panel: Controls */
+    .controls-panel {
+      grid-column: 1 / span 3;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      height: 90px;
+      gap: 30px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.15);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      border: none;
+      color: #060814;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 15px rgba(0, 198, 255, 0.35);
+    }
+
+    .btn.primary:hover {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.55);
+      color: #060814;
+      border: none;
+    }
+
+    .btn.danger {
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .btn.danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: #ef4444;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn.view-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      border-radius: 6px;
+      border-color: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .btn.view-btn.active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0, 242, 254, 0.08);
+    }
+
+    /* Slider Container */
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 180px;
+    }
+
+    .slider-label {
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 5px;
+      background: #1e293b;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--cyan);
+      transition: transform 0.1s;
+    }
+
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Simulation Status display */
+    .sim-status-display {
+      text-align: right;
+    }
+
+    .sim-label {
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sim-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--green);
+      letter-spacing: 0.5px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 242, 254, 0.2);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1100px) {
+      .hud-overlay {
+        grid-template-columns: 260px 1fr 280px;
+        padding: 10px;
+        gap: 10px;
+      }
+      .header-panel {
+        padding: 10px 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 2D HUD UI Overlay Layer -->
+  <div class="hud-overlay">
+    
+
+
+    <!-- Left Sidebar: Layer Navigation Matrix -->
+    <aside class="ui-panel stack-panel">
+      <div class="panel-section-title">Networking Layer Stack</div>
+      <ul class="layer-list" id="layerNavList">
+        <!-- Rendered dynamically by script -->
+      </ul>
+    </aside>
+
+    <!-- Right Sidebar: Inspection & Telemetry Panel -->
+    <aside class="ui-panel inspect-panel" id="inspectPanel">
+      <div class="panel-section-title">Holographic Telemetry</div>
+      
+      <div id="inspectDefaultMessage" style="text-align: center; margin-top: 50%; color: #64748b;">
+        <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin: 0 auto 15px; display: block; opacity: 0.5;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+        </svg>
+        Select a layer or initiate a simulation transfer to inspect packet structure changes.
+      </div>
+
+      <div id="inspectContent" style="display: none;">
+        <h2 class="card-title" id="inspectTitle">Layer Name</h2>
+        <div class="card-subtitle">
+          <span id="inspectEquivalence">TCP/IP Equivalent</span>
+          <span class="badge-pdu-detail" id="inspectPDU">PDU Unit</span>
+        </div>
+        
+        <div class="detail-section">
+          <div class="section-label">General Role & Function</div>
+          <div class="section-content" id="inspectRole">Description here.</div>
+        </div>
+
+        <div class="detail-section receiver-side">
+          <div class="section-label">Protocols Engaged</div>
+          <div class="protocol-tag-container" id="inspectProtocols">
+            <!-- Dynamic tags -->
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-label" id="actionLabel">Transformation Process</div>
+          <div class="section-content" id="inspectAction">Transformation notes.</div>
+        </div>
+
+        <div class="packet-map-container">
+          <div class="packet-map-title">
+            <span>Visual PDU Map</span>
+            <span id="packetMapState" style="color: var(--cyan); font-weight: bold;">Frame Assembly</span>
+          </div>
+          <div class="visual-pdu-flow" id="packetMapVisual">
+            <!-- Dynamic chunk display representing visual encapsulation hierarchy -->
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Bottom Controls panel -->
+    <footer class="ui-panel controls-panel">
+      <!-- Simulation Actions -->
+      <div class="control-group">
+        <button class="btn primary" id="btnSendPacket" onclick="startFullSimulation()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 2px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          Send Packet
+        </button>
+        <button class="btn" id="btnPlayPause" onclick="togglePlayPause()" disabled>
+          Play / Pause
+        </button>
+        <button class="btn danger" onclick="resetSimulation()">
+          Reset
+        </button>
+      </div>
+
+      <!-- Simulation Parameter / Speed control -->
+      <div class="control-group">
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>Simulation Speed</span>
+            <span id="speedValue">1.0x</span>
+          </div>
+          <input type="range" class="slider" id="speedSlider" min="0.2" max="3" step="0.2" value="1.0" oninput="updateSimSpeed(this.value)">
+        </div>
+
+        <!-- Stepper -->
+        <button class="btn" onclick="stepBackward()" title="Step Backward">
+          &larr;
+        </button>
+        <button class="btn" onclick="stepForward()" title="Step Forward">
+          &rarr;
+        </button>
+      </div>
+
+      <!-- Camera Traverses / Shortcuts -->
+      <div class="control-group">
+        <span class="slider-label" style="margin-right: 5px;">Camera Ride:</span>
+        <button class="btn view-btn active" id="camViewOverview" onclick="setCameraView('overview')">Overview</button>
+        <button class="btn view-btn" id="camViewSender" onclick="setCameraView('sender')">Sender Node</button>
+        <button class="btn view-btn" id="camViewReceiver" onclick="setCameraView('receiver')">Receiver Node</button>
+      </div>
+
+      <!-- Real-time Status -->
+      <div class="sim-status-display">
+        <div class="sim-label">SIMULATOR STATUS</div>
+        <div class="sim-value" id="simStatusText">SYSTEM IDLE</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- A-Frame 3D Scene Layer -->
+  <a-scene background="color: #030409" vr-mode-ui="enabled: true" cursor="raycaster: .clickable">
+
+    <!-- Pre-load Custom assets & mixins -->
+    <a-assets>
+      <!-- Cybergrid Texture -->
+      <img id="gridTex" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/textures/grid.png" crossorigin="anonymous">
+      <!-- Glow Shader / Material properties -->
+      <a-mixin id="glowingPlatform" material="emissiveIntensity: 0.6; metalness: 0.8; roughness: 0.2; opacity: 0.85; transparent: true"></a-mixin>
+      <a-mixin id="ringLaser" geometry="primitive: torus; radius: 1.2; radiusTubular: 0.015; segmentsTubular: 32" material="shader: flat; transparent: true; opacity: 0.75" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"></a-mixin>
+    </a-assets>
+
+    <!-- Custom Camera Rig that we can animate dynamically vertically -->
+    <a-entity id="cameraRig" position="0 6.5 12" rotation="0 0 0">
+      <a-camera id="mainCamera" look-controls="pointerLockEnabled: false" wasd-controls="enabled: true">
+        <!-- Cursor pointer for clicking elements directly in 3D -->
+        <a-cursor 
+          id="sceneCursor" 
+          raycaster="objects: .clickable" 
+          material="color: #00f2fe; shader: flat" 
+          scale="0.8 0.8 0.8"
+          animation__hover="property: scale; startEvents: mouseenter; to: 1.4 1.4 1.4; dur: 150"
+          animation__leave="property: scale; startEvents: mouseleave; to: 0.8 0.8 0.8; dur: 150">
+        </a-cursor>
+      </a-camera>
+
+      <!-- Laser Controls for VR mode -->
+      <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 20"></a-entity>
+      <a-entity laser-controls="hand: right" raycaster="objects: .clickable; far: 20"></a-entity>
+    </a-entity>
+
+    <!-- Holographic 3D Global Space Lights -->
+    <a-light type="ambient" color="#1e293b" intensity="0.8"></a-light>
+    <!-- Direct lighting simulating neon colors cast on structures -->
+    <a-light type="point" color="#00f2fe" intensity="1.8" position="-5 7 -3" distance="15"></a-light>
+    <a-light type="point" color="#ff007f" intensity="1.8" position="5 7 -3" distance="15"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.5" position="0 15 10"></a-light>
+
+    <!-- Background Space / Horizon -->
+    <a-sky color="#03040c" radius="50"></a-sky>
+
+    <!-- Neon Horizon Wireframe Grid -->
+    <a-plane 
+      rotation="-90 0 0" 
+      width="100" 
+      height="100" 
+      material="src: #gridTex; repeat: 40 40; color: #1e1b4b; opacity: 0.3; roughness: 1" 
+      position="0 0 0">
+    </a-plane>
+
+    <!-- ============================================== -->
+    <!-- SENDER TOWER (Left Structure, x = -4) -->
+    <!-- ============================================== -->
+    <a-entity id="senderTower" position="-4.5 0 -4">
+      
+      <!-- Core Backbone Beam -->
+      <a-cylinder radius="0.1" height="14.5" color="#00f2fe" position="0 7 0" material="emissive: #00f2fe; emissiveIntensity: 0.3; transparent: true; opacity: 0.6"></a-cylinder>
+
+      <!-- Decorative Cyber Support cage -->
+      <a-box position="0 7 0" width="1" height="14.2" depth="1" material="wireframe: true; color: #1e293b; opacity: 0.4"></a-box>
+
+      <!-- Tower Base Platform -->
+      <a-cylinder radius="2" height="0.4" position="0 0.2 0" color="#0b1329" material="metalness: 0.9; roughness: 0.1">
+        <a-cylinder radius="1.8" height="0.05" position="0 0.21 0" color="#00f2fe" material="emissive: #00f2fe; emissiveIntensity: 0.5"></a-cylinder>
+      </a-cylinder>
+      <a-text value="SENDER NODE" align="center" position="0 0.8 1.8" color="#00f2fe" scale="1.5 1.5 1.5"></a-text>
+
+      <!-- Dynamic Layer Platforms container (rendered via script) -->
+      <a-entity id="senderPlatforms"></a-entity>
+    </a-entity>
+
+    <!-- ============================================== -->
+    <!-- RECEIVER TOWER (Right Structure, x = 4) -->
+    <!-- ============================================== -->
+    <a-entity id="receiverTower" position="4.5 0 -4">
+      
+      <!-- Core Backbone Beam -->
+      <a-cylinder radius="0.1" height="14.5" color="#ff007f" position="0 7 0" material="emissive: #ff007f; emissiveIntensity: 0.3; transparent: true; opacity: 0.6"></a-cylinder>
+
+      <!-- Decorative Cyber Support cage -->
+      <a-box position="0 7 0" width="1" height="14.2" depth="1" material="wireframe: true; color: #1e293b; opacity: 0.4"></a-box>
+
+      <!-- Tower Base Platform -->
+      <a-cylinder radius="2" height="0.4" position="0 0.2 0" color="#0b1329" material="metalness: 0.9; roughness: 0.1">
+        <a-cylinder radius="1.8" height="0.05" position="0 0.21 0" color="#ff007f" material="emissive: #ff007f; emissiveIntensity: 0.5"></a-cylinder>
+      </a-cylinder>
+      <a-text value="RECEIVER NODE" align="center" position="0 0.8 1.8" color="#ff007f" scale="1.5 1.5 1.5"></a-text>
+
+      <!-- Dynamic Layer Platforms container (rendered via script) -->
+      <a-entity id="receiverPlatforms"></a-entity>
+    </a-entity>
+
+    <!-- ============================================== -->
+    <!-- PHYSICAL CONDUIT BRIDGE (Transfers L1 to L1) -->
+    <!-- ============================================== -->
+    <a-entity id="physicalBridge">
+      <!-- Outer Tube -->
+      <a-cylinder 
+        position="0 1.5 -4" 
+        rotation="0 0 90" 
+        radius="0.15" 
+        height="9" 
+        color="#00ff87" 
+        material="transparent: true; opacity: 0.45; emissive: #00ff87; emissiveIntensity: 0.3">
+      </a-cylinder>
+      <!-- Core light pulse filament -->
+      <a-cylinder 
+        position="0 1.5 -4" 
+        rotation="0 0 90" 
+        radius="0.03" 
+        height="9" 
+        color="#ffffff" 
+        material="shader: flat; transparent: true; opacity: 0.9">
+      </a-cylinder>
+      
+      <!-- Dynamic particles (moving bits) will be children here -->
+      <a-entity id="conduitParticles"></a-entity>
+
+      <!-- Tech panel above conduit -->
+      <a-box position="0 2.2 -4" width="3" height="0.6" depth="0.2" color="#0b0f2a" material="opacity: 0.9">
+        <a-text value="PHYSICAL MEDIUM (FIBER OPTIC CHANNEL)" align="center" position="0 0 0.11" scale="0.6 0.6 0.6" color="#00ff87"></a-text>
+      </a-box>
+    </a-entity>
+
+    <!-- ============================================== -->
+    <!-- DYNAMIC 3D PACKET ENTITY (Encapsulating Model) -->
+    <!-- ============================================== -->
+    <a-entity id="visualPacket" position="-4.5 13.5 -4" scale="0 0 0" visible="false">
+      <!-- Central core payload (Cyan data cube) -->
+      <a-box id="packetCore" width="0.7" height="0.7" depth="0.7" color="#00f2fe" material="roughness: 0.1; metalness: 0.3; opacity: 0.85; transparent: true; emissive: #00f2fe; emissiveIntensity: 0.4">
+        <!-- Inside message indicator label -->
+        <a-text value="DATA" align="center" position="0 0 0.36" scale="0.9 0.9 0.9" color="#03040c" font="monoid"></a-text>
+      </a-box>
+
+      <!-- Layer 6 Presentation: Crystalline Shell representation (Matrix encryption) -->
+      <a-box id="packPresentation" width="0.75" height="0.75" depth="0.75" color="#60efff" visible="false"
+             material="wireframe: true; wireframeLinewidth: 2; transparent: true; opacity: 0.8; emissive: #60efff; emissiveIntensity: 0.6">
+      </a-box>
+
+      <!-- Layer 5 Session: Violet collar ring added at the top -->
+      <a-torus id="packSession" position="0 0.42 0" rotation="90 0 0" radius="0.4" radius-tubular="0.04" color="#a18cd1" visible="false"
+               material="emissive: #a18cd1; emissiveIntensity: 0.8"></a-torus>
+
+      <!-- Layer 4 Transport: Blue segment cylinders (Wraps TCP Ports) -->
+      <a-entity id="packTransport" visible="false">
+        <a-cylinder position="-0.45 0 0" radius="0.12" height="0.9" color="#3b82f6" material="emissive: #3b82f6; emissiveIntensity: 0.6"></a-cylinder>
+        <a-cylinder position="0.45 0 0" radius="0.12" height="0.9" color="#3b82f6" material="emissive: #3b82f6; emissiveIntensity: 0.6"></a-cylinder>
+        <a-text value="TCP" align="center" position="0 0.5 0" scale="0.6 0.6 0.6" color="#3b82f6"></a-text>
+      </a-entity>
+
+      <!-- Layer 3 Network: Green IP encapsulation shield wrapper -->
+      <a-sphere id="packNetwork" radius="0.65" color="#00ff87" visible="false"
+                material="transparent: true; opacity: 0.45; roughness: 0.1; metalness: 0.5; emissive: #00ff87; emissiveIntensity: 0.4">
+        <a-text value="IP HDR" align="center" position="0 0 0.68" scale="0.5 0.5 0.5" color="#ffffff"></a-text>
+      </a-sphere>
+
+      <!-- Layer 2 Data Link: Red ethernet frames front (MAC Header) and back (Trailer) -->
+      <a-entity id="packDataLink" visible="false">
+        <!-- Front MAC Header Block -->
+        <a-box position="0 0 0.5" width="1.2" height="0.4" depth="0.15" color="#ef4444" material="emissive: #ef4444; emissiveIntensity: 0.6">
+          <a-text value="MAC Hdr" align="center" position="0 0 0.08" scale="0.4 0.4 0.4" color="white"></a-text>
+        </a-box>
+        <!-- Back MAC Trailer / CRC Check Block -->
+        <a-box position="0 0 -0.5" width="1.2" height="0.4" depth="0.15" color="#991b1b" material="emissive: #991b1b; emissiveIntensity: 0.6">
+          <a-text value="CRC Trlr" align="center" position="0 0 -0.08" rotation="0 180 0" scale="0.4 0.4 0.4" color="white"></a-text>
+        </a-box>
+      </a-entity>
+    </a-entity>
+
+  </a-scene>
+
+  <!-- ============================================== -->
+  <!-- SIMULATION AND UI LOGIC -->
+  <!-- ============================================== -->
+  <script>
+    // Detailed Networking Layers Model Data (OSI mapped with TCP/IP equivalents)
+    const layers = [
+      {
+        num: 7,
+        name: "Application",
+        tcpip: "Application",
+        pdu: "Data",
+        color: "#00f2fe",
+        role: "Serves as the window for users and application processes to access network services.",
+        protocols: ["HTTP", "HTTPS", "DNS", "FTP", "SMTP", "SSH", "WebSocket"],
+        actionSender: "Creates the primary PDU containing the message data: { msg: 'Hello Net!' }.",
+        actionReceiver: "Unpacks raw payload directly into the destination application socket stream.",
+        visualMap: ["data"]
+      },
+      {
+        num: 6,
+        name: "Presentation",
+        tcpip: "Application",
+        pdu: "Data",
+        color: "#60efff",
+        role: "Formats, encrypts, decrypts, and compresses data to ensure compatibility between heterogeneous systems.",
+        protocols: ["SSL", "TLS", "ASCII", "JPEG", "MP4", "GZIP"],
+        actionSender: "Transforms character payload into compressed, encrypted bytes (via TLS handshake).",
+        actionReceiver: "Decrypts encrypted packets and decompresses data streams back to human-readable strings.",
+        visualMap: ["encrypt", "data"]
+      },
+      {
+        num: 5,
+        name: "Session",
+        tcpip: "Application",
+        pdu: "Data",
+        color: "#a18cd1",
+        role: "Establishes, maintains, coordinates, and terminates session connections between local and remote applications.",
+        protocols: ["Sockets", "NetBIOS", "RPC", "PPTP", "SOCKS"],
+        actionSender: "Spawns communication socket tokens and appends a Session ID Header (e.g. ID: 8940) for connection state.",
+        actionReceiver: "Verifies Session token IDs, logs state parameters, and synchronizes transport data dialogs.",
+        visualMap: ["session", "encrypt", "data"]
+      },
+      {
+        num: 4,
+        name: "Transport",
+        tcpip: "Transport",
+        pdu: "Segment",
+        color: "#3b82f6",
+        role: "Responsible for end-to-end communication flow control, reliability, error correction, and stream segmentation.",
+        protocols: ["TCP", "UDP", "SCTP", "QUIC"],
+        actionSender: "Segments data stream and mounts the TCP Header containing source & target port markers (e.g. Src: 443, Dst: 58000).",
+        actionReceiver: "Validates sequence numbers, acknowledges receipt, reassembles segments, and strips transport TCP clamps.",
+        visualMap: ["tcp", "session", "encrypt", "data"]
+      },
+      {
+        num: 3,
+        name: "Network",
+        tcpip: "Network / Internet",
+        pdu: "Packet",
+        color: "#00ff87",
+        role: "Manages logical routing of packets across multiple gateways and intermediate nodes using logical IP addressing.",
+        protocols: ["IPv4", "IPv6", "ICMP", "IPsec", "OSPF", "ARP"],
+        actionSender: "Encapsulates segments within an IP Packet Shell containing Source and Destination IP Addresses.",
+        actionReceiver: "Validates IP headers, confirms packet routing matches host interfaces, and strips logical network casing.",
+        visualMap: ["ip", "tcp", "session", "encrypt", "data"]
+      },
+      {
+        num: 2,
+        name: "Data Link",
+        tcpip: "Network Access",
+        pdu: "Frame",
+        color: "#ef4444",
+        role: "Facilitates reliable node-to-node data transfer across local links, parsing physical MAC addresses and performing error checks.",
+        protocols: ["Ethernet", "Wi-Fi (802.11)", "PPP", "LLC", "ARP"],
+        actionSender: "Applies a physical MAC Header (hardware nodes) and stamps a Cyclical Redundancy Check (CRC) trailer for hardware integrity.",
+        actionReceiver: "Calculates local CRC to verify data integrity, confirms destination hardware MAC address matches, and strips frame caps.",
+        visualMap: ["mac", "ip", "tcp", "session", "encrypt", "data", "crc"]
+      },
+      {
+        num: 1,
+        name: "Physical",
+        tcpip: "Network Access",
+        pdu: "Bits",
+        color: "#ffd200",
+        role: "Transmits raw bit streams (electrical pulses, light signals, radio frequencies) over physical cabling hardware.",
+        protocols: ["Cat6 Copper", "Fiber Optics", "DSL", "Bluetooth", "100BASE-T"],
+        actionSender: "Serializes frame packets into electronic frequencies or laser bursts representing raw binary bits (0s and 1s).",
+        actionReceiver: "Gathers raw optical pulses or cable voltages, converting mechanical waveforms back into a coherent binary frame.",
+        visualMap: []
+      }
+    ].reverse(); // Physical (Layer 1) to Application (Layer 7)
+
+    // State Variables
+    let currentStep = -1; // -1: Idle/Unstarted. 0-6: Sender Descent. 7: Transit. 8-14: Receiver Ascent.
+    let simulationTimer = null;
+    let isPlaying = false;
+    let simSpeed = 1.0;
+    let selectedLayerNum = 7; // Application by default
+    let isSenderActiveFocus = true;
+
+    // A-Frame element references
+    const senderPlatformsContainer = document.querySelector('#senderPlatforms');
+    const receiverPlatformsContainer = document.querySelector('#receiverPlatforms');
+    const visualPacket = document.querySelector('#visualPacket');
+    const conduitParticles = document.querySelector('#conduitParticles');
+    const cameraRig = document.querySelector('#cameraRig');
+
+    // UI elements references
+    const layerNavList = document.getElementById('layerNavList');
+    const inspectDefaultMessage = document.getElementById('inspectDefaultMessage');
+    const inspectContent = document.getElementById('inspectContent');
+    const inspectTitle = document.getElementById('inspectTitle');
+    const inspectEquivalence = document.getElementById('inspectEquivalence');
+    const inspectPDU = document.getElementById('inspectPDU');
+    const inspectRole = document.getElementById('inspectRole');
+    const inspectProtocols = document.getElementById('inspectProtocols');
+    const inspectAction = document.getElementById('inspectAction');
+    const actionLabel = document.getElementById('actionLabel');
+    const packetMapVisual = document.getElementById('packetMapVisual');
+    const packetMapState = document.getElementById('packetMapState');
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const speedValue = document.getElementById('speedValue');
+    const simStatusText = document.getElementById('simStatusText');
+
+    // Setup and initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      build2DLayerNavList();
+      build3DPlatforms();
+      selectLayer(7); // Select Application Layer initially
+      resetSimulation();
+    });
+
+    // Build the left 2D sidebar layers list
+    function build2DLayerNavList() {
+      layerNavList.innerHTML = '';
+      // Visual stack representation: Top to Bottom (L7 to L1)
+      const displayOrder = [...layers].reverse(); 
+      
+      displayOrder.forEach(layer => {
+        const li = document.createElement('li');
+        li.className = `layer-item ${layer.num === selectedLayerNum ? 'active' : ''}`;
+        li.id = `layerItem-${layer.num}`;
+        li.onclick = () => selectLayer(layer.num);
+
+        li.innerHTML = `
+          <span class="layer-num">L${layer.num}</span>
+          <div class="layer-name-group">
+            <span class="layer-name-osi">${layer.name}</span>
+            <span class="layer-name-tcp">TCP/IP: ${layer.tcpip}</span>
+          </div>
+          <span class="layer-pdu">${layer.pdu}</span>
+        `;
+        layerNavList.appendChild(li);
+      });
+    }
+
+    // Build the 3D Layer Ring Platforms and Labels
+    function build3DPlatforms() {
+      senderPlatformsContainer.innerHTML = '';
+      receiverPlatformsContainer.innerHTML = '';
+
+      layers.forEach((layer) => {
+        const heightY = getLayerHeight(layer.num);
+        
+        // ----------------------------------------------------
+        // SENDER LAYER (Left Tower)
+        // ----------------------------------------------------
+        const senderPlatform = document.createElement('a-entity');
+        senderPlatform.setAttribute('position', `0 ${heightY} 0`);
+        
+        // Outer Neon Glow Ring
+        const ring = document.createElement('a-entity');
+        ring.setAttribute('mixin', 'ringLaser');
+        ring.setAttribute('material', `color: ${layer.color}; opacity: 0.6`);
+        senderPlatform.appendChild(ring);
+
+        // Thin semi-translucent disk
+        const disc = document.createElement('a-cylinder');
+        disc.setAttribute('radius', '1.3');
+        disc.setAttribute('height', '0.04');
+        disc.setAttribute('color', '#0b1329');
+        disc.setAttribute('material', `transparent: true; opacity: 0.7; emissive: ${layer.color}; emissiveIntensity: 0.15`);
+        disc.className = 'clickable';
+        // When clicked in 3D, select this layer
+        disc.addEventListener('click', () => {
+          selectLayer(layer.num, 'sender');
+        });
+        senderPlatform.appendChild(disc);
+
+        // Hologram light column
+        const column = document.createElement('a-cylinder');
+        column.setAttribute('radius', '1.0');
+        column.setAttribute('height', '2.0');
+        column.setAttribute('position', '0 1.0 0');
+        column.setAttribute('material', `shader: flat; transparent: true; opacity: 0.05; color: ${layer.color}; side: double`);
+        senderPlatform.appendChild(column);
+
+        // Floating floating 3D text label
+        const txt = document.createElement('a-text');
+        txt.setAttribute('value', `L${layer.num}: ${layer.name.toUpperCase()}`);
+        txt.setAttribute('position', '1.6 0.1 0');
+        txt.setAttribute('rotation', '0 0 0');
+        txt.setAttribute('scale', '0.9 0.9 0.9');
+        txt.setAttribute('color', layer.color);
+        txt.setAttribute('font', 'monoid');
+        senderPlatform.appendChild(txt);
+
+        senderPlatformsContainer.appendChild(senderPlatform);
+
+        // ----------------------------------------------------
+        // RECEIVER LAYER (Right Tower)
+        // ----------------------------------------------------
+        const receiverPlatform = document.createElement('a-entity');
+        receiverPlatform.setAttribute('position', `0 ${heightY} 0`);
+
+        // Outer Neon Glow Ring
+        const ringR = document.createElement('a-entity');
+        ringR.setAttribute('mixin', 'ringLaser');
+        ringR.setAttribute('material', `color: ${layer.color}; opacity: 0.6`);
+        receiverPlatform.appendChild(ringR);
+
+        // Thin disc
+        const discR = document.createElement('a-cylinder');
+        discR.setAttribute('radius', '1.3');
+        discR.setAttribute('height', '0.04');
+        discR.setAttribute('color', '#0b1329');
+        discR.setAttribute('material', `transparent: true; opacity: 0.7; emissive: ${layer.color}; emissiveIntensity: 0.15`);
+        discR.className = 'clickable';
+        discR.addEventListener('click', () => {
+          selectLayer(layer.num, 'receiver');
+        });
+        receiverPlatform.appendChild(discR);
+
+        // Hologram light column
+        const columnR = document.createElement('a-cylinder');
+        columnR.setAttribute('radius', '1.0');
+        columnR.setAttribute('height', '2.0');
+        columnR.setAttribute('position', '0 1.0 0');
+        columnR.setAttribute('material', `shader: flat; transparent: true; opacity: 0.05; color: ${layer.color}; side: double`);
+        receiverPlatform.appendChild(columnR);
+
+        // Floating text label
+        const txtR = document.createElement('a-text');
+        txtR.setAttribute('value', `L${layer.num}: ${layer.name.toUpperCase()}`);
+        txtR.setAttribute('position', '-2.6 0.1 0');
+        txtR.setAttribute('rotation', '0 0 0');
+        txtR.setAttribute('scale', '0.9 0.9 0.9');
+        txtR.setAttribute('color', layer.color);
+        txtR.setAttribute('font', 'monoid');
+        receiverPlatform.appendChild(txtR);
+
+        receiverPlatformsContainer.appendChild(receiverPlatform);
+      });
+    }
+
+    // Helper: Map layer number to vertical height coordinate
+    function getLayerHeight(layerNum) {
+      // Space layers out vertically from y=2 to y=14
+      return (layerNum - 1) * 1.9 + 2.0;
+    }
+
+    // Select and inspect a specific layer
+    function selectLayer(layerNum, side = 'sender') {
+      selectedLayerNum = layerNum;
+      isSenderActiveFocus = (side === 'sender');
+
+      // Update 2D list UI active state
+      document.querySelectorAll('.layer-item').forEach(item => item.classList.remove('active'));
+      const activeItem = document.getElementById(`layerItem-${layerNum}`);
+      if (activeItem) activeItem.classList.add('active');
+
+      const layerData = layers.find(l => l.num === layerNum);
+      if (!layerData) return;
+
+      // Populate right sidebar details
+      inspectDefaultMessage.style.display = 'none';
+      inspectContent.style.display = 'block';
+      
+      inspectTitle.textContent = `L${layerData.num}: ${layerData.name}`;
+      inspectTitle.style.color = layerData.color;
+      
+      inspectEquivalence.textContent = `TCP/IP Equivalence: ${layerData.tcpip}`;
+      inspectPDU.textContent = layerData.pdu;
+      inspectPDU.style.color = layerData.color;
+
+      inspectRole.textContent = layerData.role;
+
+      // Build Protocols Tags
+      inspectProtocols.innerHTML = '';
+      layerData.protocols.forEach(proto => {
+        const span = document.createElement('span');
+        span.className = 'protocol-tag';
+        span.textContent = proto;
+        inspectProtocols.appendChild(span);
+      });
+
+      // Update Action labels based on sender/receiver focus
+      if (isSenderActiveFocus) {
+        actionLabel.textContent = "SENDER-SIDE ENCAPSULATION";
+        inspectAction.textContent = layerData.actionSender;
+        document.querySelector('.inspect-panel').style.borderColor = 'rgba(0, 242, 254, 0.25)';
+      } else {
+        actionLabel.textContent = "RECEIVER-SIDE DECAPSULATION";
+        inspectAction.textContent = layerData.actionReceiver;
+        document.querySelector('.inspect-panel').style.borderColor = 'rgba(255, 0, 127, 0.25)';
+      }
+
+      // Re-render visual PDU Map to show accumulation structure
+      renderVisualPDUMap(layerData);
+
+      // Vertically slide camera rig to focus on this layer level!
+      const cameraTargetY = getLayerHeight(layerNum) + 0.5;
+      const cameraTargetX = isSenderActiveFocus ? -4.5 : 4.5;
+      // We look slightly toward the tower, so let's adjust camera rig position
+      animateCameraRig(cameraTargetX, cameraTargetY, 5);
+      
+      // Update camera ride button active states
+      document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+      if (isSenderActiveFocus) {
+        document.getElementById('camViewSender').classList.add('active');
+      } else {
+        document.getElementById('camViewReceiver').classList.add('active');
+      }
+    }
+
+    // Camera Rig smooth animation handler
+    function animateCameraRig(x, y, z) {
+      // Clear previous animations if any
+      cameraRig.removeAttribute('animation');
+      
+      cameraRig.setAttribute('animation', {
+        property: 'position',
+        to: `${x} ${y} ${z}`,
+        dur: 900,
+        easing: 'easeInOutQuad'
+      });
+    }
+
+    // Set preset viewports via bottom panel
+    function setCameraView(preset) {
+      document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`camView${preset.charAt(0).toUpperCase() + preset.slice(1)}`).classList.add('active');
+
+      if (preset === 'overview') {
+        animateCameraRig(0, 7.5, 12.5);
+      } else if (preset === 'sender') {
+        selectLayer(selectedLayerNum, 'sender');
+      } else if (preset === 'receiver') {
+        selectLayer(selectedLayerNum, 'receiver');
+      }
+    }
+
+    // Update Live Packet Map in Telemetry panel
+    function renderVisualPDUMap(layerData) {
+      packetMapVisual.innerHTML = '';
+      
+      const visualMap = layerData.visualMap;
+      if (visualMap.length === 0) {
+        packetMapVisual.innerHTML = '<div style="color: #64748b; font-style: italic;">Physical Serial Bitstream (Not Framed)</div>';
+        packetMapState.textContent = "Raw Signaling";
+        packetMapState.style.color = '#ffd200';
+        return;
+      }
+
+      packetMapState.textContent = layerData.pdu + " Frame";
+      packetMapState.style.color = layerData.color;
+
+      visualMap.forEach(chunk => {
+        const div = document.createElement('div');
+        div.className = `pdu-chunk ${chunk}`;
+        
+        let label = chunk.toUpperCase();
+        if (chunk === 'data') label = "L7 DATA PAYLOAD";
+        if (chunk === 'encrypt') label = "L6 PRESENTATION ENCRYPTED";
+        if (chunk === 'session') label = "L5 SESSION ID HEADER";
+        if (chunk === 'tcp') label = "L4 TCP PORT SEGMENT HDR";
+        if (chunk === 'ip') label = "L3 IP ROUTING PACKET HDR";
+        if (chunk === 'mac') label = "L2 HARDWARE MAC HDR";
+        if (chunk === 'crc') label = "L2 FRAME CRC TRAILER";
+
+        div.textContent = label;
+        packetMapVisual.appendChild(div);
+      });
+    }
+
+    // Speed Slider listener
+    function updateSimSpeed(val) {
+      simSpeed = parseFloat(val);
+      speedValue.textContent = simSpeed.toFixed(1) + 'x';
+      
+      // If playing, re-establish simulation intervals
+      if (isPlaying) {
+        pauseSimulationTimer();
+        playSimulationTimer();
+      }
+    }
+
+    // Play/Pause simulation loop
+    function togglePlayPause() {
+      if (isPlaying) {
+        pauseSimulation();
+      } else {
+        playSimulation();
+      }
+    }
+
+    function playSimulation() {
+      isPlaying = true;
+      btnPlayPause.textContent = "Pause Sim";
+      btnPlayPause.classList.add('active');
+      simStatusText.textContent = "RUNNING SIM";
+      simStatusText.style.color = "var(--cyan)";
+      playSimulationTimer();
+    }
+
+    function pauseSimulation() {
+      isPlaying = false;
+      btnPlayPause.textContent = "Resume Sim";
+      btnPlayPause.classList.remove('active');
+      simStatusText.textContent = "SIM PAUSED";
+      simStatusText.style.color = "var(--gold)";
+      pauseSimulationTimer();
+    }
+
+    function playSimulationTimer() {
+      // Calculate delay based on normal 2500ms divided by speed multiplier
+      const stepDelay = 2500 / simSpeed;
+      simulationTimer = setInterval(() => {
+        stepForward();
+      }, stepDelay);
+    }
+
+    function pauseSimulationTimer() {
+      if (simulationTimer) {
+        clearInterval(simulationTimer);
+        simulationTimer = null;
+      }
+    }
+
+    // Reset whole visual simulation
+    function resetSimulation() {
+      pauseSimulationTimer();
+      isPlaying = false;
+      currentStep = -1;
+      
+      btnPlayPause.textContent = "Play Sim";
+      btnPlayPause.classList.remove('active');
+      btnPlayPause.disabled = true;
+      document.getElementById('btnSendPacket').disabled = false;
+      simStatusText.textContent = "SYSTEM IDLE";
+      simStatusText.style.color = "var(--green)";
+
+      // Reset Packet 3D model properties
+      visualPacket.setAttribute('visible', 'false');
+      visualPacket.setAttribute('scale', '0 0 0');
+      visualPacket.setAttribute('position', `-4.5 ${getLayerHeight(7)} -4`);
+      
+      // Reset packet headers visibility
+      document.querySelector('#packPresentation').setAttribute('visible', 'false');
+      document.querySelector('#packSession').setAttribute('visible', 'false');
+      document.querySelector('#packTransport').setAttribute('visible', 'false');
+      document.querySelector('#packNetwork').setAttribute('visible', 'false');
+      document.querySelector('#packDataLink').setAttribute('visible', 'false');
+
+      // Clear physical bridge particles
+      conduitParticles.innerHTML = '';
+    }
+
+    // Trigger full simulation beginning
+    function startFullSimulation() {
+      resetSimulation();
+      document.getElementById('btnSendPacket').disabled = true;
+      btnPlayPause.disabled = false;
+      
+      currentStep = 0; // Set to Sender Application Layer
+      
+      // Visual setup packet
+      visualPacket.setAttribute('visible', 'true');
+      visualPacket.setAttribute('scale', '1 1 1');
+      visualPacket.setAttribute('position', `-4.5 ${getLayerHeight(7)} -4`);
+      
+      playSimulation();
+      updateVisualsForStep();
+    }
+
+    // Move forward single step in state machine
+    function stepForward() {
+      if (currentStep === -1) {
+        startFullSimulation();
+        return;
+      }
+
+      currentStep++;
+      if (currentStep > 15) { // Simulation finished
+        currentStep = -1;
+        resetSimulation();
+        simStatusText.textContent = "DELIVERED SUCCESS";
+        simStatusText.style.color = "var(--green)";
+        alert("Payload Delivered: Receiver client fully processed and reassembled HTTP application packet!");
+        return;
+      }
+
+      updateVisualsForStep();
+    }
+
+    // Move backward single step in state machine
+    function stepBackward() {
+      if (currentStep <= 0) {
+        resetSimulation();
+        return;
+      }
+      currentStep--;
+      updateVisualsForStep();
+    }
+
+    // Sync 3D Elements and 2D panels based on current step index
+    // Steps map:
+    // 0: Sender L7 (Application)
+    // 1: Sender L6 (Presentation)
+    // 2: Sender L5 (Session)
+    // 3: Sender L4 (Transport)
+    // 4: Sender L3 (Network)
+    // 5: Sender L2 (Data Link)
+    // 6: Sender L1 (Physical)
+    // 7: Conduit Transit Bridge (Bits)
+    // 8: Receiver L1 (Physical)
+    // 9: Receiver L2 (Data Link)
+    // 10: Receiver L3 (Network)
+    // 11: Receiver L4 (Transport)
+    // 12: Receiver L5 (Session)
+    // 13: Receiver L6 (Presentation)
+    // 14: Receiver L7 (Application)
+    // 15: Arrived / Fully Unpacked
+    function updateVisualsForStep() {
+      if (currentStep < 0) return;
+
+      // ----------------------------------------------------
+      // PHASE 1: SENDER DESCENT (Encapsulation) - Steps 0 to 6
+      // ----------------------------------------------------
+      if (currentStep >= 0 && currentStep <= 6) {
+        const layerNum = 7 - currentStep;
+        selectLayer(layerNum, 'sender');
+        simStatusText.textContent = `ENCAPSULATING L${layerNum}`;
+        simStatusText.style.color = "var(--cyan)";
+
+        // Set packet positions
+        const targetY = getLayerHeight(layerNum);
+        animatePacketPosition(-4.5, targetY, -4);
+
+        // Turn on headers step-by-step
+        document.querySelector('#packPresentation').setAttribute('visible', currentStep >= 1 ? 'true' : 'false');
+        document.querySelector('#packSession').setAttribute('visible', currentStep >= 2 ? 'true' : 'false');
+        document.querySelector('#packTransport').setAttribute('visible', currentStep >= 3 ? 'true' : 'false');
+        document.querySelector('#packNetwork').setAttribute('visible', currentStep >= 4 ? 'true' : 'false');
+        document.querySelector('#packDataLink').setAttribute('visible', currentStep >= 5 ? 'true' : 'false');
+
+        // Flash layer rings for dramatic effect
+        flashPlatformRing(layerNum, 'sender');
+      }
+      
+      // ----------------------------------------------------
+      // PHASE 2: CONDUIT TRANSIT (Serial Bits) - Step 7
+      // ----------------------------------------------------
+      else if (currentStep === 7) {
+        simStatusText.textContent = "TRANSMITTING PHYSICAL SIGNAL";
+        simStatusText.style.color = "var(--green)";
+
+        // Hide main packet while in physical transition
+        visualPacket.setAttribute('visible', 'false');
+        
+        // Focus camera on bottom bridge
+        animateCameraRig(0, 2.5, 7.5);
+
+        // Trigger fiber-optic stream simulation
+        spawnConduitBitstream();
+      }
+
+      // ----------------------------------------------------
+      // PHASE 3: RECEIVER ASCENT (Decapsulation) - Steps 8 to 14
+      // ----------------------------------------------------
+      else if (currentStep >= 8 && currentStep <= 14) {
+        const layerNum = currentStep - 7;
+        selectLayer(layerNum, 'receiver');
+        simStatusText.textContent = `DECAPSULATING L${layerNum}`;
+        simStatusText.style.color = "var(--magenta)";
+
+        // Make packet visible at receiver node
+        visualPacket.setAttribute('visible', 'true');
+        visualPacket.setAttribute('scale', '1 1 1');
+        const targetY = getLayerHeight(layerNum);
+        animatePacketPosition(4.5, targetY, -4);
+
+        // Turn OFF headers step-by-step as we rise (decapsulating)
+        // 8 (L1): All visible
+        // 9 (L2): Strip Link Red
+        // 10 (L3): Strip Network Green
+        // 11 (L4): Strip Transport Blue
+        // 12 (L5): Strip Session Violet
+        // 13 (L6): Strip Presentation Matrix
+        // 14 (L7): Only original Data left!
+        document.querySelector('#packPresentation').setAttribute('visible', currentStep <= 13 ? 'true' : 'false');
+        document.querySelector('#packSession').setAttribute('visible', currentStep <= 12 ? 'true' : 'false');
+        document.querySelector('#packTransport').setAttribute('visible', currentStep <= 11 ? 'true' : 'false');
+        document.querySelector('#packNetwork').setAttribute('visible', currentStep <= 10 ? 'true' : 'false');
+        document.querySelector('#packDataLink').setAttribute('visible', currentStep <= 9 ? 'true' : 'false');
+
+        // Special dissolve puff effects (represented by scale shrinking / popping and color transitions)
+        if (currentStep > 8) {
+          triggerLayerPopEffect(layerNum - 1);
+        }
+
+        flashPlatformRing(layerNum, 'receiver');
+      }
+    }
+
+    // Animate packet movement smoothly between floor platforms
+    function animatePacketPosition(x, y, z) {
+      visualPacket.removeAttribute('animation');
+      visualPacket.setAttribute('animation', {
+        property: 'position',
+        to: `${x} ${y} ${z}`,
+        dur: 600 / simSpeed,
+        easing: 'easeInOutQuad'
+      });
+    }
+
+    // Highlight neon platforms on transit
+    function flashPlatformRing(layerNum, side) {
+      const container = (side === 'sender') ? senderPlatformsContainer : receiverPlatformsContainer;
+      // Get appropriate platform node (1-indexed mapping to children array)
+      const platformNodeIndex = layerNum - 1;
+      const platform = container.children[platformNodeIndex];
+      if (!platform) return;
+
+      const ring = platform.querySelector('[mixin="ringLaser"]');
+      if (ring) {
+        ring.removeAttribute('animation__flash');
+        ring.setAttribute('animation__flash', {
+          property: 'material.opacity',
+          from: 1.0,
+          to: 0.6,
+          dur: 800,
+          loop: 2
+        });
+      }
+    }
+
+    // visual decapsulation explosion puff represented by a momentary glowing cloud
+    // We will spawn the dissolving puff around the packet inside the specific platform
+    function triggerLayerPopEffect(layerNum) {
+      const platform = receiverPlatformsContainer.children[layerNum - 1];
+      if (!platform) return;
+
+      const flash = document.createElement('a-entity');
+      flash.setAttribute('geometry', 'primitive: torus; radius: 0.5; radiusTubular: 0.05');
+      flash.setAttribute('position', '0 1.0 0'); // centered inside the platform column
+      flash.setAttribute('material', 'color: #ff007f; shader: flat; transparent: true; opacity: 0.9');
+      flash.setAttribute('animation', `
+        property: scale;
+        to: 3.5 3.5 3.5;
+        dur: ${500 / simSpeed};
+        easing: easeOutQuad
+      `);
+      flash.setAttribute('animation__opacity', `
+        property: material.opacity;
+        to: 0;
+        dur: ${500 / simSpeed};
+        easing: easeOutQuad
+      `);
+      
+      platform.appendChild(flash);
+      
+      // Clean up element after animation
+      setTimeout(() => {
+        if (flash.parentNode) {
+          flash.parentNode.removeChild(flash);
+        }
+      }, 700 / simSpeed);
+    }
+
+    // High-tech bitstream simulator along fiber cable
+    function spawnConduitBitstream() {
+      conduitParticles.innerHTML = '';
+      
+      // Generate multiple binary text particles ('0' and '1') flying from left (Sender L1, x = -4.5) to right (Receiver L1, x = 4.5)
+      const particleCount = 25;
+      const travelDuration = (1800 / simSpeed); // milliseconds
+
+      for (let i = 0; i < particleCount; i++) {
+        setTimeout(() => {
+          if (currentStep !== 7) return; // cancel if user skipped ahead
+          
+          const bitVal = Math.random() > 0.5 ? "1" : "0";
+          const textEnt = document.createElement('a-text');
+          
+          textEnt.setAttribute('value', bitVal);
+          textEnt.setAttribute('align', 'center');
+          textEnt.setAttribute('color', '#00ff87');
+          textEnt.setAttribute('scale', '0.6 0.6 0.6');
+          
+          // Random tiny variations in spacing to look like serial packet bursts
+          const randomY = 1.4 + (Math.random() - 0.5) * 0.15;
+          const randomZ = -4 + (Math.random() - 0.5) * 0.15;
+          
+          textEnt.setAttribute('position', `-4.5 ${randomY} ${randomZ}`);
+          textEnt.setAttribute('animation', `
+            property: position;
+            to: 4.5 ${randomY} ${randomZ};
+            dur: ${travelDuration};
+            easing: linear
+          `);
+
+          conduitParticles.appendChild(textEnt);
+
+          // Clean up particles
+          setTimeout(() => {
+            if (textEnt.parentNode) {
+              textEnt.parentNode.removeChild(textEnt);
+            }
+          }, travelDuration + 100);
+
+        }, i * (1200 / simSpeed) / particleCount);
+      }
+    }
+  </script>
+</body>
+</html>

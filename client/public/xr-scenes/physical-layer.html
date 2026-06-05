@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CyberMediums — WebXR Transmission Mediums Lab</title>
+  <!-- Modern Fonts from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- A-Frame Library -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #04050a;
+      --bg-panel: rgba(8, 10, 22, 0.82);
+      --border-glow: rgba(0, 242, 254, 0.2);
+      --cyan: #00f2fe;
+      --magenta: #ff007f;
+      --gold: #ffd200;
+      --glass-blur: blur(16px);
+      --shadow-glow: 0 0 20px rgba(0, 242, 254, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+    }
+
+    /* 2D HUD UI Overlay */
+    .hud-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none; /* Let clicks pass through to A-Frame unless on UI panels */
+      display: grid;
+      grid-template-columns: 310px 1fr 280px;
+      grid-template-rows: 1fr auto;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .ui-panel {
+      background: var(--bg-panel);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 20px;
+      pointer-events: auto; /* Enable interaction with controls */
+      box-shadow: var(--shadow-glow);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ui-panel:hover {
+      border-color: rgba(0, 242, 254, 0.35);
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.2);
+    }
+
+    .panel-section-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-section-title span {
+      font-size: 10px;
+      background: rgba(0, 242, 254, 0.1);
+      color: var(--cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-glow);
+    }
+
+    /* Left Sidebar: Medium & Message Selection */
+    .selector-panel {
+      grid-column: 1;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .medium-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .medium-card:hover {
+      background: rgba(0, 242, 254, 0.04);
+      border-color: rgba(0, 242, 254, 0.25);
+      transform: translateX(4px);
+    }
+
+    .medium-card.active {
+      border-color: var(--cyan);
+      background: rgba(0, 242, 254, 0.08);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+    }
+
+    .medium-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .medium-title {
+      font-weight: 800;
+      font-size: 14.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .medium-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #64748b;
+    }
+
+    .medium-card.active .medium-dot.copper { background-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
+    .medium-card.active .medium-dot.fiber { background-color: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+    .medium-card.active .medium-dot.wireless { background-color: var(--magenta); box-shadow: 0 0 10px var(--magenta); }
+
+    .medium-description {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    .input-group {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .text-input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 13.5px;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .text-input:focus {
+      border-color: var(--cyan);
+    }
+
+    /* Right Sidebar: Telemetry & ASCII Log */
+    .telemetry-panel {
+      grid-column: 3;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .binary-stream-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 12px;
+      line-height: 1.5;
+      color: #94a3b8;
+      min-height: 120px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      word-wrap: break-word;
+      word-break: break-all;
+    }
+
+    .binary-stream-box span.bit-0 { color: #64748b; }
+    .binary-stream-box span.bit-1 { color: var(--cyan); font-weight: bold; }
+    .binary-stream-box span.bit-active { background-color: rgba(0, 242, 254, 0.25); color: #fff; padding: 0 2px; }
+
+    .telemetry-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      margin-bottom: 8px;
+      border-bottom: 1px dashed rgba(255,255,255,0.05);
+      padding-bottom: 6px;
+    }
+
+    .telemetry-item span.label {
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .telemetry-item span.value {
+      color: #f1f5f9;
+      font-weight: 700;
+    }
+
+    .spec-badge {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .spec-badge.copper { background: rgba(255, 210, 0, 0.15); color: var(--gold); }
+    .spec-badge.fiber { background: rgba(0, 242, 254, 0.15); color: var(--cyan); }
+    .spec-badge.wireless { background: rgba(255, 0, 127, 0.15); color: var(--magenta); }
+
+    /* Bottom Panel: Controls Deck */
+    .controls-panel {
+      grid-column: 1 / span 3;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      height: 85px;
+      gap: 30px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.15);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      border: none;
+      color: #04050a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 15px rgba(0, 198, 255, 0.35);
+    }
+
+    .btn.primary:hover {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.55);
+      color: #04050a;
+    }
+
+    .btn.view-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      border-radius: 6px;
+      border-color: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .btn.view-btn.active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0, 242, 254, 0.08);
+    }
+
+    /* Slider Container */
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 150px;
+    }
+
+    .slider-label {
+      font-size: 9px;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #1e293b;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    .sim-status-display {
+      text-align: right;
+    }
+
+    .sim-label {
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sim-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--green);
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 2D HUD UI Overlay Layer -->
+  <div class="hud-overlay">
+    
+    <!-- Left Sidebar: Selection & Input -->
+    <aside class="ui-panel selector-panel">
+      <div class="panel-section-title">
+        Medium Selector <span>Select Transmission Path</span>
+      </div>
+
+      <!-- Wired Copper Card -->
+      <div class="medium-card active" id="card-copper" onclick="selectMedium('copper')">
+        <div class="medium-header">
+          <div class="medium-title">
+            <div class="medium-dot copper"></div>
+            <span>Wired Copper Cable</span>
+          </div>
+          <span class="spec-badge copper">ELECTRICAL</span>
+        </div>
+        <div class="medium-description">
+          Transfers data using physical **voltage fluctuations** over copper strands. Guided path with moderate speeds, yielding simple digital square-wave behavior.
+        </div>
+      </div>
+
+      <!-- Fiber Optic Card -->
+      <div class="medium-card" id="card-fiber" onclick="selectMedium('fiber')">
+        <div class="medium-header">
+          <div class="medium-title">
+            <div class="medium-dot fiber"></div>
+            <span>Fiber Optic Tube</span>
+          </div>
+          <span class="spec-badge fiber">OPTICAL</span>
+        </div>
+        <div class="medium-description">
+          Transmits binary bits as high-speed **pulses of laser light** bouncing inside reflective glass cores. Guided laser paths delivering maximum speeds.
+        </div>
+      </div>
+
+      <!-- Wireless Wi-Fi Card -->
+      <div class="medium-card" id="card-wireless" onclick="selectMedium('wireless')">
+        <div class="medium-header">
+          <div class="medium-title">
+            <div class="medium-dot wireless"></div>
+            <span>Wireless Wi-Fi (Radio)</span>
+          </div>
+          <span class="spec-badge wireless">ELECTROMAGNETIC</span>
+        </div>
+        <div class="medium-description">
+          Propagates data wirelessly through open air via expanding concentric **electromagnetic radio waves** (sinusoidal cycles). Unguided, vulnerable path.
+        </div>
+      </div>
+
+      <!-- Message Custom Input -->
+      <div class="input-group">
+        <label class="control-label" for="messageInput">Message Payload Text</label>
+        <input type="text" class="text-input" id="messageInput" maxlength="15" value="HELLO">
+      </div>
+    </aside>
+
+    <!-- Right Sidebar: Live Binary Serialization Logs -->
+    <aside class="ui-panel telemetry-panel">
+      <div class="panel-section-title">
+        ASCII Binary Stream <span>Live Serialization</span>
+      </div>
+
+      <div class="binary-stream-box" id="binaryBox">
+        <!-- Renders bits dynamically -->
+        01001000 01000101 01001100 01001100 01001111
+      </div>
+
+      <div class="panel-section-title" style="font-size: 11px;">Transmission Telemetry</div>
+      
+      <div class="telemetry-item">
+        <span class="label">Signal Type</span>
+        <span class="value" id="lblSignalType">Square Wave Pulse (Voltages)</span>
+      </div>
+
+      <div class="telemetry-item">
+        <span class="label">Modulation Method</span>
+        <span class="value" id="lblModulation">Amplitude Shift Keying (ASK)</span>
+      </div>
+
+      <div class="telemetry-item">
+        <span class="label">Propagation Speed</span>
+        <span class="value" id="lblSpeed">Moderate (~2.0 × 10^8 m/s)</span>
+      </div>
+
+      <div class="telemetry-item">
+        <span class="label">Transmitted Bits</span>
+        <span class="value" id="lblBitsTransmitted">0 / 40 bits</span>
+      </div>
+
+      <div class="telemetry-item">
+        <span class="label">Delivery Progress</span>
+        <span class="value" id="lblProgress">0%</span>
+      </div>
+
+      <div style="margin-top: 15px; font-size:12px; line-height:1.4; color:#94a3b8; background:rgba(0,0,0,0.2); border-radius:10px; padding:12px; border-left:3px solid var(--gold);">
+        <span style="color:var(--gold); font-weight:bold; display:block; margin-bottom:4px;">HOW DATA TRAVELS:</span>
+        Computers store text as letters. When sending, Host A serializes letters to **binary bytes (0s and 1s)**. These bits are modulated into wave shapes, shot across the physical medium, and reassembled by Host B!
+      </div>
+    </aside>
+
+    <!-- Bottom Controls Panel -->
+    <footer class="ui-panel controls-panel">
+      <!-- Transmission Launch Trigger -->
+      <div class="control-group">
+        <button class="btn primary" id="btnSendData" onclick="launchDataTransmission()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 2.5px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          Send Data
+        </button>
+      </div>
+
+      <!-- Simulation Speeds -->
+      <div class="control-group">
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>Transmission Speed</span>
+            <span id="speedValue">1.0x</span>
+          </div>
+          <input type="range" class="slider" id="speedSlider" min="0.2" max="3" step="0.2" value="1.0" oninput="updateSimSpeed(this.value)">
+        </div>
+      </div>
+
+      <!-- Camera Preset angles -->
+      <div class="control-group">
+        <span class="slider-label" style="margin-right: 5px;">View angle:</span>
+        <button class="btn view-btn active" id="camViewOverview" onclick="setCameraView('overview')">Overview</button>
+        <button class="btn view-btn" id="camViewSender" onclick="setCameraView('sender')">Host A (Sender)</button>
+        <button class="btn view-btn" id="camViewReceiver" onclick="setCameraView('receiver')">Host B (Receiver)</button>
+      </div>
+
+      <!-- Live State Status -->
+      <div class="sim-status-display">
+        <div class="sim-label">MEDIUM CHANNEL STATE</div>
+        <div class="sim-value" id="simStatusText">READY TO TRANSMIT</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- A-Frame 3D Scene Layer -->
+  <a-scene background="color: #020206" vr-mode-ui="enabled: true">
+
+    <a-assets>
+      <!-- Cybergrid Texture -->
+      <img id="gridTex" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/textures/grid.png" crossorigin="anonymous">
+      <!-- Wireless Waves Concentric ring mixin -->
+      <a-mixin id="radioWave" geometry="primitive: torus; radius: 0.1; radiusTubular: 0.015; segmentsTheta: 32" material="shader: flat; transparent: true; opacity: 0.75" rotation="0 90 0"></a-mixin>
+    </a-assets>
+
+    <!-- Custom Camera Rig for dynamic pans -->
+    <a-entity id="cameraRig" position="0 3.2 7.5" rotation="-15 0 0">
+      <a-camera id="mainCamera" look-controls="pointerLockEnabled: false" wasd-controls="enabled: true">
+        <a-cursor id="sceneCursor" material="color: #00f2fe; shader: flat" scale="0.6 0.6 0.6"></a-cursor>
+      </a-camera>
+    </a-entity>
+
+    <!-- Environmental Lights -->
+    <a-light type="ambient" color="#181a30" intensity="1.2"></a-light>
+    <a-light type="point" color="#00f2fe" intensity="1.5" position="-4 5 2" distance="15"></a-light>
+    <a-light type="point" color="#ff007f" intensity="1.5" position="4 5 2" distance="15"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.4" position="0 10 5"></a-light>
+
+    <a-sky color="#020206"></a-sky>
+
+    <!-- Cyber floor grid -->
+    <a-plane 
+      rotation="-90 0 0" 
+      width="24" 
+      height="14" 
+      material="src: #gridTex; repeat: 24 14; color: #1e1b4b; opacity: 0.25; roughness: 1" 
+      position="0 0.1 0">
+    </a-plane>
+
+
+    <!-- ============================================== -->
+    <!-- SENDER TERMINAL (Host A, x = -4) -->
+    <!-- ============================================== -->
+    <a-entity id="hostA" position="-4.5 0.5 0">
+      <!-- Dark Server Chassis -->
+      <a-box width="1.2" height="0.8" depth="0.8" color="#0c0e1d" material="roughness: 0.2; metalness: 0.9; emissive: #00f2fe; emissiveIntensity: 0.15">
+        <a-box width="1.22" height="0.82" depth="0.82" material="wireframe: true; color: #00f2fe; opacity: 0.25"></a-box>
+      </a-box>
+      <!-- Angled Glowing Terminal Monitor -->
+      <a-box position="0 0.7 0" rotation="-15 90 0" width="0.7" height="0.5" depth="0.1" color="#030712">
+        <a-plane position="0 0 0.055" width="0.65" height="0.45" color="#090d26" material="opacity: 0.9">
+          <!-- Live Terminal Screen text displays -->
+          <a-text value="HOST A (SENDER)\nSTATUS: ONLINE\n\nTX BUFFER:\nHELLO" align="center" position="0 0.02 0.01" scale="0.5 0.5 0.5" color="#00f2fe" font="monoid" id="screenAText"></a-text>
+        </a-plane>
+      </a-box>
+      <!-- Antenna for Wireless mode (pulsing radio rings attach here) -->
+      <a-cylinder position="-0.4 0.5 -0.25" radius="0.018" height="0.6" color="#111827" id="antA">
+        <a-sphere position="0 0.3 0" radius="0.04" color="#00f2fe" material="shader: flat; emissive: #00f2fe; emissiveIntensity: 0.8"></a-sphere>
+      </a-cylinder>
+      <!-- Floating Label -->
+      <a-text value="HOST A" align="center" position="0 1.25 0" scale="0.8 0.8 0.8" color="#00f2fe" font="monoid" side="double"></a-text>
+    </a-entity>
+
+
+    <!-- ============================================== -->
+    <!-- RECEIVER TERMINAL (Host B, x = 4) -->
+    <!-- ============================================== -->
+    <a-entity id="hostB" position="4.5 0.5 0">
+      <!-- Dark Server Chassis -->
+      <a-box width="1.2" height="0.8" depth="0.8" color="#0c0e1d" material="roughness: 0.2; metalness: 0.9; emissive: #ff007f; emissiveIntensity: 0.15">
+        <a-box width="1.22" height="0.82" depth="0.82" material="wireframe: true; color: #ff007f; opacity: 0.25"></a-box>
+      </a-box>
+      <!-- Angled Glowing Terminal Monitor -->
+      <a-box position="0 0.7 0" rotation="-15 -90 0" width="0.7" height="0.5" depth="0.1" color="#030712">
+        <a-plane position="0 0 0.055" width="0.65" height="0.45" color="#090d26" material="opacity: 0.9">
+          <!-- Live Terminal Screen text displays -->
+          <a-text value="HOST B (RECEIVER)\nSTATUS: IDLE\n\nRX BUFFER:\n[WAITING...]" align="center" position="0 0.02 0.01" scale="0.5 0.5 0.5" color="#ff007f" font="monoid" id="screenBText"></a-text>
+        </a-plane>
+      </a-box>
+      <!-- Antenna for Wireless mode -->
+      <a-cylinder position="0.4 0.5 -0.25" radius="0.018" height="0.6" color="#111827" id="antB">
+        <a-sphere position="0 0.3 0" radius="0.04" color="#ff007f" material="shader: flat; emissive: #ff007f; emissiveIntensity: 0.8"></a-sphere>
+      </a-cylinder>
+      <!-- Floating Label -->
+      <a-text value="HOST B" align="center" position="0 1.25 0" scale="0.8 0.8 0.8" color="#ff007f" font="monoid" side="double"></a-text>
+    </a-entity>
+
+
+    <!-- ============================================== -->
+    <!-- PHYSICAL MEDIUM CHANNELS (Connecting Host A to B) -->
+    <!-- ============================================== -->
+    <!-- 1. Wired Copper Cable (Wired Copper Mode) -->
+    <a-entity id="chanCopper" visible="true">
+      <a-cylinder 
+        position="0 0.5 0" 
+        rotation="0 0 90" 
+        radius="0.08" 
+        height="7.8" 
+        color="#a16207" 
+        material="roughness: 0.1; metalness: 0.9; emissive: #a16207; emissiveIntensity: 0.1">
+      </a-cylinder>
+      <a-cylinder 
+        position="0 0.5 0" 
+        rotation="0 0 90" 
+        radius="0.085" 
+        height="7.8" 
+        material="wireframe: true; color: #ffd200; opacity: 0.3">
+      </a-cylinder>
+    </a-entity>
+
+    <!-- 2. Fiber Optic Tube (Fiber Optic Mode) -->
+    <a-entity id="chanFiber" visible="false">
+      <!-- Outer Glass Protection Tube -->
+      <a-cylinder 
+        position="0 0.5 0" 
+        rotation="0 0 90" 
+        radius="0.14" 
+        height="7.8" 
+        color="#00f2fe" 
+        material="roughness: 0; metalness: 0.1; transparent: true; opacity: 0.25; side: double">
+      </a-cylinder>
+      <!-- Inner Thin Fiber Optic Core filament -->
+      <a-cylinder 
+        id="fiberCore"
+        position="0 0.5 0" 
+        rotation="0 0 90" 
+        radius="0.02" 
+        height="7.8" 
+        color="#00f2fe" 
+        material="shader: flat; transparent: true; opacity: 0.7">
+      </a-cylinder>
+    </a-entity>
+
+    <!-- 3. Wireless Air space (Antennas & open space ripples) -->
+    <a-entity id="chanWireless" visible="false">
+      <!-- Concentric radio waves expanding from Sender (Host A) to Host B -->
+      <a-entity id="radioWaves">
+        <a-entity mixin="radioWave" position="-4.2 0.8 -0.25" material="color: #ff007f" class="radio-ripple" data-delay="0"></a-entity>
+        <a-entity mixin="radioWave" position="-4.2 0.8 -0.25" material="color: #ff007f" class="radio-ripple" data-delay="1"></a-entity>
+        <a-entity mixin="radioWave" position="-4.2 0.8 -0.25" material="color: #ff007f" class="radio-ripple" data-delay="2"></a-entity>
+      </a-entity>
+    </a-entity>
+
+
+    <!-- ============================================== -->
+    <!-- DYNAMIC FLOATING WAVEFORM PARTICLES -->
+    <!-- ============================================== -->
+    <!-- Generated programmatically as a row of 24 floating glowing spheres -->
+    <a-entity id="waveContainer"></a-entity>
+
+
+    <!-- ============================================== -->
+    <!-- ACTIVE DATA PACKET GENERATION (Shooting Bits) -->
+    <!-- ============================================== -->
+    <!-- Active bitstream packets appear here -->
+    <a-entity id="packetContainer"></a-entity>
+
+    <!-- Arrival confirmation VFX rings -->
+    <a-entity id="arrivalRing" position="3.9 0.5 0" rotation="0 90 0" geometry="primitive: ring; radiusInner: 0.1; radiusOuter: 0.8" material="shader: flat; color: #ff007f; transparent: true; opacity: 0"
+              animation="property: scale; to: 2 2 2; dur: 450; startEvents: arrive; easing: easeOutQuad">
+    </a-entity>
+
+  </a-scene>
+
+  <!-- ============================================== -->
+  <!-- SIMULATION STATE & SERALIZATION SCRIPT -->
+  <!-- ============================================== -->
+  <script>
+    // Medium parameters config
+    const mediums = {
+      copper: {
+        id: 'copper',
+        name: 'Wired Copper Cable',
+        signal: 'Square Wave Pulse (Voltages)',
+        modulation: 'Amplitude Shift Keying (ASK)',
+        speedDesc: 'Moderate (~2.0 × 10^8 m/s)',
+        speedVal: 0.04, // step displacement speed
+        color: '#ffd200',
+        waveStyle: 'square'
+      },
+      fiber: {
+        id: 'fiber',
+        name: 'Fiber Optic Glass Core',
+        signal: 'Digital Light pulses (Lasers)',
+        modulation: 'On-Off Keying (OOK)',
+        speedDesc: 'Blazing Fast (~3.0 × 10^8 m/s)',
+        speedVal: 0.09, // very fast
+        color: '#00f2fe',
+        waveStyle: 'laser'
+      },
+      wireless: {
+        id: 'wireless',
+        name: 'Wireless Wi-Fi (Air Space)',
+        signal: 'Sinusoidal Radio Waves (EM Waves)',
+        modulation: 'Phase Shift Keying (PSK)',
+        speedDesc: 'Moderate Wave-Guided',
+        speedVal: 0.035, // walking waves
+        color: '#ff007f',
+        waveStyle: 'sine'
+      }
+    };
+
+    // Global states
+    let activeMedium = mediums.copper;
+    let simSpeed = 1.0;
+    let isTransmitting = false;
+    let waveTime = 0;
+    let radioWaveAge = [0, 1, 2];
+
+    // Wave particles tracking list
+    const waveParticleCount = 28;
+    const waveParticles = [];
+    
+    // Packet queue for current transmission
+    const packetQueue = [];
+    const activePacketsInFlight = [];
+
+    // DOM References
+    const binaryBox = document.getElementById('binaryBox');
+    const lblSignalType = document.getElementById('lblSignalType');
+    const lblModulation = document.getElementById('lblModulation');
+    const lblSpeed = document.getElementById('lblSpeed');
+    const lblBitsTransmitted = document.getElementById('lblBitsTransmitted');
+    const lblProgress = document.getElementById('lblProgress');
+    const simStatusText = document.getElementById('simStatusText');
+    const screenAText = document.getElementById('screenAText');
+    const screenBText = document.getElementById('screenBText');
+    const messageInput = document.getElementById('messageInput');
+
+    const waveContainer = document.getElementById('waveContainer');
+    const packetContainer = document.getElementById('packetContainer');
+    const arrivalRing = document.getElementById('arrivalRing');
+    const cameraRig = document.getElementById('cameraRig');
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Generate 3D floating wave particles row
+      init3DWaveParticles();
+
+      // 2. Continuous 60fps frame tick animation loop
+      requestAnimationFrame(runSimulationFrame);
+
+      // Initialize default telemetry texts
+      updateMediumUI();
+
+      // Monitor text inputs to sync Host A screen in A-Frame
+      messageInput.addEventListener('input', (evt) => {
+        const txt = evt.target.value.toUpperCase();
+        screenAText.setAttribute('value', `HOST A (SENDER)\nSTATUS: ONLINE\n\nTX BUFFER:\n${txt}`);
+      });
+    });
+
+    // Populate dynamic 3D wave spheres horizontally between Host A and B
+    function init3DWaveParticles() {
+      waveContainer.innerHTML = '';
+      waveParticles.length = 0;
+
+      for (let i = 0; i < waveParticleCount; i++) {
+        // Space out particles from x = -3.8 (Host A antenna boundary) to x = 3.8 (Host B)
+        const posX = -3.8 + (i / (waveParticleCount - 1)) * 7.6;
+        const sphere = document.createElement('a-sphere');
+        sphere.setAttribute('radius', '0.045');
+        sphere.setAttribute('position', `${posX} 0.5 0`);
+        sphere.setAttribute('color', activeMedium.color);
+        sphere.setAttribute('material', 'shader: flat; transparent: true; opacity: 0.75');
+        
+        waveContainer.appendChild(sphere);
+
+        waveParticles.push({
+          el: sphere,
+          x: posX,
+          baseY: 0.5
+        });
+      }
+    }
+
+    // Toggle Medium active states via 2D cards click
+    function selectMedium(type) {
+      if (isTransmitting) {
+        alert("Transmission channel is currently busy. Please wait for packets to deliver!");
+        return;
+      }
+
+      activeMedium = mediums[type];
+
+      // Update HUD active classes
+      document.querySelectorAll('.medium-card').forEach(c => c.classList.remove('active'));
+      document.getElementById(`card-${activeMedium.id}`).classList.add('active');
+
+      // Update 3D medium elements visibility in A-Frame
+      document.getElementById('chanCopper').setAttribute('visible', type === 'copper');
+      document.getElementById('chanFiber').setAttribute('visible', type === 'fiber');
+      document.getElementById('chanWireless').setAttribute('visible', type === 'wireless');
+
+      // Sync 2D HUD telemetry text lists
+      updateMediumUI();
+
+      // Reset color of floating wave particles
+      waveParticles.forEach(p => {
+        p.el.setAttribute('color', activeMedium.color);
+      });
+    }
+
+    // Sync Telemetry text
+    function updateMediumUI() {
+      lblSignalType.textContent = activeMedium.signal;
+      lblModulation.textContent = activeMedium.modulation;
+      lblSpeed.textContent = activeMedium.speedDesc;
+      lblBitsTransmitted.textContent = `0 / ${messageInput.value.length * 8} bits`;
+      lblProgress.textContent = "0%";
+      simStatusText.textContent = `READY TO TRANSMIT (${activeMedium.name.toUpperCase()})`;
+
+      const inputVal = messageInput.value.toUpperCase();
+      // Render text into raw binary representation
+      let completeBinaryStr = '';
+      for (let i = 0; i < inputVal.length; i++) {
+        const asciiBin = inputVal.charCodeAt(i).toString(2).padStart(8, '0');
+        completeBinaryStr += asciiBin + ' ';
+      }
+      binaryBox.innerHTML = completeBinaryStr.trim();
+    }
+
+    // Trigger full ASCII data transmission animation
+    function launchDataTransmission() {
+      if (isTransmitting) return;
+
+      const message = messageInput.value.trim().toUpperCase();
+      if (message.length === 0) {
+        alert("Please enter a valid text message to transmit!");
+        return;
+      }
+
+      isTransmitting = true;
+      document.getElementById('btnSendData').disabled = true;
+      messageInput.disabled = true;
+      simStatusText.textContent = "TRANSMITTING DATA STREAM...";
+      simStatusText.style.color = "var(--gold)";
+
+      // Reset Receiver Display text in A-Frame screen
+      screenBText.setAttribute('value', "HOST B (RECEIVER)\nSTATUS: RX BUFFERING\n\nRX DATA:\n[WAITING BITS...]");
+
+      // 1. Serialize entire message string into binary array of bits (0s and 1s)
+      packetQueue.length = 0;
+      let binaryReprHTML = '';
+
+      for (let charIndex = 0; charIndex < message.length; charIndex++) {
+        const char = message.charAt(charIndex);
+        const codeVal = message.charCodeAt(charIndex);
+        const binaryByte = codeVal.toString(2).padStart(8, '0');
+
+        for (let bitIndex = 0; bitIndex < 8; bitIndex++) {
+          const bit = parseInt(binaryByte.charAt(bitIndex));
+          packetQueue.push({
+            bitValue: bit,
+            charIndex: charIndex,
+            charValue: char,
+            bitPosition: (charIndex * 8) + bitIndex,
+            totalBitsCount: message.length * 8
+          });
+
+          // Build ASCII logs HTML
+          binaryReprHTML += `<span id="telemetryBit-${(charIndex * 8) + bitIndex}" class="bit-${bit}">${bit}</span>`;
+        }
+        binaryReprHTML += ' ';
+      }
+
+      binaryBox.innerHTML = binaryReprHTML;
+
+      // 2. Launch sequenced timers to spawn bit packets onto the line
+      // Calculate delay intervals based on simulation speeds
+      const delayInterval = (350 / simSpeed);
+      let packetIndex = 0;
+
+      function spawnNextBit() {
+        if (packetIndex >= packetQueue.length) return;
+
+        const packetData = packetQueue[packetIndex];
+        spawnBitPacket3D(packetData);
+
+        // Highlight currently transmitting bit inside HUD logs
+        const telemetryBitSpan = document.getElementById(`telemetryBit-${packetData.bitPosition}`);
+        if (telemetryBitSpan) {
+          telemetryBitSpan.className = "bit-active";
+        }
+
+        packetIndex++;
+        
+        // Loop recursion
+        if (packetIndex < packetQueue.length) {
+          setTimeout(spawnNextBit, delayInterval);
+        }
+      }
+
+      spawnNextBit();
+    }
+
+    // Spawn 3D floating bit packet
+    function spawnBitPacket3D(packetData) {
+      // Starting offset at Host A antenna/filament core (x = -3.9, y = 0.5)
+      const packetEl = document.createElement('a-entity');
+      packetEl.setAttribute('position', '-3.9 0.5 0');
+
+      // Packet Sphere model
+      const sphere = document.createElement('a-sphere');
+      sphere.setAttribute('radius', '0.12');
+      sphere.setAttribute('color', activeMedium.color);
+      // Faded glow representing 0s and bright flashing represents 1s (modulation)
+      const pulseIntensity = (packetData.bitValue === 1) ? 1.0 : 0.08;
+      sphere.setAttribute('material', `shader: flat; opacity: ${packetData.bitValue === 1 ? 0.95 : 0.45}`);
+      packetEl.appendChild(sphere);
+
+      // Floating 3D bit value text label
+      const txt = document.createElement('a-text');
+      txt.setAttribute('value', packetData.bitValue);
+      txt.setAttribute('align', 'center');
+      txt.setAttribute('position', '0 0.28 0');
+      txt.setAttribute('scale', '0.65 0.65 0.65');
+      txt.setAttribute('color', activeMedium.color);
+      txt.setAttribute('font', 'monoid');
+      packetEl.appendChild(txt);
+
+      packetContainer.appendChild(packetEl);
+
+      // Track active flight
+      activePacketsInFlight.push({
+        el: packetEl,
+        progress: 0,
+        data: packetData
+      });
+    }
+
+    // 60FPS Continuous Frame Ticks animation loop
+    function runSimulationFrame() {
+      waveTime += 0.08 * simSpeed;
+
+      // 1. Oscillate floating 3D waveforms based on selected channel medium
+      animate3DWaveforms();
+
+      // 2. Animate concentric wireless radio ripples in space
+      animateWirelessRipples();
+
+      // 3. Slide bit packets along medium lines and process arrivals
+      animatePacketsInFlight();
+
+      // Frame recursion
+      requestAnimationFrame(runSimulationFrame);
+    }
+
+    // Oscillate floating 3D waveforms based on selected channel medium
+    function animate3DWaveforms() {
+      const style = activeMedium.waveStyle;
+
+      waveParticles.forEach(particle => {
+        let targetY = 0.5;
+        let opacity = 0.75;
+        let scale = 1.0;
+
+        if (style === 'sine') {
+          // Sinusoidal Radio electromagnetic wave math
+          // Oscillate smoothly in y
+          targetY = 0.8 + Math.sin((waveTime * 0.4) + (particle.x * 2.0)) * 0.45;
+          opacity = 0.8;
+        } 
+        else if (style === 'square') {
+          // Digital Square electrical voltage waves
+          // Snap sharp signals between high and low states
+          targetY = 0.8 + Math.sign(Math.sin((waveTime * 0.4) + (particle.x * 2.0))) * 0.4;
+          opacity = 0.8;
+        } 
+        else if (style === 'laser') {
+          // Guided Fiber Optic straight core
+          targetY = 0.5; // straight path
+          // Simulating digital laser light flashing
+          const laserPulseVal = Math.sin((waveTime * 0.8) + (particle.x * 4.0));
+          opacity = (laserPulseVal > 0) ? 0.95 : 0.15;
+          scale = (laserPulseVal > 0) ? 1.2 : 0.65;
+        }
+
+        // Apply animated attributes in A-Frame
+        particle.el.setAttribute('position', `${particle.x} ${targetY} 0`);
+        particle.el.setAttribute('material', `transparent: true; opacity: ${opacity}`);
+        particle.el.setAttribute('scale', `${scale} ${scale} ${scale}`);
+      });
+    }
+
+    // Concentric expanding wireless radio ripples
+    function animateWirelessRipples() {
+      if (activeMedium.id !== 'wireless') return;
+
+      for (let i = 0; i < 3; i++) {
+        radioWaveAge[i] += 0.015 * simSpeed;
+        if (radioWaveAge[i] > 3) {
+          radioWaveAge[i] = 0;
+        }
+      }
+
+      const ripplesContainer = document.getElementById('radioWaves');
+      const ripples = ripplesContainer.children;
+
+      for (let i = 0; i < 3; i++) {
+        const age = radioWaveAge[i];
+        // Scale ripple radius outward
+        const rad = 0.4 + (age * 2.8);
+        const opacity = Math.max(0, 0.8 - (age * 0.27));
+
+        const rippleNode = ripples[i];
+        if (rippleNode) {
+          rippleNode.setAttribute('geometry', `primitive: torus; radius: ${rad}; radiusTubular: 0.012`);
+          rippleNode.setAttribute('material', `color: var(--magenta); opacity: ${opacity}`);
+        }
+      }
+    }
+
+    // Slide packets along transmission lines
+    function animatePacketsInFlight() {
+      const arrivedPackets = [];
+
+      for (let i = activePacketsInFlight.length - 1; i >= 0; i--) {
+        const pkt = activePacketsInFlight[i];
+        
+        // Speed scaling based on channel medium specs
+        pkt.progress += activeMedium.speedVal * simSpeed;
+
+        if (pkt.progress >= 1.0) {
+          // Packet reached receiver destination terminal Host B
+          arrivedPackets.push(pkt);
+          activePacketsInFlight.splice(i, 1);
+        } else {
+          // Compute positional coordinates
+          // Interpolate horizontally from x = -3.9 (Host A) to x = 3.9 (Host B)
+          const currentX = -3.9 + (pkt.progress * 7.8);
+          let currentY = 0.5;
+
+          // If wireless path is active, guide packet along the peaks and valleys of the Sine Wave!
+          if (activeMedium.waveStyle === 'sine') {
+            currentY = 0.8 + Math.sin((waveTime * 0.4) + (currentX * 2.0)) * 0.45;
+          } 
+          // If copper path is active, guide along the Square Wave edges!
+          else if (activeMedium.waveStyle === 'square') {
+            currentY = 0.8 + Math.sign(Math.sin((waveTime * 0.4) + (currentX * 2.0))) * 0.4;
+          }
+
+          pkt.el.setAttribute('position', `${currentX} ${currentY} 0`);
+        }
+      }
+
+      // Process arrivals
+      if (arrivedPackets.length > 0) {
+        arrivedPackets.forEach(pkt => {
+          processBitArrivalHostB(pkt);
+        });
+      }
+    }
+
+    // Arriving bits collection & reconstruction at Host B terminal
+    // Track byte assembly array
+    const receivedBitstreamArray = [];
+
+    function processBitArrivalHostB(pkt) {
+      // 1. Remove 3D packet element from container
+      if (pkt.el.parentNode) {
+        pkt.el.parentNode.removeChild(pkt.el);
+      }
+
+      // 2. Play flash neon ring impact VFX on Host B screen
+      arrivalRing.setAttribute('material', 'opacity: 0.8');
+      arrivalRing.setAttribute('scale', '0.1 0.1 0.1');
+      arrivalRing.setAttribute('animation', {
+        property: 'scale', to: '1.5 1.5 1.5', dur: 350, easing: 'easeOutQuad'
+      });
+      arrivalRing.removeAttribute('animation__opacity');
+      arrivalRing.setAttribute('animation__opacity', {
+        property: 'material.opacity', to: 0, dur: 350, easing: 'easeOutQuad'
+      });
+      arrivalRing.emit('arrive');
+
+      // 3. Highlight successfully delivered bit in HUD logs
+      const telemetryBitSpan = document.getElementById(`telemetryBit-${pkt.data.bitPosition}`);
+      if (telemetryBitSpan) {
+        // Reset from active to default completed state
+        telemetryBitSpan.className = `bit-${pkt.data.bitValue}`;
+        telemetryBitSpan.style.border = "1px solid var(--green)";
+        telemetryBitSpan.style.background = "rgba(0, 255, 135, 0.08)";
+      }
+
+      // 4. Update arrival metrics text in HUD
+      receivedBitstreamArray.push(pkt.data.bitValue);
+      const totalBitsTransmitted = receivedBitstreamArray.length;
+      const progressPercent = Math.round((totalBitsTransmitted / pkt.data.totalBitsCount) * 100);
+
+      lblBitsTransmitted.textContent = `${totalBitsTransmitted} / ${pkt.data.totalBitsCount} bits`;
+      lblProgress.textContent = `${progressPercent}%`;
+
+      // 5. Decode characters sequentially character-by-character on Host B screen
+      // Break stream into 8-bit bytes to assemble characters
+      let decodedStr = '';
+      const totalBytesReceived = Math.floor(totalBitsTransmitted / 8);
+
+      for (let byteIdx = 0; byteIdx < totalBytesReceived; byteIdx++) {
+        let byteBits = '';
+        for (let bitIdx = 0; bitIdx < 8; bitIdx++) {
+          byteBits += receivedBitstreamArray[(byteIdx * 8) + bitIdx];
+        }
+        // Convert byte bits back to character
+        const codeVal = parseInt(byteBits, 2);
+        decodedStr += String.fromCharCode(codeVal);
+      }
+
+      // If we are currently in middle of buffering a byte
+      const remainsBitsCount = totalBitsTransmitted % 8;
+      let bufferIndicator = decodedStr;
+      if (remainsBitsCount > 0) {
+        // Display partial bits buffered
+        let partialByte = '';
+        for (let i = 0; i < remainsBitsCount; i++) {
+          partialByte += receivedBitstreamArray[(totalBytesReceived * 8) + i];
+        }
+        bufferIndicator += `... [Buffering Bit ${remainsBitsCount}/8: ${partialByte}]`;
+      }
+
+      // Update Receiver Screen text in A-Frame
+      screenBText.setAttribute('value', `HOST B (RECEIVER)\nSTATUS: RX BUFFERING\n\nRX DATA:\n${bufferIndicator}`);
+
+      // Check if complete stream is received
+      if (totalBitsTransmitted === pkt.data.totalBitsCount) {
+        isTransmitting = false;
+        document.getElementById('btnSendData').disabled = false;
+        messageInput.disabled = false;
+        simStatusText.textContent = "DELIVERY SUCCESSFUL!";
+        simStatusText.style.color = "var(--green)";
+
+        // Finalize Receiver Screen screen state
+        screenBText.setAttribute('value', `HOST B (RECEIVER)\nSTATUS: SUCCESS\n\nRX DATA:\n${decodedStr}`);
+        
+        // Reset array
+        receivedBitstreamArray.length = 0;
+
+        alert(`Data Reassembled! Host B received complete stream:\n"${decodedStr}"`);
+      }
+    }
+
+    // Speed slider updates
+    function updateSimSpeed(val) {
+      simSpeed = parseFloat(val);
+      document.getElementById('speedValue').textContent = simSpeed.toFixed(1) + 'x';
+    }
+
+    // Set camera viewports via controls deck
+    function setCameraView(view) {
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+      const rig = document.getElementById('cameraRig');
+
+      if (view === 'overview') {
+        document.getElementById('camViewOverview').classList.add('active');
+        rig.removeAttribute('animation__cam');
+        rig.setAttribute('animation__cam', {
+          property: 'position', to: '0 3.2 7.5', dur: 800, easing: 'easeInOutQuad'
+        });
+        rig.setAttribute('animation__camRot', {
+          property: 'rotation', to: '-15 0 0', dur: 800, easing: 'easeInOutQuad'
+        });
+      } 
+      else if (view === 'sender') {
+        document.getElementById('camViewSender').classList.add('active');
+        rig.removeAttribute('animation__cam');
+        rig.setAttribute('animation__cam', {
+          property: 'position', to: '-4.2 1.3 2.5', dur: 800, easing: 'easeInOutQuad'
+        });
+        rig.setAttribute('animation__camRot', {
+          property: 'rotation', to: '-5 0 0', dur: 800, easing: 'easeInOutQuad'
+        });
+      } 
+      else if (view === 'receiver') {
+        document.getElementById('camViewReceiver').classList.add('active');
+        rig.removeAttribute('animation__cam');
+        rig.setAttribute('animation__cam', {
+          property: 'position', to: '4.2 1.3 2.5', dur: 800, easing: 'easeInOutQuad'
+        });
+        rig.setAttribute('animation__camRot', {
+          property: 'rotation', to: '-5 0 0', dur: 800, easing: 'easeInOutQuad'
+        });
+      }
+    }
+  </script>
+</body>
+</html>

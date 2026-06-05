@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CyberLock — WebXR Deadlock & Resource Lab</title>
+  <!-- Modern Fonts from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- A-Frame Library -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #030409;
+      --bg-panel: rgba(8, 10, 24, 0.88);
+      --border-glow: rgba(0, 242, 254, 0.22);
+      --cyan: #00f2fe;
+      --magenta: #ff007f;
+      --gold: #ffd200;
+      --green: #00ff87;
+      --red: #ff3b30;
+      --glass-blur: blur(16px);
+      --shadow-glow: 0 0 20px rgba(0, 242, 254, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+    }
+
+    /* 2D HUD UI Overlay */
+    .hud-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none; /* Let clicks pass through to A-Frame unless on UI panels */
+      display: grid;
+      grid-template-columns: 330px 1fr 360px;
+      grid-template-rows: 1fr auto;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .ui-panel {
+      background: var(--bg-panel);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 20px;
+      pointer-events: auto; /* Enable interaction with controls */
+      box-shadow: var(--shadow-glow);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ui-panel:hover {
+      border-color: rgba(0, 242, 254, 0.4);
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.25);
+    }
+
+    .panel-section-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-section-title span {
+      font-size: 10px;
+      background: rgba(0, 242, 254, 0.12);
+      color: var(--cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-glow);
+    }
+
+    /* Left Sidebar: Scenario Builder & Prevention Configurator */
+    .scenario-panel {
+      grid-column: 1;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .preset-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .preset-card:hover {
+      background: rgba(0, 242, 254, 0.04);
+      border-color: rgba(0, 242, 254, 0.25);
+      transform: translateX(4px);
+    }
+
+    .preset-card.active-safe {
+      border-color: var(--green);
+      background: rgba(0, 255, 135, 0.06);
+    }
+
+    .preset-card.active-deadlock {
+      border-color: var(--red);
+      background: rgba(255, 59, 48, 0.06);
+      animation: pulseRedBorder 2s infinite alternate;
+    }
+
+    .preset-title {
+      font-weight: 800;
+      font-size: 14.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preset-title.safe { color: var(--green); }
+    .preset-title.deadlock { color: var(--red); }
+
+    .preset-description {
+      font-size: 11.5px;
+      color: #cbd5e1;
+      line-height: 1.4;
+      margin-top: 6px;
+    }
+
+    /* Prevention Rule switch toggle */
+    .prevention-toggle-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .prevention-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .prevention-label {
+      font-weight: 700;
+      font-size: 13.5px;
+    }
+
+    /* Switch button styling */
+    .switch-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .switch-btn.active {
+      color: #030409;
+      background-color: var(--cyan);
+      border-color: transparent;
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.35);
+    }
+
+    .prevention-desc {
+      font-size: 11.5px;
+      color: #94a3b8;
+      line-height: 1.4;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 8px;
+    }
+
+    /* Right Sidebar: Dynamic RAG Allocation Matrix */
+    .matrix-panel {
+      grid-column: 3;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .allocation-matrix-container {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: 80px 1fr 1fr 1fr;
+      gap: 6px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+    }
+
+    .matrix-hdr {
+      font-weight: bold;
+      color: #64748b;
+      font-size: 10px;
+      text-transform: uppercase;
+      padding: 6px 0;
+    }
+
+    .matrix-row-title {
+      font-weight: bold;
+      color: var(--cyan);
+      text-align: left;
+      align-self: center;
+    }
+
+    .matrix-cell {
+      padding: 6px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .matrix-cell:hover {
+      background: rgba(0, 242, 254, 0.08);
+      border-color: rgba(0, 242, 254, 0.2);
+    }
+
+    .matrix-cell.held {
+      background: rgba(0, 255, 135, 0.15);
+      color: var(--green);
+      border-color: var(--green);
+      font-weight: bold;
+    }
+
+    .matrix-cell.waiting {
+      background: rgba(255, 59, 48, 0.15);
+      color: var(--red);
+      border-color: var(--red);
+      font-weight: bold;
+      animation: pulseCellAlert 1s infinite alternate;
+    }
+
+    /* Sandbox Operation Tools */
+    .sandbox-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-action {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #94a3b8;
+      padding: 10px;
+      font-size: 12.5px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--cyan);
+      color: #fff;
+    }
+
+    .btn-action.active-target {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0, 242, 254, 0.05);
+    }
+
+    .btn-action.active-target.res {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(255, 210, 0, 0.05);
+    }
+
+    .btn-action.danger {
+      border-color: rgba(255, 59, 48, 0.3);
+      color: var(--red);
+    }
+
+    .btn-action.danger:hover {
+      background: rgba(255, 59, 48, 0.15);
+      border-color: var(--red);
+      box-shadow: 0 0 10px rgba(255, 59, 48, 0.2);
+    }
+
+    /* Bottom Panel Controls Deck */
+    .controls-panel {
+      grid-column: 1 / span 3;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      height: 85px;
+      gap: 30px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.15);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.view-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      border-radius: 6px;
+      border-color: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .btn.view-btn.active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0, 242, 254, 0.08);
+    }
+
+    .sim-status-display {
+      text-align: right;
+    }
+
+    .sim-label {
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sim-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--green);
+      letter-spacing: 0.5px;
+    }
+
+    .sim-value.deadlock-alert {
+      color: var(--red);
+      animation: blinkRedText 0.8s infinite alternate;
+    }
+
+    @keyframes pulseRedBorder {
+      from { border-color: rgba(255, 59, 48, 0.3); box-shadow: 0 0 5px rgba(255, 59, 48, 0.1); }
+      to { border-color: var(--red); box-shadow: 0 0 15px rgba(255, 59, 48, 0.35); }
+    }
+
+    @keyframes pulseCellAlert {
+      from { background: rgba(255, 59, 48, 0.05); }
+      to { background: rgba(255, 59, 48, 0.25); }
+    }
+
+    @keyframes blinkRedText {
+      from { opacity: 0.4; text-shadow: none; }
+      to { opacity: 1; text-shadow: 0 0 10px var(--red); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 2D HUD UI Overlay Layer -->
+  <div class="hud-overlay">
+    
+    <!-- Left Sidebar: Scenario Presets & Havender Rules -->
+    <aside class="ui-panel selector-panel">
+      <div class="panel-section-title">
+        Scenario Presets <span>Thread Sandbox</span>
+      </div>
+
+      <!-- Safe Presets -->
+      <div class="preset-card active-safe" id="preset-safe" onclick="triggerSafeSequence()">
+        <div class="preset-title safe">
+          <span>Safe Execution Sequence</span>
+          <span style="font-size: 9px; opacity:0.8; font-family:'JetBrains Mono';">NO DEADLOCK</span>
+        </div>
+        <div class="preset-description">
+          Processes successfully request and release keys. Symmetrical resource dispatch completes and threads exit happily, showing clean, active packet flow.
+        </div>
+      </div>
+
+      <!-- Deadlock Preset -->
+      <div class="preset-card" id="preset-deadlock" onclick="triggerDeadlockSequence()">
+        <div class="preset-title deadlock">
+          <span>Circular Wait Deadlock</span>
+          <span style="font-size: 9px; opacity:0.8; font-family:'JetBrains Mono';">SYSTEM FREEZE</span>
+        </div>
+        <div class="preset-description">
+          P1 holds R1 and requests R2; P2 holds R2 and requests R3; P3 holds R3 and requests R1. A closed RAG loop freezes the room and triggers a data packet traffic jam!
+        </div>
+      </div>
+
+      <!-- Deadlock Prevention selector -->
+      <div class="prevention-toggle-card">
+        <div class="prevention-row">
+          <span class="prevention-label">Havender's Rule Prevention</span>
+          <button class="switch-btn" id="btnToggleOrder" onclick="toggleOrderingPrevention()">
+            Disabled
+          </button>
+        </div>
+        <div class="prevention-desc">
+          Enforces **Resource Ordering**. A process can only request resources in an increasing numerical index. Blocks backward requests ($R_3 \to R_1$) to prevent circular waits.
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right Sidebar: Interactive Allocation Matrix -->
+    <aside class="ui-panel matrix-panel">
+      <div class="panel-section-title">
+        Resource Allocation Graph <span>3D RAG Matrix</span>
+      </div>
+
+      <!-- Interaction matrix mapping -->
+      <div class="allocation-matrix-container">
+        <div style="font-size:10px; font-weight:bold; color:#64748b; margin-bottom:8px; text-transform:uppercase;">Allocation Grid</div>
+        
+        <div class="matrix-grid">
+          <div></div>
+          <div class="matrix-hdr">R1</div>
+          <div class="matrix-hdr">R2</div>
+          <div class="matrix-hdr">R3</div>
+
+          <div class="matrix-row-title">P1</div>
+          <div class="matrix-cell" id="cell-P1-R1" onclick="toggleMatrixBinding('P1', 'R1')">-</div>
+          <div class="matrix-cell" id="cell-P1-R2" onclick="toggleMatrixBinding('P1', 'R2')">-</div>
+          <div class="matrix-cell" id="cell-P1-R3" onclick="toggleMatrixBinding('P1', 'R3')">-</div>
+
+          <div class="matrix-row-title">P2</div>
+          <div class="matrix-cell" id="cell-P2-R1" onclick="toggleMatrixBinding('P2', 'R1')">-</div>
+          <div class="matrix-cell" id="cell-P2-R2" onclick="toggleMatrixBinding('P2', 'R2')">-</div>
+          <div class="matrix-cell" id="cell-P2-R3" onclick="toggleMatrixBinding('P2', 'R3')">-</div>
+
+          <div class="matrix-row-title">P3</div>
+          <div class="matrix-cell" id="cell-P3-R1" onclick="toggleMatrixBinding('P3', 'R1')">-</div>
+          <div class="matrix-cell" id="cell-P3-R2" onclick="toggleMatrixBinding('P3', 'R2')">-</div>
+          <div class="matrix-cell" id="cell-P3-R3" onclick="toggleMatrixBinding('P3', 'R3')">-</div>
+        </div>
+
+        <div style="font-size:9px; color:#64748b; margin-top:8px; line-height:1.3;">
+          *Click a cell to cycle RAG bindings:<br>
+          **Empty** (-) &rarr; **Process Request** (W) &rarr; **Resource Allocation** (H)
+        </div>
+      </div>
+
+      <div class="panel-section-title">Manual Sandbox Tools</div>
+      <!-- Direct selections of processes to terminate -->
+      <div class="sandbox-actions">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <button class="btn-action" id="selP1Btn" onclick="selectProcessSandbox(1)">P1 Focus</button>
+          <button class="btn-action" id="selP2Btn" onclick="selectProcessSandbox(2)">P2 Focus</button>
+        </div>
+        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:8px; margin-bottom:12px;">
+          <button class="btn-action" id="selP3Btn" onclick="selectProcessSandbox(3)">P3 Focus</button>
+          <button class="btn-action danger" onclick="killFocusedProcess()">Kill Thread</button>
+        </div>
+
+        <div style="font-size:11px; line-height:1.4; color:#94a3b8; background:rgba(0,0,0,0.25); border-radius:10px; padding:12px; border-left:3px solid var(--gold);">
+          <span style="color:var(--gold); font-weight:bold; display:block; margin-bottom:4px;">RESOLVING DEADLOCKS:</span>
+          Select the deadlocked process and click **"Kill Thread"**. The process terminates, releasing its held keys, and dissolving the packet traffic jam immediately!
+        </div>
+      </div>
+    </aside>
+
+    <!-- Bottom Controls Panel -->
+    <footer class="ui-panel controls-panel">
+      <!-- Reset deck -->
+      <div class="control-group">
+        <button class="btn primary" onclick="resetSandboxGraph()">
+          Reset System
+        </button>
+        <button class="btn" onclick="releaseAllKeys()">
+          Release All Keys
+        </button>
+      </div>
+
+      <!-- Speed clock slider -->
+      <div class="control-group">
+        <div class="slider-container" style="width: 140px; margin-top: 0;">
+          <div class="slider-label">
+            <span>Data Flow Clock</span>
+            <span id="speedValue">1.0x</span>
+          </div>
+          <input type="range" class="slider" id="speedSlider" min="0.2" max="3" step="0.2" value="1.0" oninput="updateSimSpeed(this.value)">
+        </div>
+      </div>
+
+      <!-- Camera views -->
+      <div class="control-group">
+        <span class="slider-label" style="margin-right: 5px;">View angle:</span>
+        <button class="btn view-btn active" id="camViewOverview" onclick="setCameraView('overview')">Overview</button>
+        <button class="btn view-btn" id="camViewTop" onclick="setCameraView('top')">2D Top-Down</button>
+      </div>
+
+      <!-- Symmetrical Alert matrix status -->
+      <div class="sim-status-display">
+        <div class="sim-label">DEADLOCK ALARM DETECTOR</div>
+        <div class="sim-value" id="simStatusText">SYSTEM ACTIVE / HEALTHY</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- A-Frame 3D Scene Layer -->
+  <a-scene background="color: #020306" vr-mode-ui="enabled: true">
+
+    <a-assets>
+      <!-- Cybergrid Texture -->
+      <img id="gridTex" src="https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/textures/grid.png" crossorigin="anonymous">
+      <!-- Symmetrical RAG Lasers mixins -->
+      <a-mixin id="allocationLaser" material="shader: flat; transparent: true; opacity: 0.85"></a-mixin>
+    </a-assets>
+
+    <!-- Camera Rig -->
+    <a-entity id="cameraRig" position="0 5.2 6.5" rotation="-38 0 0">
+      <a-camera id="mainCamera" look-controls="pointerLockEnabled: false" wasd-controls="enabled: true">
+        <a-cursor id="sceneCursor" material="color: #00f2fe; shader: flat" scale="0.6 0.6 0.6"></a-cursor>
+      </a-camera>
+    </a-entity>
+
+    <!-- Global lighting -->
+    <a-light type="ambient" color="#181e35" intensity="1.2" id="ambientLight"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.4" position="0 10 4"></a-light>
+    
+    <!-- Neon spotlight inside deadlock alarm -->
+    <a-light type="point" color="#ff0055" intensity="0" position="0 4 -4.5" id="sirenLight" distance="18"></a-light>
+
+    <a-sky color="#020306" id="sceneSky"></a-sky>
+
+    <!-- Neon Grid floor -->
+    <a-plane 
+      rotation="-90 0 0" 
+      width="20" 
+      height="14" 
+      material="src: #gridTex; repeat: 20 14; color: #1e1b4b; opacity: 0.25; roughness: 1" 
+      position="0 0.1 -4.5">
+    </a-plane>
+
+
+    <!-- ============================================== -->
+    <!-- RAG ROTATING CENTRAL CHASSIS -->
+    <!-- ============================================== -->
+    <!-- Contains alternately positioned Process Cylinders and Resource Keys -->
+    <a-entity id="ragRing" position="0 0.5 -4.5">
+      <!-- Glowing inner circle ring platform -->
+      <a-torus radius="3.5" radius-tubular="0.04" color="#0c0e1a" material="roughness: 0.2; metalness: 0.9">
+        <a-torus radius="3.5" radius-tubular="0.015" color="#00f2fe" id="neonRingPlate" material="shader: flat; opacity: 0.4"></a-torus>
+      </a-torus>
+
+      <!-- ---------------------------------------------------- -->
+      <!-- PROCESS NODES (Arranged at 0, 120, 240 degrees) -->
+      <!-- ---------------------------------------------------- -->
+      <!-- Process P1 (0 deg: x = 3.5, z = 0) -->
+      <a-entity id="node-P1" position="3.5 0.5 0" class="clickable" onclick="selectProcessSandbox(1)">
+        <a-cylinder radius="0.4" height="0.6" color="#0b1021" material="roughness: 0.3; metalness: 0.8; emissive: #00f2fe; emissiveIntensity: 0.1">
+          <a-torus radius="0.4" radius-tubular="0.015" color="#00f2fe" material="shader: flat; opacity: 0.8" rotation="90 0 0"></a-torus>
+        </a-cylinder>
+        <!-- Floating details -->
+        <a-text value="P1" align="center" position="0 0.7 0" scale="0.8 0.8 0.8" color="#00f2fe" font="monoid" side="double"></a-text>
+        <a-text value="PROCESS" align="center" position="0 -0.5 0" scale="0.4 0.4 0.4" color="#64748b" font="monoid" side="double"></a-text>
+        
+        <!-- Starvation Alert Shield -->
+        <a-box id="shield-P1" position="0 1.1 0" width="0.6" height="0.4" depth="0.05" color="#ff3b30" visible="false"
+               material="shader: flat; transparent: true; opacity: 0.85">
+          <a-text value="BLOCKED" align="center" position="0 0 0.03" scale="0.4 0.4 0.4" color="white" font="monoid"></a-text>
+        </a-box>
+      </a-entity>
+
+      <!-- Process P2 (120 deg: x = -1.75, z = 3.03) -->
+      <a-entity id="node-P2" position="-1.75 0.5 3.03" class="clickable" onclick="selectProcessSandbox(2)">
+        <a-cylinder radius="0.4" height="0.6" color="#0b1021" material="roughness: 0.3; metalness: 0.8; emissive: #ff007f; emissiveIntensity: 0.1">
+          <a-torus radius="0.4" radius-tubular="0.015" color="#ff007f" material="shader: flat; opacity: 0.8" rotation="90 0 0"></a-torus>
+        </a-cylinder>
+        <a-text value="P2" align="center" position="0 0.7 0" scale="0.8 0.8 0.8" color="#ff007f" font="monoid" side="double"></a-text>
+        <a-text value="PROCESS" align="center" position="0 -0.5 0" scale="0.4 0.4 0.4" color="#64748b" font="monoid" side="double"></a-text>
+
+        <!-- Starvation Alert Shield -->
+        <a-box id="shield-P2" position="0 1.1 0" width="0.6" height="0.4" depth="0.05" color="#ff3b30" visible="false"
+               material="shader: flat; transparent: true; opacity: 0.85">
+          <a-text value="BLOCKED" align="center" position="0 0 0.03" scale="0.4 0.4 0.4" color="white" font="monoid"></a-text>
+        </a-box>
+      </a-entity>
+
+      <!-- Process P3 (240 deg: x = -1.75, z = -3.03) -->
+      <a-entity id="node-P3" position="-1.75 0.5 -3.03" class="clickable" onclick="selectProcessSandbox(3)">
+        <a-cylinder radius="0.4" height="0.6" color="#0b1021" material="roughness: 0.3; metalness: 0.8; emissive: #ffd200; emissiveIntensity: 0.1">
+          <a-torus radius="0.4" radius-tubular="0.015" color="#ffd200" material="shader: flat; opacity: 0.8" rotation="90 0 0"></a-torus>
+        </a-cylinder>
+        <a-text value="P3" align="center" position="0 0.7 0" scale="0.8 0.8 0.8" color="#ffd200" font="monoid" side="double"></a-text>
+        <a-text value="PROCESS" align="center" position="0 -0.5 0" scale="0.4 0.4 0.4" color="#64748b" font="monoid" side="double"></a-text>
+
+        <!-- Starvation Alert Shield -->
+        <a-box id="shield-P3" position="0 1.1 0" width="0.6" height="0.4" depth="0.05" color="#ff3b30" visible="false"
+               material="shader: flat; transparent: true; opacity: 0.85">
+          <a-text value="BLOCKED" align="center" position="0 0 0.03" scale="0.4 0.4 0.4" color="white" font="monoid"></a-text>
+        </a-box>
+      </a-entity>
+
+      <!-- ---------------------------------------------------- -->
+      <!-- RESOURCE NODES (Arranged at 60, 180, 300 degrees) -->
+      <!-- ---------------------------------------------------- -->
+      <!-- Resource R1 (60 deg: x = 1.75, z = 3.03) -->
+      <a-entity id="node-R1" position="1.75 0.5 3.03">
+        <!-- Floating Pedestal Platform -->
+        <a-cylinder radius="0.3" height="0.3" color="#111827" material="roughness: 0.3; metalness: 0.8">
+          <a-cylinder radius="0.25" height="0.05" position="0 0.13 0" color="#00ff87" material="shader: flat; opacity: 0.5"></a-cylinder>
+        </a-cylinder>
+        <!-- Procedural Key Model (Spinning glowing Octahedron Core inside Wireframe Diamond) -->
+        <a-entity position="0 0.65 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+          <a-entity geometry="primitive: octahedron; radius: 0.2" material="shader: flat; color: #00ff87; transparent: true; opacity: 0.85"></a-entity>
+          <a-entity geometry="primitive: octahedron; radius: 0.32" material="wireframe: true; color: #00ff87; opacity: 0.4"></a-entity>
+        </a-entity>
+        <!-- Floating Labels -->
+        <a-text value="R1" align="center" position="0 1.2 0" scale="0.8 0.8 0.8" color="#00ff87" font="monoid" side="double"></a-text>
+        <a-text value="KEY" align="center" position="0 -0.32 0" scale="0.35 0.35 0.35" color="#64748b" font="monoid" side="double"></a-text>
+      </a-entity>
+
+      <!-- Resource R2 (180 deg: x = -3.5, z = 0) -->
+      <a-entity id="node-R2" position="-3.5 0.5 0">
+        <a-cylinder radius="0.3" height="0.3" color="#111827" material="roughness: 0.3; metalness: 0.8">
+          <a-cylinder radius="0.25" height="0.05" position="0 0.13 0" color="#00ff87" material="shader: flat; opacity: 0.5"></a-cylinder>
+        </a-cylinder>
+        <a-entity position="0 0.65 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+          <a-entity geometry="primitive: octahedron; radius: 0.2" material="shader: flat; color: #00ff87; transparent: true; opacity: 0.85"></a-entity>
+          <a-entity geometry="primitive: octahedron; radius: 0.32" material="wireframe: true; color: #00ff87; opacity: 0.4"></a-entity>
+        </a-entity>
+        <a-text value="R2" align="center" position="0 1.2 0" scale="0.8 0.8 0.8" color="#00ff87" font="monoid" side="double"></a-text>
+        <a-text value="KEY" align="center" position="0 -0.32 0" scale="0.35 0.35 0.35" color="#64748b" font="monoid" side="double"></a-text>
+      </a-entity>
+
+      <!-- Resource R3 (300 deg: x = 1.75, z = -3.03) -->
+      <a-entity id="node-R3" position="1.75 0.5 -3.03">
+        <a-cylinder radius="0.3" height="0.3" color="#111827" material="roughness: 0.3; metalness: 0.8">
+          <a-cylinder radius="0.25" height="0.05" position="0 0.13 0" color="#00ff87" material="shader: flat; opacity: 0.5"></a-cylinder>
+        </a-cylinder>
+        <a-entity position="0 0.65 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+          <a-entity geometry="primitive: octahedron; radius: 0.2" material="shader: flat; color: #00ff87; transparent: true; opacity: 0.85"></a-entity>
+          <a-entity geometry="primitive: octahedron; radius: 0.32" material="wireframe: true; color: #00ff87; opacity: 0.4"></a-entity>
+        </a-entity>
+        <a-text value="R3" align="center" position="0 1.2 0" scale="0.8 0.8 0.8" color="#00ff87" font="monoid" side="double"></a-text>
+        <a-text value="KEY" align="center" position="0 -0.32 0" scale="0.35 0.35 0.35" color="#64748b" font="monoid" side="double"></a-text>
+      </a-entity>
+
+      <!-- ---------------------------------------------------- -->
+      <!-- DYNAMIC RAG LASERS & TRAFFIC PACKETS CONTAINER -->
+      <!-- ---------------------------------------------------- -->
+      <!-- Dynamic laser paths represent RAG edges will render here -->
+      <a-entity id="ragLasers"></a-entity>
+      
+      <!-- Dynamic bumper-to-bumper traffic jams will appear inside this container -->
+      <a-entity id="trafficContainer"></a-entity>
+
+      <!-- 3D prevention rule alert text floating in the middle -->
+      <a-text id="preventionAlertText" value="" align="center" position="0 2.2 0" scale="1.4 1.4 1.4" color="#ff3b30" font="monoid" side="double" visible="false"></a-text>
+    </a-entity>
+
+  </a-scene>
+
+  <!-- ============================================== -->
+  <!-- SIMULATION AND DFS CYCLE ENGINE SCRIPT -->
+  <!-- ============================================== -->
+  <script>
+    // Symmetrical alternating RAG positions map (radius = 3.5m)
+    const positions = {
+      P1: { x: 3.5,  y: 0.5, z: 0 },
+      R1: { x: 1.75, y: 0.5, z: 3.03 },
+      P2: { x: -1.75,y: 0.5, z: 3.03 },
+      R2: { x: -3.5, y: 0.5, z: 0 },
+      P3: { x: -1.75,y: 0.5, z: -3.03 },
+      R3: { x: 1.75, y: 0.5, z: -3.03 }
+    };
+
+    // RAG State Model
+    const rag = {
+      // allocations: Resource ID mapped to paired Process ID (null if free)
+      allocations: { R1: null, R2: null, R3: null },
+      // requests: Process ID mapped to arrays of requested Resource IDs
+      requests: { P1: [], P2: [], P3: [] },
+      // active processes lists (in case they get killed)
+      alive: { P1: true, P2: true, P3: true }
+    };
+
+    // Config parameters
+    let isOrderingPreventionActive = false;
+    let selectedProcessNum = 1; // Direct sandbox tool focus
+    let simSpeed = 1.0;
+    let isSystemDeadlocked = false;
+    
+    // Scene tick timers
+    let waveTime = 0;
+    let deadlockedPathNodes = [];
+
+    // DOM references
+    const simStatusText = document.getElementById('simStatusText');
+    const speedValue = document.getElementById('speedValue');
+    const preventionAlertText = document.getElementById('preventionAlertText');
+    const ragRing = document.getElementById('ragRing');
+    const ragLasers = document.getElementById('ragLasers');
+    const trafficContainer = document.getElementById('trafficContainer');
+    
+    const ambientLight = document.getElementById('ambientLight');
+    const sirenLight = document.getElementById('sirenLight');
+    const sceneSky = document.getElementById('sceneSky');
+    const neonRingPlate = document.getElementById('neonRingPlate');
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Default to Safe Preset Sequence on launch
+      triggerSafeSequence();
+
+      // Continuous 60fps frame tick animation loop
+      requestAnimationFrame(runSimulationFrame);
+    });
+
+    // Preset 1: Safe Sequence (Processes request and release keys cleanly)
+    function triggerSafeSequence() {
+      if (isSystemDeadlocked) {
+        resetSandboxGraph();
+      }
+
+      document.getElementById('preset-safe').classList.add('active-safe');
+      document.getElementById('preset-deadlock').classList.remove('active-deadlock');
+
+      // Clear previous
+      releaseAllKeys();
+
+      // P1 holds R1, P2 holds R2, R3 remains free. P3 is idle.
+      rag.allocations.R1 = 'P1';
+      rag.allocations.R2 = 'P2';
+      
+      // Spawn some safe requests
+      rag.requests.P3 = ['R2']; // P3 wants R2 (blocks, waits)
+
+      syncRAGState();
+    }
+
+    // Preset 2: Circular Wait Deadlock Sequence (System freezes, traffic jams)
+    function triggerDeadlockSequence() {
+      document.getElementById('preset-safe').classList.remove('active-safe');
+      document.getElementById('preset-deadlock').classList.add('active-deadlock');
+
+      // Clear previous
+      releaseAllKeys();
+
+      // Enforce the deadlock loop:
+      // P1 holds R1, wants R2
+      // P2 holds R2, wants R3
+      // P3 holds R3, wants R1
+      rag.allocations.R1 = 'P1';
+      rag.allocations.R2 = 'P2';
+      rag.allocations.R3 = 'P3';
+
+      // If ordering rules are active, bypass loop to demonstrate prevention
+      if (isOrderingPreventionActive) {
+        rag.requests.P1 = ['R2'];
+        rag.requests.P2 = ['R3'];
+        // P3 requesting R1 gets blocked!
+        showPreventionAlert("CIRCULAR WAIT PREVENTED:\nOrdering Rule Blocks P3 -> R1!");
+      } else {
+        rag.requests.P1 = ['R2'];
+        rag.requests.P2 = ['R3'];
+        rag.requests.P3 = ['R1'];
+      }
+
+      syncRAGState();
+    }
+
+    // Toggle resource ordering prevention rules
+    function toggleOrderingPrevention() {
+      isOrderingPreventionActive = !isOrderingPreventionActive;
+      const btn = document.getElementById('btnToggleOrder');
+
+      if (isOrderingPreventionActive) {
+        btn.textContent = "Enabled";
+        btn.className = "switch-btn active";
+        
+        // If deadlock currently exists, break it by checking resource ordering violations
+        if (rag.requests.P3.includes('R1')) {
+          rag.requests.P3 = rag.requests.P3.filter(r => r !== 'R1');
+          showPreventionAlert("CIRCULAR WAIT PREVENTED:\nOrdering Rule Blocks P3 -> R1!");
+          syncRAGState();
+        }
+      } else {
+        btn.textContent = "Disabled";
+        btn.className = "switch-btn";
+        hidePreventionAlert();
+      }
+    }
+
+    // Select sandbox process focus
+    function selectProcessSandbox(num) {
+      selectedProcessNum = num;
+      // Toggle button classes
+      document.querySelectorAll('.btn-action').forEach(b => {
+        if (b.id && b.id.startsWith('selP')) {
+          b.classList.remove('active-target');
+        }
+      });
+      document.getElementById(`selP${num}Btn`).classList.add('active-target');
+    }
+
+    // Kill selected process (Deadlock resolution method)
+    function killFocusedProcess() {
+      const pid = `P${selectedProcessNum}`;
+      if (!rag.alive[pid]) {
+        alert(`${pid} is already terminated!`);
+        return;
+      }
+
+      // 1. Play dramatic disintegration scale collapse in A-Frame
+      const pEntity = document.getElementById(`node-${pid}`);
+      pEntity.removeAttribute('animation__kill');
+      pEntity.setAttribute('animation__kill', {
+        property: 'scale',
+        to: '0 0 0',
+        dur: 400,
+        easing: 'easeOutQuad'
+      });
+
+      // 2. Free held resources and cancel waiting requests in RAG state
+      rag.alive[pid] = false;
+
+      // Release all allocations held by this process
+      for (const [r, p] of Object.entries(rag.allocations)) {
+        if (p === pid) {
+          rag.allocations[r] = null;
+        }
+      }
+
+      // Cancel all waiting requests
+      rag.requests[pid] = [];
+
+      // Recheck states
+      setTimeout(() => {
+        syncRAGState();
+      }, 450);
+
+      // Disable preset active styles
+      document.getElementById('preset-safe').classList.remove('active-safe');
+      document.getElementById('preset-deadlock').classList.remove('active-deadlock');
+    }
+
+    // Release all keys
+    function releaseAllKeys() {
+      rag.allocations = { R1: null, R2: null, R3: null };
+      rag.requests = { P1: [], P2: [], P3: [] };
+      syncRAGState();
+    }
+
+    // Reset whole sandbox
+    function resetSandboxGraph() {
+      // Restore all processes
+      ['P1', 'P2', 'P3'].forEach(pid => {
+        rag.alive[pid] = true;
+        const pEntity = document.getElementById(`node-${pid}`);
+        pEntity.setAttribute('scale', '1 1 1');
+      });
+
+      releaseAllKeys();
+      hidePreventionAlert();
+      
+      // Default back to Safe presets
+      triggerSafeSequence();
+    }
+
+    // Dynamic 3D click and grid allocations matrix triggers
+    function toggleMatrixBinding(pid, rid) {
+      if (!rag.alive[pid]) {
+        alert(`${pid} is currently terminated. Spawn it back by resetting before editing links!`);
+        return;
+      }
+
+      // Cycle bindings:
+      // Empty -> Request (if key is busy) -> Allocated (if key is free)
+      const holdsKey = (rag.allocations[rid] === pid);
+      const waitsKey = (rag.requests[pid].includes(rid));
+
+      // Clear previous allocations/requests for this binding
+      if (holdsKey) {
+        // Holds -> Empty
+        rag.allocations[rid] = null;
+      } 
+      else if (waitsKey) {
+        // Waits -> Holds (if free) / Empty (if busy)
+        rag.requests[pid] = rag.requests[pid].filter(r => r !== rid);
+        if (rag.allocations[rid] === null) {
+          // Rule ordering check before allocation
+          if (isOrderingPreventionActive && !validateResourceOrdering(pid, rid)) {
+            showPreventionAlert(`🚫 ORDER PREVENTED:\nOrdering Rule Blocks ${pid} -> ${rid}!`);
+          } else {
+            rag.allocations[rid] = pid;
+          }
+        }
+      } 
+      else {
+        // Empty -> Allocated (if free) / Request (if busy)
+        if (rag.allocations[rid] === null) {
+          // Rule ordering check
+          if (isOrderingPreventionActive && !validateResourceOrdering(pid, rid)) {
+            showPreventionAlert(`🚫 ORDER PREVENTED:\nOrdering Rule Blocks ${pid} -> ${rid}!`);
+          } else {
+            rag.allocations[rid] = pid;
+          }
+        } else {
+          // Key is busy, request it
+          if (isOrderingPreventionActive && !validateResourceOrdering(pid, rid)) {
+            showPreventionAlert(`🚫 ORDER PREVENTED:\nOrdering Rule Blocks ${pid} -> ${rid}!`);
+          } else {
+            rag.requests[pid].push(rid);
+          }
+        }
+      }
+
+      // Sync modifications
+      syncRAGState();
+    }
+
+    // Enforce Havender's ordering rules ($R_i < R_j$)
+    // E.g. A process holding a higher index resource (like R3) cannot request a lower index (like R1)
+    function validateResourceOrdering(pid, targetRid) {
+      // Find what resources the process currently holds
+      const heldRids = [];
+      for (const [r, p] of Object.entries(rag.allocations)) {
+        if (p === pid) heldRids.push(r);
+      }
+
+      if (heldRids.length === 0) return true;
+
+      // Extract numerical indices
+      const targetIndex = parseInt(targetRid.replace('R', ''));
+      
+      for (const r of heldRids) {
+        const heldIndex = parseInt(r.replace('R', ''));
+        // If attempting to request a lower index than currently held index
+        if (targetIndex < heldIndex) {
+          return false; // Violates ordering rule
+        }
+      }
+      return true;
+    }
+
+    // Symmetrical DFS cycle detection engine
+    function runCycleDetection() {
+      // Vertices: P1, P2, P3, R1, R2, R3
+      const adj = {};
+      const nodes = ['P1', 'P2', 'P3', 'R1', 'R2', 'R3'];
+      nodes.forEach(n => adj[n] = []);
+
+      // Edge 1: Allocations (Rj -> Pi)
+      for (const [r, p] of Object.entries(rag.allocations)) {
+        if (p && rag.alive[p]) {
+          adj[r].push(p);
+        }
+      }
+
+      // Edge 2: Requests (Pi -> Rj)
+      for (const [p, rList] of Object.entries(rag.requests)) {
+        if (rag.alive[p]) {
+          rList.forEach(r => {
+            adj[p].push(r);
+          });
+        }
+      }
+
+      // Depth-First Search cycle check
+      const visited = {};
+      const recStack = {};
+      let cyclePath = [];
+
+      function dfs(v, path) {
+        visited[v] = true;
+        recStack[v] = true;
+        path.push(v);
+
+        for (const neighbor of adj[v]) {
+          if (!visited[neighbor]) {
+            if (dfs(neighbor, path)) return true;
+          } else if (recStack[neighbor]) {
+            // Closed loop detected
+            const index = path.indexOf(neighbor);
+            cyclePath = path.slice(index);
+            return true;
+          }
+        }
+
+        recStack[v] = false;
+        path.pop();
+        return false;
+      }
+
+      for (const node of nodes) {
+        if (!visited[node] && rag.alive[node] !== false) {
+          const path = [];
+          if (dfs(node, path)) {
+            return { deadlocked: true, path: cyclePath };
+          }
+        }
+      }
+
+      return { deadlocked: false, path: [] };
+    }
+
+    // Sync RAG state changes into 3D lasers and 2D matrix cells
+    function syncRAGState() {
+      // 1. Run RAG cycle detector
+      const detectionResult = runCycleDetection();
+      isSystemDeadlocked = detectionResult.deadlocked;
+      deadlockedPathNodes = detectionResult.path;
+
+      // 2. Update HUD panel telemetry
+      if (isSystemDeadlocked) {
+        simStatusText.textContent = `🚨 DEADLOCK DETECTED! CIRCULAR WAIT LOOP: ${deadlockedPathNodes.join(' -> ')} -> ${deadlockedPathNodes[0]}`;
+        simStatusText.className = "sim-value deadlock-alert";
+        
+        // Trigger flashing red room alarm lights
+        ambientLight.setAttribute('color', '#3a0812');
+        sceneSky.setAttribute('color', '#060105');
+        sirenLight.setAttribute('intensity', '2.5');
+        neonRingPlate.setAttribute('color', 'var(--red)');
+      } else {
+        simStatusText.textContent = "SYSTEM ACTIVE / HEALTHY";
+        simStatusText.className = "sim-value";
+        
+        ambientLight.setAttribute('color', '#181e35');
+        sceneSky.setAttribute('color', '#020205');
+        sirenLight.setAttribute('intensity', '0');
+        neonRingPlate.setAttribute('color', 'var(--cyan)');
+        
+        hidePreventionAlert();
+      }
+
+      // 3. Render 3D Laser connections in A-Frame
+      ragLasers.innerHTML = '';
+      
+      // Symmetrical pairing nodes
+      const processes = ['P1', 'P2', 'P3'];
+      const resources = ['R1', 'R2', 'R3'];
+
+      processes.forEach(p => {
+        resources.forEach(r => {
+          const holds = (rag.allocations[r] === p);
+          const waits = (rag.requests[p].includes(r));
+
+          // Draw connection lasers
+          if (holds || waits) {
+            const startPt = positions[holds ? r : p];
+            const endPt = positions[holds ? p : r];
+
+            const laser = document.createElement('a-entity');
+            
+            // Allocation beam is solid green; Request is dashed orange/red
+            const color = holds ? 'var(--green)' : 'var(--magenta)';
+            
+            laser.setAttribute('line', {
+              start: `${startPt.x} 1.1 ${startPt.z}`,
+              end: `${endPt.x} 1.1 ${endPt.z}`,
+              color: color,
+              opacity: 0.95
+            });
+
+            // If request waits, draw blinking/dashed visual
+            if (waits) {
+              laser.setAttribute('animation__dash', {
+                property: 'material.opacity',
+                from: 0.95,
+                to: 0.35,
+                dur: 400,
+                dir: 'alternate',
+                loop: true
+              });
+            }
+
+            ragLasers.appendChild(laser);
+          }
+        });
+      });
+
+      // 4. Update 3D blocked warnings above processes
+      processes.forEach(p => {
+        const shield = document.getElementById(`shield-${p}`);
+        if (shield) {
+          // If process is waiting for something it is blocked
+          const isBlocked = (rag.requests[p].length > 0 && rag.alive[p]);
+          shield.setAttribute('visible', isBlocked ? 'true' : 'false');
+        }
+      });
+
+      // 5. Update 2D HUD matrix cells
+      processes.forEach(p => {
+        resources.forEach(r => {
+          const cell = document.getElementById(`cell-${p}-${r}`);
+          cell.className = "matrix-cell";
+          
+          const holds = (rag.allocations[r] === p);
+          const waits = (rag.requests[p].includes(r));
+
+          if (holds) {
+            cell.textContent = "H";
+            cell.classList.add('held');
+          } else if (waits) {
+            cell.textContent = "W";
+            cell.classList.add('waiting');
+          } else {
+            cell.textContent = "-";
+          }
+        });
+      });
+
+      // 6. Spawn or clear dynamic traffic jam bumper-to-bumper queue packets
+      spawnDataTrafficPackets();
+    }
+
+    // High-tech deadlock data packet traffic jam (bumper-to-bumper gridlock)
+    function spawnDataTrafficPackets() {
+      trafficContainer.innerHTML = '';
+
+      if (isSystemDeadlocked) {
+        // Draw clusters of packets bumper-to-bumper along the deadlocked loop path!
+        // Path contains alternating processes and resources (e.g. ['P1', 'R2', 'P2', 'R3', 'P3', 'R1'])
+        const pathLen = deadlockedPathNodes.length;
+
+        for (let i = 0; i < pathLen; i++) {
+          const u = deadlockedPathNodes[i];
+          const v = deadlockedPathNodes[(i + 1) % pathLen];
+
+          const startPt = positions[u];
+          const endPt = positions[v];
+
+          // Place 4 packets bumper-to-bumper along this link (representing gridlock)
+          for (let k = 1; k <= 4; k++) {
+            const ratio = k / 5;
+            // Interpolate position along link vector
+            const px = startPt.x + (endPt.x - startPt.x) * ratio;
+            const pz = startPt.z + (endPt.z - startPt.z) * ratio;
+
+            const packet = document.createElement('a-sphere');
+            packet.setAttribute('radius', '0.1');
+            packet.setAttribute('position', `${px} 1.1 ${pz}`);
+            packet.setAttribute('color', 'var(--red)');
+            packet.setAttribute('material', 'shader: flat; transparent: true; opacity: 0.85; emissive: var(--red); emissiveIntensity: 0.8');
+            
+            // Add a vibrating/shaking hazard jitter animation showing bumper-to-bumper gridlock
+            packet.setAttribute('animation__jitter', `
+              property: position;
+              to: ${px + (Math.random() - 0.5) * 0.05} 1.1 ${pz + (Math.random() - 0.5) * 0.05};
+              dir: alternate;
+              dur: 150;
+              loop: true
+            `);
+
+            trafficContainer.appendChild(packet);
+          }
+        }
+      } else {
+        // Active healthy packet flow along holding links!
+        // We spawn moving packets gliding smoothly along active allocations (Resource -> Process)
+        for (const [r, p] of Object.entries(rag.allocations)) {
+          if (p && rag.alive[p]) {
+            const startPt = positions[r];
+            const endPt = positions[p];
+
+            const packet = document.createElement('a-sphere');
+            packet.setAttribute('radius', '0.08');
+            packet.setAttribute('color', 'var(--green)');
+            packet.setAttribute('material', 'shader: flat; emissive: var(--green); emissiveIntensity: 0.8');
+            
+            packet.setAttribute('position', `${startPt.x} 1.1 ${startPt.z}`);
+            
+            // Slide smoothly along link
+            const travelTime = (1200 / simSpeed);
+            packet.setAttribute('animation', `
+              property: position;
+              to: ${endPt.x} 1.1 ${endPt.z};
+              dur: ${travelTime};
+              loop: true;
+              easing: linear
+            `);
+
+            trafficContainer.appendChild(packet);
+          }
+        }
+      }
+    }
+
+    // 60FPS continuous rotation frame ticks
+    function runSimulationFrame() {
+      // Spin the central hexagonal platform chassis only when system is healthy (Not deadlocked!)
+      if (!isSystemDeadlocked) {
+        waveTime += 0.5 * simSpeed;
+        ragRing.setAttribute('rotation', `0 ${waveTime * 0.08} 0`);
+      } else {
+        // Complete freeze: waveTime locked, visual shaking representing critical gridlock
+        const freezeShake = Math.sin(Date.now() * 0.05) * 0.2;
+        ragRing.setAttribute('rotation', `0 ${waveTime * 0.08 + freezeShake} 0`);
+      }
+
+      // Frame recursion
+      requestAnimationFrame(runSimulationFrame);
+    }
+
+    // HUD Alerts prevention messages
+    function showPreventionAlert(msg) {
+      preventionAlertText.setAttribute('visible', 'true');
+      preventionAlertText.setAttribute('value', msg);
+    }
+
+    function hidePreventionAlert() {
+      preventionAlertText.setAttribute('visible', 'false');
+      preventionAlertText.setAttribute('value', '');
+    }
+
+    // Controls deck callbacks
+    function updateSimSpeed(val) {
+      simSpeed = parseFloat(val);
+      document.getElementById('speedValue').textContent = simSpeed.toFixed(1) + 'x';
+      syncRAGState(); // reload speed into gliding packets
+    }
+
+    function setCameraView(view) {
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+      const rig = document.getElementById('cameraRig');
+
+      if (view === 'overview') {
+        document.getElementById('camViewOverview').classList.add('active');
+        rig.removeAttribute('animation__cam');
+        rig.setAttribute('animation__cam', {
+          property: 'position', to: '0 5.2 6.5', dur: 800, easing: 'easeInOutQuad'
+        });
+        rig.setAttribute('animation__camRot', {
+          property: 'rotation', to: '-38 0 0', dur: 800, easing: 'easeInOutQuad'
+        });
+      } 
+      else if (view === 'top') {
+        document.getElementById('camViewTop').classList.add('active');
+        rig.removeAttribute('animation__cam');
+        rig.setAttribute('animation__cam', {
+          property: 'position', to: '0 8.5 0.5', dur: 800, easing: 'easeInOutQuad'
+        });
+        rig.setAttribute('animation__camRot', {
+          property: 'rotation', to: '-90 0 0', dur: 800, easing: 'easeInOutQuad'
+        });
+      }
+    }
+  </script>
+</body>
+</html>
