@@ -15,7 +15,7 @@ LearnVerse is a WebXR-based educational platform that enhances learning through 
 # Technologies Used
 Frontend: React.js, Tailwind CSS, Vite<br>
 Backend: Node.js, Express.js<br>
-3D/WebXR: Three.js, WebXR<br>
+3D/WebXR: A-Frame, WebXR<br>
 Authentication: JWT, bcrypt.js<br>
 
 # Modules
