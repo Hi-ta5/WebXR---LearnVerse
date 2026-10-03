@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>NLP - Word Embeddings VR Lab</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      background: #020617;
+    }
+
+    /* =========================
+       CONTROL PANEL
+    ========================= */
+
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 320px;
+      padding: 20px;
+      background: linear-gradient(145deg, rgba(4, 10, 28, 0.96), rgba(9, 20, 45, 0.88));
+      border-radius: 20px;
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      color: white;
+      z-index: 999;
+      box-shadow: 0 0 35px rgba(0, 255, 255, 0.18), inset 0 0 30px rgba(59, 130, 246, 0.05);
+      backdrop-filter: blur(14px);
+    }
+
+    .ui h2 {
+      margin-top: 0;
+      color: #00ffff;
+      font-size: 19px;
+      letter-spacing: 0.5px;
+    }
+
+    .ui p {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 8px 0 12px;
+    }
+
+    .ui input {
+      width: 100%;
+      padding: 12px 13px;
+      margin-top: 6px;
+      box-sizing: border-box;
+      border: 1px solid #164e63;
+      border-radius: 10px;
+      background: #071426;
+      color: white;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .ui input:focus {
+      border-color: #00ffff;
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+    }
+
+    .ui button {
+      width: 100%;
+      padding: 11px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 10px;
+      background: #00ffff;
+      color: #000000;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+    }
+
+    .ui button:hover {
+      background: #7fffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(0, 255, 255, 0.45);
+    }
+
+    .ui button.btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .ui button.btn-reset:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #00ffff;
+      border-color: #00ffff;
+    }
+
+    #status {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(2, 6, 23, 0.65);
+      border: 1px solid rgba(34, 211, 238, 0.15);
+      color: #86efac;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     CONTROL PANEL
+================================================== -->
+
+<div class="ui">
+
+  <h2>🧠 WORD EMBEDDINGS</h2>
+
+  <p>
+
+    Words with similar meanings are placed
+    closer together in the 3D semantic space.
+
+  </p>
+
+
+  <input
+
+    id="wordInput"
+
+    placeholder="Enter a word e.g. king">
+
+
+  <button onclick="searchWord()">
+
+    🔍 Find Word
+
+  </button>
+
+
+  <button onclick="showPeople()">
+
+    👨 People
+
+  </button>
+
+
+  <button onclick="showTechnology()">
+
+    💻 Technology
+
+  </button>
+
+
+  <button onclick="showAnimals()">
+
+    🐶 Animals
+
+  </button>
+
+
+  <button onclick="showVehicles()">
+
+    🚗 Vehicles
+
+  </button>
+
+
+  <button class="btn-reset" onclick="resetLab()">
+
+    🔄 Reset Space
+
+  </button>
+
+
+  <div id="status">
+
+    Ready
+
+  </div>
+
+</div>
+
+
+<!-- ==================================================
+     A-FRAME SCENE
+================================================== -->
+
+<a-scene
+
+  background="color:#020617"
+
+  vr-mode-ui="enabled:true">
+
+
+  <!-- ==================================================
+       ASSETS
+  ================================================== -->
+
+  <a-assets>
+
+    <a-asset-item
+
+      id="robotModel"
+
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+
+    </a-asset-item>
+
+  </a-assets>
+
+
+  <!-- ==================================================
+       CAMERA
+  ================================================== -->
+
+  <a-camera
+
+    position="0 5 20">
+
+  </a-camera>
+
+
+  <!-- ==================================================
+       LIGHTS
+  ================================================== -->
+
+  <a-light
+
+    type="ambient"
+
+    intensity="1.5">
+
+  </a-light>
+
+
+  <a-light
+
+    type="point"
+
+    intensity="4"
+
+    position="0 10 5">
+
+  </a-light>
+
+
+  <!-- ==================================================
+       FLOOR
+  ================================================== -->
+
+  <a-plane
+
+    rotation="-90 0 0"
+
+    width="60"
+
+    height="60"
+
+    color="#111827">
+
+  </a-plane>
+
+
+  <!-- ==================================================
+       SKY
+  ================================================== -->
+
+  <a-sky
+
+    color="#020617">
+
+  </a-sky>
+
+
+  <!-- ==================================================
+       TITLE
+  ================================================== -->
+
+  <a-text
+
+    value="3D WORD EMBEDDING SPACE"
+
+    position="-6.5 10 -13"
+
+    scale="2.7 2.7 2.7"
+
+    color="#00ffff">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       ROBOT LEFT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="-12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property:rotation;
+      to:0 360 0;
+      loop:true;
+      dur:16000">
+
+  </a-gltf-model>
+
+
+  <!-- ==================================================
+       ROBOT RIGHT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property:rotation;
+      to:0 -360 0;
+      loop:true;
+      dur:16000">
+
+  </a-gltf-model>
+
+
+  <!-- ==================================================
+       3D AXES
+  ================================================== -->
+
+  <!-- X AXIS -->
+
+  <a-cylinder
+
+    position="0 1 -10"
+
+    radius="0.04"
+
+    height="12"
+
+    rotation="0 0 90"
+
+    color="#ef4444">
+
+  </a-cylinder>
+
+
+  <!-- Y AXIS -->
+
+  <a-cylinder
+
+    position="0 4 -10"
+
+    radius="0.04"
+
+    height="7"
+
+    color="#22c55e">
+
+  </a-cylinder>
+
+
+  <!-- Z AXIS -->
+
+  <a-cylinder
+
+    position="0 4 -10"
+
+    radius="0.04"
+
+    height="12"
+
+    rotation="90 0 0"
+
+    color="#3b82f6">
+
+  </a-cylinder>
+
+
+  <!-- AXIS LABELS -->
+
+  <a-text
+
+    value="X"
+
+    position="6.5 1 -10"
+
+    color="#ef4444"
+
+    scale="1.5 1.5 1.5">
+
+  </a-text>
+
+
+  <a-text
+
+    value="Y"
+
+    position="0 8 -10"
+
+    color="#22c55e"
+
+    scale="1.5 1.5 1.5">
+
+  </a-text>
+
+
+  <a-text
+
+    value="Z"
+
+    position="0 1 -4"
+
+    color="#3b82f6"
+
+    scale="1.5 1.5 1.5">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       WORD CONTAINER
+  ================================================== -->
+
+  <a-entity
+
+    id="wordContainer">
+
+  </a-entity>
+
+
+  <!-- ==================================================
+       INFORMATION
+  ================================================== -->
+
+  <a-plane
+
+    position="0 -0.8 -9"
+
+    width="15"
+
+    height="1.6"
+
+    color="#0f172a">
+
+  </a-plane>
+
+
+  <a-text
+
+    id="explanation"
+
+    value="Similar words appear closer together in semantic space."
+
+    position="-6.3 -0.4 -8.8"
+
+    scale="1 1 1"
+
+    color="white">
+
+  </a-text>
+
+
+</a-scene>
+
+
+<script>
+
+
+/* =====================================================
+   WORD DATA
+===================================================== */
+
+const words = [
+
+  /*
+     PEOPLE
+  */
+
+  {
+    word: "king",
+    x: -4,
+    y: 5,
+    z: -10,
+    group: "people",
+    color: "#facc15"
+  },
+
+  {
+    word: "queen",
+    x: -2,
+    y: 5,
+    z: -10,
+    group: "people",
+    color: "#facc15"
+  },
+
+  {
+    word: "man",
+    x: -4,
+    y: 3,
+    z: -10,
+    group: "people",
+    color: "#3b82f6"
+  },
+
+  {
+    word: "woman",
+    x: -2,
+    y: 3,
+    z: -10,
+    group: "people",
+    color: "#ec4899"
+  },
+
+
+  /*
+     TECHNOLOGY
+  */
+
+  {
+    word: "computer",
+    x: 3,
+    y: 5,
+    z: -10,
+    group: "technology",
+    color: "#8b5cf6"
+  },
+
+  {
+    word: "laptop",
+    x: 5,
+    y: 5,
+    z: -10,
+    group: "technology",
+    color: "#8b5cf6"
+  },
+
+  {
+    word: "software",
+    x: 3,
+    y: 3,
+    z: -10,
+    group: "technology",
+    color: "#a855f7"
+  },
+
+  {
+    word: "program",
+    x: 5,
+    y: 3,
+    z: -10,
+    group: "technology",
+    color: "#a855f7"
+  },
+
+
+  /*
+     ANIMALS
+  */
+
+  {
+    word: "dog",
+    x: -5,
+    y: 1,
+    z: -10,
+    group: "animals",
+    color: "#22c55e"
+  },
+
+  {
+    word: "puppy",
+    x: -3,
+    y: 1,
+    z: -10,
+    group: "animals",
+    color: "#22c55e"
+  },
+
+  {
+    word: "cat",
+    x: -1,
+    y: 1,
+    z: -10,
+    group: "animals",
+    color: "#16a34a"
+  },
+
+
+  /*
+     VEHICLES
+  */
+
+  {
+    word: "car",
+    x: 2,
+    y: 1,
+    z: -10,
+    group: "vehicles",
+    color: "#f97316"
+  },
+
+  {
+    word: "vehicle",
+    x: 4,
+    y: 1,
+    z: -10,
+    group: "vehicles",
+    color: "#f97316"
+  },
+
+  {
+    word: "bus",
+    x: 6,
+    y: 1,
+    z: -10,
+    group: "vehicles",
+    color: "#fb923c"
+  }
+
+];
+
+
+/* =====================================================
+   CREATE WORD
+===================================================== */
+
+function createWord(item) {
+
+
+  const container =
+
+    document.getElementById(
+      "wordContainer"
+    );
+
+
+  /*
+     WORD SPHERE
+  */
+
+  const sphere =
+
+    document.createElement(
+      "a-sphere"
+    );
+
+
+  sphere.setAttribute(
+
+    "position",
+
+    `${item.x} ${item.y} ${item.z}`
+
+  );
+
+
+  sphere.setAttribute(
+
+    "radius",
+
+    "0.45"
+
+  );
+
+
+  sphere.setAttribute(
+
+    "color",
+
+    item.color
+
+  );
+
+
+  sphere.setAttribute(
+
+    "material",
+
+    `
+      emissive:${item.color};
+      emissiveIntensity:0.7
+    `
+
+  );
+
+
+  /*
+     FLOATING ANIMATION
+  */
+
+  sphere.setAttribute(
+
+    "animation",
+
+    `
+      property:position;
+      dir:alternate;
+      dur:1800;
+      loop:true;
+      to:${item.x} ${item.y + 0.4} ${item.z}
+    `
+
+  );
+
+
+  /*
+     CLICK EVENT
+  */
+
+  sphere.addEventListener(
+
+    "click",
+
+    function() {
+
+      selectWord(item);
+
+    }
+
+  );
+
+
+  container.appendChild(
+    sphere
+  );
+
+
+  /*
+     WORD LABEL
+  */
+
+  const label =
+
+    document.createElement(
+      "a-text"
+    );
+
+
+  label.setAttribute(
+
+    "value",
+
+    item.word
+
+  );
+
+
+  label.setAttribute(
+
+    "align",
+
+    "center"
+
+  );
+
+
+  label.setAttribute(
+
+    "color",
+
+    "white"
+
+  );
+
+
+  label.setAttribute(
+
+    "position",
+
+    `${item.x} ${item.y - 0.8} ${item.z}`
+
+  );
+
+
+  label.setAttribute(
+
+    "scale",
+
+    "1.2 1.2 1.2"
+
+  );
+
+
+  container.appendChild(
+    label
+  );
+
+}
+
+
+/* =====================================================
+   CREATE ALL WORDS
+===================================================== */
+
+function renderAll() {
+
+  const container =
+
+    document.getElementById(
+      "wordContainer"
+    );
+
+
+  container.innerHTML = "";
+
+
+  words.forEach(
+
+    item => {
+
+      createWord(item);
+
+    }
+
+  );
+
+
+  createConnections();
+
+}
+
+
+/* =====================================================
+   CONNECTIONS
+===================================================== */
+
+function createConnections() {
+
+  /*
+     Similar words are connected.
+  */
+
+  const connections = [
+
+    ["king", "queen"],
+
+    ["king", "man"],
+
+    ["queen", "woman"],
+
+    ["man", "woman"],
+
+    ["computer", "laptop"],
+
+    ["computer", "software"],
+
+    ["software", "program"],
+
+    ["dog", "puppy"],
+
+    ["dog", "cat"],
+
+    ["car", "vehicle"],
+
+    ["vehicle", "bus"]
+
+  ];
+
+
+  connections.forEach(
+
+    pair => {
+
+      const first =
+
+        words.find(
+          w => w.word === pair[0]
+        );
+
+
+      const second =
+
+        words.find(
+          w => w.word === pair[1]
+        );
+
+
+      if (!first || !second)
+        return;
+
+
+      createLine(
+        first,
+        second
+      );
+
+    }
+
+  );
+
+}
+
+
+/* =====================================================
+   CREATE LINE
+===================================================== */
+
+function createLine(
+
+  first,
+  second
+
+) {
+
+
+  const container =
+
+    document.getElementById(
+      "wordContainer"
+    );
+
+
+  const line =
+
+    document.createElement(
+      "a-cylinder"
+    );
+
+
+  /*
+     Calculate midpoint
+  */
+
+  const midX =
+
+    (first.x + second.x) / 2;
+
+
+  const midY =
+
+    (first.y + second.y) / 2;
+
+
+  const midZ =
+
+    (first.z + second.z) / 2;
+
+
+  /*
+     Calculate distance
+  */
+
+  const dx =
+    second.x - first.x;
+
+  const dy =
+    second.y - first.y;
+
+  const dz =
+    second.z - first.z;
+
+
+  const distance =
+
+    Math.sqrt(
+
+      dx * dx +
+      dy * dy +
+      dz * dz
+
+    );
+
+
+  line.setAttribute(
+
+    "position",
+
+    `${midX} ${midY} ${midZ}`
+
+  );
+
+
+  line.setAttribute(
+
+    "height",
+
+    distance
+
+  );
+
+
+  line.setAttribute(
+
+    "radius",
+
+    "0.025"
+
+  );
+
+
+  line.setAttribute(
+
+    "color",
+
+    "#00ffff"
+
+  );
+
+
+  container.appendChild(
+    line
+  );
+
+}
+
+
+/* =====================================================
+   SELECT WORD
+===================================================== */
+
+function selectWord(item) {
+
+
+  /*
+     Clear previous selection
+  */
+
+  const allSpheres =
+
+    document.querySelectorAll(
+      "#wordContainer a-sphere"
+    );
+
+
+  allSpheres.forEach(
+
+    sphere => {
+
+      sphere.setAttribute(
+        "scale",
+        "1 1 1"
+      );
+
+    }
+
+  );
+
+
+  /*
+     Find selected word
+  */
+
+  const selected =
+
+    [...allSpheres].find(
+
+      sphere => {
+
+        const position =
+          sphere.getAttribute(
+            "position"
+          );
+
+        return (
+
+          Math.abs(
+            position.x - item.x
+          ) < 0.1 &&
+
+          Math.abs(
+            position.y - item.y
+          ) < 0.1
+
+        );
+
+      }
+
+    );
+
+
+  if (selected) {
+
+    selected.setAttribute(
+      "scale",
+      "2 2 2"
+    );
+
+  }
+
+
+  /*
+     Update information
+  */
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+
+      "value",
+
+      `"${item.word}" belongs to the ${item.group} semantic group.`
+
+    );
+
+
+  document
+    .getElementById(
+      "status"
+    )
+    .innerText =
+
+      "Selected: " +
+      item.word;
+
+}
+
+
+/* =====================================================
+   SEARCH WORD
+===================================================== */
+
+function searchWord() {
+
+
+  const input =
+
+    document
+      .getElementById(
+        "wordInput"
+      )
+      .value
+      .toLowerCase()
+      .trim();
+
+
+  if (!input) {
+
+    alert(
+      "Enter a word first."
+    );
+
+    return;
+
+  }
+
+
+  const item =
+
+    words.find(
+
+      w =>
+        w.word.toLowerCase()
+        === input
+
+    );
+
+
+  if (!item) {
+
+    document
+      .getElementById(
+        "status"
+      )
+      .innerText =
+        "Word not found.";
+
+    return;
+
+  }
+
+
+  selectWord(item);
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+
+      "value",
+
+      `"${item.word}" is positioned in the ${item.group} semantic region.`
+
+    );
+
+}
+
+
+/* =====================================================
+   FILTER GROUP
+===================================================== */
+
+function showGroup(group) {
+
+
+  const container =
+
+    document.getElementById(
+      "wordContainer"
+    );
+
+
+  container.innerHTML = "";
+
+
+  const filtered =
+
+    words.filter(
+
+      item =>
+        item.group === group
+
+    );
+
+
+  filtered.forEach(
+
+    item => {
+
+      createWord(item);
+
+    }
+
+  );
+
+
+  document
+    .getElementById(
+      "status"
+    )
+    .innerText =
+
+      group.toUpperCase() +
+      " WORDS";
+
+}
+
+
+/* =====================================================
+   PEOPLE
+===================================================== */
+
+function showPeople() {
+
+  showGroup("people");
+
+}
+
+
+/* =====================================================
+   TECHNOLOGY
+===================================================== */
+
+function showTechnology() {
+
+  showGroup("technology");
+
+}
+
+
+/* =====================================================
+   ANIMALS
+===================================================== */
+
+function showAnimals() {
+
+  showGroup("animals");
+
+}
+
+
+/* =====================================================
+   VEHICLES
+===================================================== */
+
+function showVehicles() {
+
+  showGroup("vehicles");
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab() {
+
+  renderAll();
+
+
+  document
+    .getElementById(
+      "wordInput"
+    )
+    .value = "";
+
+
+  document
+    .getElementById(
+      "status"
+    )
+    .innerText =
+      "All words restored";
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+
+      "value",
+
+      "Similar words appear closer together in semantic space."
+
+    );
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+renderAll();
+
+</script>
+
+</body>
+
+</html>

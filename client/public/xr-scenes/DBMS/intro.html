@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DBMS Fundamentals VR Lab</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    overflow:hidden;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#020617;
+}
+
+/* =====================================================
+   CONTROL PANEL
+===================================================== */
+
+.panel{
+    position:absolute;
+    z-index:20;
+
+    top:18px;
+    left:18px;
+
+    width:310px;
+    max-height:94vh;
+    overflow:auto;
+
+    padding:18px;
+
+    background:rgba(2,6,23,.96);
+    color:white;
+
+    border:1px solid #22d3ee;
+    border-radius:18px;
+
+    box-shadow:
+        0 0 30px rgba(34,211,238,.25),
+        inset 0 0 20px rgba(34,211,238,.05);
+
+    backdrop-filter:blur(10px);
+}
+
+.panel h2{
+    margin:0 0 6px;
+    color:#22d3ee;
+    font-size:22px;
+}
+
+.subtitle{
+    color:#94a3b8;
+    font-size:13px;
+    line-height:1.4;
+    margin-bottom:14px;
+}
+
+#info{
+    min-height:95px;
+
+    padding:13px;
+
+    background:#0f172a;
+
+    border-radius:10px;
+
+    border-left:3px solid #22d3ee;
+
+    font-size:13px;
+    line-height:1.5;
+}
+
+button{
+    width:100%;
+
+    padding:10px;
+
+    margin-top:7px;
+
+    border:0;
+    border-radius:9px;
+
+    background:#22d3ee;
+
+    color:#020617;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+button:hover{
+    background:#67e8f9;
+    transform:translateY(-2px);
+}
+
+.secondary{
+    background:#334155;
+    color:white;
+}
+
+.secondary:hover{
+    background:#475569;
+}
+
+.quizBtn{
+    background:#8b5cf6;
+    color:white;
+}
+
+.resetBtn{
+    background:#ef4444;
+    color:white;
+}
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.statusBox{
+    margin-top:12px;
+
+    padding:10px;
+
+    background:#020617;
+
+    border-radius:9px;
+
+    text-align:center;
+
+    border:1px solid #1e293b;
+}
+
+.statusLabel{
+    display:block;
+
+    font-size:10px;
+
+    color:#64748b;
+}
+
+#activity{
+    display:block;
+
+    margin-top:4px;
+
+    color:#22d3ee;
+
+    font-weight:bold;
+
+    font-size:12px;
+}
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.navigation{
+    position:absolute;
+
+    z-index:20;
+
+    right:18px;
+    top:18px;
+
+    display:flex;
+
+    gap:7px;
+}
+
+.navigation button{
+    width:auto;
+
+    margin:0;
+
+    padding:9px 14px;
+}
+
+/* =====================================================
+   LEGEND
+===================================================== */
+
+.legend{
+    position:absolute;
+
+    z-index:20;
+
+    right:18px;
+    bottom:18px;
+
+    padding:12px 15px;
+
+    background:rgba(2,6,23,.93);
+
+    color:white;
+
+    border:1px solid #334155;
+
+    border-radius:12px;
+
+    font-size:12px;
+}
+
+.legend div{
+    margin:5px 0;
+}
+
+.dot{
+    display:inline-block;
+
+    width:10px;
+    height:10px;
+
+    border-radius:50%;
+
+    margin-right:6px;
+}
+
+.cyan{
+    background:#22d3ee;
+}
+
+.purple{
+    background:#8b5cf6;
+}
+
+.green{
+    background:#14b8a6;
+}
+
+.orange{
+    background:#f59e0b;
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:700px){
+
+    .panel{
+        width:280px;
+        max-height:90vh;
+    }
+
+    .navigation{
+        display:none;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- =====================================================
+     CONTROL PANEL
+===================================================== -->
+
+<div class="panel">
+
+    <h2>🗄️ DBMS Fundamentals</h2>
+
+    <div class="subtitle">
+        Explore how users, applications, DBMS and databases
+        work together.
+    </div>
+
+    <div id="info">
+
+        <b>Welcome to the DBMS Lab!</b>
+
+        <br><br>
+
+        Click the 3D components or choose a concept
+        below to start learning.
+
+    </div>
+
+
+    <button onclick="showDatabase()">
+        🗄️ Database
+    </button>
+
+    <button onclick="showFileSystem()">
+        📁 File System
+    </button>
+
+    <button onclick="showDBMS()">
+        ⚙️ DBMS
+    </button>
+
+    <button onclick="showAdvantages()">
+        ⭐ Advantages
+    </button>
+
+    <button onclick="startDataFlow()">
+        ▶ Run Data Flow
+    </button>
+
+    <button class="quizBtn" onclick="startQuiz()">
+        🧠 Take Mini Quiz
+    </button>
+
+    <button class="secondary" onclick="resetLab()">
+        ↻ Reset Lab
+    </button>
+
+
+    <div class="statusBox">
+
+        <span class="statusLabel">
+            LAB STATUS
+        </span>
+
+        <span id="activity">
+            READY
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
+
+<div class="navigation">
+
+    <button onclick="goHome()">🏠 Home</button>
+
+    <button onclick="goBack()">← Back</button>
+
+    <button onclick="goNext()">Next →</button>
+
+</div>
+
+
+<!-- =====================================================
+     LEGEND
+===================================================== -->
+
+<div class="legend">
+
+    <div>
+        <span class="dot cyan"></span>
+        DBMS / Database
+    </div>
+
+    <div>
+        <span class="dot purple"></span>
+        User
+    </div>
+
+    <div>
+        <span class="dot green"></span>
+        Application
+    </div>
+
+    <div>
+        <span class="dot orange"></span>
+        Data Flow
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     A-FRAME SCENE
+===================================================== -->
+
+<a-scene
+    background="color:#020617"
+    renderer="antialias:true"
+    cursor="rayOrigin:mouse"
+    raycaster="objects:.clickable"
+    vr-mode-ui="enabled:true">
+
+
+    <!-- =================================================
+         ASSETS
+    ================================================= -->
+
+    <a-assets>
+
+        <a-asset-item
+            id="robot"
+            src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+        </a-asset-item>
+
+    </a-assets>
+
+
+    <!-- =================================================
+         CAMERA
+    ================================================= -->
+
+    <a-camera
+        position="0 3.3 16">
+
+        <a-cursor
+            color="#22d3ee"
+            fuse="false">
+        </a-cursor>
+
+    </a-camera>
+
+
+    <!-- =================================================
+         LIGHTING
+    ================================================= -->
+
+    <a-light
+        type="ambient"
+        intensity="1.5">
+    </a-light>
+
+    <a-light
+        type="point"
+        position="0 8 2"
+        intensity="3"
+        color="#22d3ee">
+    </a-light>
+
+    <a-light
+        type="point"
+        position="-8 5 -8"
+        intensity="1.5"
+        color="#8b5cf6">
+    </a-light>
+
+    <a-light
+        type="point"
+        position="8 5 -8"
+        intensity="1.5"
+        color="#14b8a6">
+    </a-light>
+
+
+    <!-- =================================================
+         FLOOR
+    ================================================= -->
+
+    <a-plane
+        rotation="-90 0 0"
+        width="40"
+        height="40"
+        color="#0b1730">
+    </a-plane>
+
+
+    <!-- GRID -->
+
+    <a-plane
+        rotation="-90 0 0"
+        position="0 0.02 -8"
+        width="30"
+        height="30"
+        material="
+            color:#172554;
+            transparent:true;
+            opacity:.35;
+            wireframe:true">
+    </a-plane>
+
+
+    <a-sky color="#020617"></a-sky>
+
+
+    <!-- =================================================
+         MAIN TITLE
+    ================================================= -->
+
+    <a-text
+        value="DATABASE MANAGEMENT SYSTEM"
+        align="center"
+        position="0 7.5 -12"
+        color="#22d3ee"
+        width="8">
+    </a-text>
+
+    <a-text
+        value="Interactive DBMS Fundamentals Laboratory"
+        align="center"
+        position="0 7.05 -12"
+        color="#94a3b8"
+        width="6">
+    </a-text>
+
+
+    <!-- =================================================
+         TOP INFORMATION BOARD
+    ================================================= -->
+
+    <a-plane
+        position="0 5.9 -12"
+        width="11"
+        height="1.25"
+        color="#0f172a"
+        material="
+            transparent:true;
+            opacity:.92">
+
+    </a-plane>
+
+
+    <a-text
+        id="infoTitle"
+        value="What is DBMS?"
+        align="center"
+        position="0 6.2 -11.9"
+        color="#22d3ee"
+        width="6">
+    </a-text>
+
+
+    <a-text
+        id="infoText"
+        value="A DBMS is software used to create, store, organize, retrieve and manage data."
+        align="center"
+        position="0 5.78 -11.9"
+        color="white"
+        width="9"
+        wrap-count="85">
+    </a-text>
+
+
+    <!-- =================================================
+         USER
+    ================================================= -->
+
+    <a-entity
+        id="userObject"
+        class="clickable"
+        position="-7 0 -10"
+        onclick="showUser()">
+
+
+        <a-cylinder
+            position="0 1.55 0"
+            radius=".9"
+            height="2"
+            color="#7c3aed"
+            material="
+                emissive:#6d28d9;
+                emissiveIntensity:.25">
+        </a-cylinder>
+
+
+        <a-sphere
+            position="0 2.9 0"
+            radius=".65"
+            color="#a78bfa">
+        </a-sphere>
+
+
+        <a-text
+            value="USER"
+            align="center"
+            position="0 .1 .9"
+            color="white"
+            width="3">
+        </a-text>
+
+
+        <a-text
+            value="Sends Request"
+            align="center"
+            position="0 -.35 .9"
+            color="#c4b5fd"
+            width="2.5">
+        </a-text>
+
+    </a-entity>
+
+
+    <!-- =================================================
+         DBMS SERVER
+    ================================================= -->
+
+    <a-entity
+        id="dbmsServer"
+        class="clickable"
+        position="0 3.2 -10"
+        onclick="showDBMS()">
+
+
+        <!-- Main server body -->
+
+        <a-box
+            position="0 0 0"
+            width="4.2"
+            height="3.6"
+            depth="1.8"
+            color="#164e63"
+            material="
+                emissive:#0369a1;
+                emissiveIntensity:.3;
+                metalness:.5;
+                roughness:.3">
+
+        </a-box>
+
+
+        <!-- Server border -->
+
+        <a-box
+            position="0 0 0.92"
+            width="4.0"
+            height="3.4"
+            depth=".04"
+            color="#0ea5e9"
+            material="
+                transparent:true;
+                opacity:.12">
+
+        </a-box>
+
+
+        <!-- Database processor layers -->
+
+        <a-cylinder
+            position="0 .85 1"
+            radius=".85"
+            height=".2"
+            color="#38bdf8">
+        </a-cylinder>
+
+        <a-cylinder
+            position="0 .45 1"
+            radius=".85"
+            height=".2"
+            color="#22d3ee">
+        </a-cylinder>
+
+        <a-cylinder
+            position="0 .05 1"
+            radius=".85"
+            height=".2"
+            color="#0284c7">
+        </a-cylinder>
+
+
+        <!-- Server title -->
+
+        <a-text
+            value="DBMS SERVER"
+            align="center"
+            position="0 2.35 1"
+            color="#22d3ee"
+            width="5">
+        </a-text>
+
+
+        <a-text
+            value="QUERY PROCESSOR"
+            align="center"
+            position="0 1.55 1"
+            color="white"
+            width="3.2">
+        </a-text>
+
+
+        <a-text
+            value="PROCESS • MANAGE • CONTROL"
+            align="center"
+            position="0 -1.15 1"
+            color="#bae6fd"
+            width="4">
+        </a-text>
+
+    </a-entity>
+
+
+    <!-- =================================================
+         APPLICATION
+    ================================================= -->
+
+    <a-entity
+        id="application"
+        class="clickable"
+        position="7 0 -10"
+        onclick="showApplication()">
+
+
+        <a-box
+            position="0 1.7 0"
+            width="3.2"
+            height="3.2"
+            depth="1.8"
+            color="#0f766e"
+            material="
+                emissive:#14b8a6;
+                emissiveIntensity:.35;
+                metalness:.4;
+                roughness:.3">
+        </a-box>
+
+
+        <!-- App screen -->
+
+        <a-plane
+            position="0 1.7 .94"
+            width="2.45"
+            height="1.65"
+            color="#042f2e">
+        </a-plane>
+
+
+        <a-text
+            value="APPLICATION"
+            align="center"
+            position="0 2.05 1"
+            color="#5eead4"
+            width="4">
+        </a-text>
+
+
+        <a-text
+            value="Website / App"
+            align="center"
+            position="0 1.5 1"
+            color="white"
+            width="3">
+        </a-text>
+
+
+        <a-text
+            value="User Interface"
+            align="center"
+            position="0 .95 1"
+            color="#ccfbf1"
+            width="2.8">
+        </a-text>
+
+    </a-entity>
+
+
+    <!-- =================================================
+         USER → DBMS CONNECTION
+    ================================================= -->
+
+    <a-cylinder
+        id="flow1"
+        position="-3.5 3.2 -10"
+        radius=".055"
+        height="3"
+        rotation="0 0 90"
+        color="#22d3ee">
+
+        <a-sphere
+            position="1.35 0 0"
+            radius=".14"
+            color="#f59e0b"
+            animation="
+                property:position;
+                from:1.35 0 0;
+                to:-1.35 0 0;
+                loop:true;
+                dur:1800">
+        </a-sphere>
+
+    </a-cylinder>
+
+
+    <!-- =================================================
+         DBMS → APPLICATION CONNECTION
+    ================================================= -->
+
+    <a-cylinder
+        id="flow2"
+        position="3.5 3.2 -10"
+        radius=".055"
+        height="3"
+        rotation="0 0 90"
+        color="#22d3ee">
+
+        <a-sphere
+            position="-1.35 0 0"
+            radius=".14"
+            color="#f59e0b"
+            animation="
+                property:position;
+                from:-1.35 0 0;
+                to:1.35 0 0;
+                loop:true;
+                dur:1800">
+        </a-sphere>
+
+    </a-cylinder>
+
+
+    <!-- =================================================
+         FLOW LABELS
+    ================================================= -->
+
+    <a-text
+        value="USER REQUEST"
+        align="center"
+        position="-3.5 3.85 -10"
+        color="#c4b5fd"
+        width="2.8">
+    </a-text>
+
+
+    <a-text
+        value="QUERY / RESPONSE"
+        align="center"
+        position="3.5 3.85 -10"
+        color="#99f6e4"
+        width="3">
+    </a-text>
+
+
+    <!-- =================================================
+         DATABASE BELOW DBMS
+    ================================================= -->
+
+    <a-entity
+        id="databaseObject"
+        class="clickable"
+        position="0 0 -10"
+        onclick="showDatabase()">
+
+
+        <!-- Database cylinder -->
+
+        <a-cylinder
+            position="0 .65 0"
+            radius="1.65"
+            height="1.3"
+            color="#0369a1"
+            material="
+                emissive:#075985;
+                emissiveIntensity:.25;
+                metalness:.5;
+                roughness:.3">
+        </a-cylinder>
+
+
+        <!-- Top -->
+
+        <a-cylinder
+            position="0 1.32 0"
+            radius="1.65"
+            height=".16"
+            color="#38bdf8">
+        </a-cylinder>
+
+
+        <!-- Middle -->
+
+        <a-cylinder
+            position="0 .75 0"
+            radius="1.65"
+            height=".12"
+            color="#0ea5e9">
+        </a-cylinder>
+
+
+        <!-- Bottom -->
+
+        <a-cylinder
+            position="0 .1 0"
+            radius="1.65"
+            height=".12"
+            color="#0284c7">
+        </a-cylinder>
+
+
+        <!-- Database label -->
+
+        <a-text
+            value="DATABASE"
+            align="center"
+            position="0 -.45 .1"
+            color="white"
+            width="4">
+        </a-text>
+
+
+        <a-text
+            value="STORES DATA"
+            align="center"
+            position="0 -0.85 .1"
+            color="#bae6fd"
+            width="3">
+        </a-text>
+
+    </a-entity>
+
+
+    <!-- =================================================
+         DBMS → DATABASE CONNECTION
+    ================================================= -->
+
+    <a-cylinder
+        id="storageFlow"
+        position="0 1.8 -10"
+        radius=".055"
+        height="1.5"
+        color="#38bdf8">
+
+        <a-sphere
+            position="0 -.65 0"
+            radius=".13"
+            color="#f59e0b"
+
+            animation="
+                property:position;
+                from:0 .65 0;
+                to:0 -.65 0;
+                loop:true;
+                dur:1500">
+        </a-sphere>
+
+    </a-cylinder>
+
+
+    <a-text
+        value="DATA STORAGE"
+        align="center"
+        position="0 1.15 -9"
+        color="#bae6fd"
+        width="2.7">
+    </a-text>
+
+
+    <!-- =================================================
+         ROBOT GUIDES
+    ================================================= -->
+
+    <a-gltf-model
+        id="robotLeft"
+        class="clickable"
+        src="#robot"
+        position="-9 0 -13"
+        scale=".65 .65 .65"
+        animation="
+            property:rotation;
+            to:0 360 0;
+            loop:true;
+            dur:15000"
+        onclick="showGuide()">
+    </a-gltf-model>
+
+
+    <a-gltf-model
+        id="robotRight"
+        class="clickable"
+        src="#robot"
+        position="9 0 -13"
+        scale=".65 .65 .65"
+        animation="
+            property:rotation;
+            to:0 -360 0;
+            loop:true;
+            dur:15000"
+        onclick="showGuide()">
+    </a-gltf-model>
+
+
+    <!-- =================================================
+         LOWER STATUS
+    ================================================= -->
+
+    <a-plane
+        position="0 0.1 -14"
+        width="9"
+        height=".75"
+        color="#0f172a"
+        material="
+            transparent:true;
+            opacity:.85">
+    </a-plane>
+
+
+    <a-text
+        id="sceneStatus"
+        value="READY — Explore the DBMS components"
+        align="center"
+        position="0 .1 -13.55"
+        color="#22d3ee"
+        width="6">
+    </a-text>
+
+
+</a-scene>
+
+
+<script>
+
+/* =====================================================
+   INFORMATION
+===================================================== */
+
+function setInfo(title,text){
+
+    document.getElementById("info").innerHTML =
+        "<b>"+title+"</b><br><br>"+text;
+
+    document
+        .getElementById("infoTitle")
+        .setAttribute("value",title);
+
+    document
+        .getElementById("infoText")
+        .setAttribute("value",text);
+
+}
+
+
+/* =====================================================
+   DATABASE
+===================================================== */
+
+function showDatabase(){
+
+    setInfo(
+        "🗄️ DATABASE",
+
+        "A database is an organized collection of related data.<br><br>" +
+
+        "It stores information in a structured form so that it can be accessed, updated and managed efficiently."
+    );
+
+    highlight("databaseObject");
+
+    setActivity("EXPLORING DATABASE");
+
+}
+
+
+/* =====================================================
+   FILE SYSTEM
+===================================================== */
+
+function showFileSystem(){
+
+    setInfo(
+        "📁 FILE SYSTEM",
+
+        "A traditional file system stores information in separate files.<br><br>" +
+
+        "Problems can include data redundancy, inconsistency, limited sharing and difficult security management."
+    );
+
+    setActivity("COMPARING FILE SYSTEM");
+
+}
+
+
+/* =====================================================
+   DBMS
+===================================================== */
+
+function showDBMS(){
+
+    setInfo(
+
+        "⚙️ DATABASE MANAGEMENT SYSTEM",
+
+        "A DBMS is software that provides an organized way to create, store, retrieve, update and secure data.<br><br>" +
+
+        "Examples include MySQL, PostgreSQL, Oracle and SQL Server."
+
+    );
+
+    highlight("dbmsServer");
+
+    setActivity("DBMS PROCESSING REQUEST");
+
+}
+
+
+/* =====================================================
+   ADVANTAGES
+===================================================== */
+
+function showAdvantages(){
+
+    setInfo(
+
+        "⭐ ADVANTAGES OF DBMS",
+
+        "✓ Reduced data redundancy<br>" +
+        "✓ Better data consistency<br>" +
+        "✓ Improved security<br>" +
+        "✓ Data sharing<br>" +
+        "✓ Backup and recovery<br>" +
+        "✓ Easier data management"
+
+    );
+
+    setActivity("DBMS ADVANTAGES");
+
+}
+
+
+/* =====================================================
+   USER
+===================================================== */
+
+function showUser(){
+
+    setInfo(
+
+        "👤 USER",
+
+        "The user interacts with an application or system to request information.<br><br>" +
+
+        "The request is passed to the DBMS, which processes it and retrieves the required data."
+
+    );
+
+    highlight("userObject");
+
+    setActivity("USER REQUEST");
+
+}
+
+
+/* =====================================================
+   APPLICATION
+===================================================== */
+
+function showApplication(){
+
+    setInfo(
+
+        "💻 APPLICATION",
+
+        "Applications provide an interface through which users interact with the database.<br><br>" +
+
+        "For example, a college management system can use a DBMS to retrieve student information."
+
+    );
+
+    highlight("application");
+
+    setActivity("APPLICATION CONNECTED");
+
+}
+
+
+/* =====================================================
+   ROBOT GUIDE
+===================================================== */
+
+function showGuide(){
+
+    setInfo(
+
+        "🤖 VR LAB GUIDE",
+
+        "Welcome to the DBMS Fundamentals Lab!<br><br>" +
+
+        "Explore each 3D component to understand how users, applications, DBMS software and databases work together."
+
+    );
+
+    setActivity("GUIDE ACTIVATED");
+
+}
+
+
+/* =====================================================
+   HIGHLIGHT
+===================================================== */
+
+function highlight(id){
+
+    const element =
+        document.getElementById(id);
+
+    if(!element) return;
+
+    element.setAttribute(
+
+        "animation__highlight",
+
+        "property:scale;" +
+        "to:1.12 1.12 1.12;" +
+        "dur:250;" +
+        "direction:alternate;" +
+        "loop:4"
+
+    );
+
+    setTimeout(function(){
+
+        element.removeAttribute(
+            "animation__highlight"
+        );
+
+    },2200);
+
+}
+
+
+/* =====================================================
+   ACTIVITY
+===================================================== */
+
+function setActivity(text){
+
+    document
+        .getElementById("activity")
+        .innerText = text;
+
+    document
+        .getElementById("sceneStatus")
+        .setAttribute(
+            "value",
+            text
+        );
+
+}
+
+
+/* =====================================================
+   DATA FLOW
+===================================================== */
+
+async function startDataFlow(){
+
+    setActivity(
+        "USER → DBMS → DATABASE → APPLICATION"
+    );
+
+    setInfo(
+
+        "🔄 DATA FLOW",
+
+        "Watch how a request moves through the DBMS.<br><br>" +
+
+        "1. User sends a request.<br>" +
+        "2. Application forwards the request.<br>" +
+        "3. DBMS processes the request.<br>" +
+        "4. Database provides the required data.<br>" +
+        "5. Result is returned to the user."
+
+    );
+
+
+    highlight("userObject");
+
+    await wait(900);
+
+    highlight("dbmsServer");
+
+    await wait(900);
+
+    highlight("databaseObject");
+
+    await wait(900);
+
+    highlight("application");
+
+    await wait(700);
+
+    setActivity(
+        "✓ DATA FLOW COMPLETED"
+    );
+
+}
+
+
+/* =====================================================
+   MINI QUIZ
+===================================================== */
+
+function startQuiz(){
+
+    const answer = prompt(
+
+        "Mini Quiz\n\n" +
+
+        "Which component manages and controls access to a database?\n\n" +
+
+        "A. File System\n" +
+        "B. DBMS\n" +
+        "C. Keyboard\n" +
+        "D. Browser"
+
+    );
+
+
+    if(answer === null){
+
+        return;
+
+    }
+
+
+    if(
+
+        answer.toLowerCase() === "b" ||
+
+        answer.toLowerCase() === "dbms"
+
+    ){
+
+        setInfo(
+
+            "🎉 CORRECT!",
+
+            "Excellent! A DBMS manages the database and provides functions such as storing, retrieving, updating and securing data."
+
+        );
+
+        setActivity("✓ QUIZ PASSED");
+
+    }
+
+    else{
+
+        setInfo(
+
+            "❌ TRY AGAIN",
+
+            "The correct answer is <b>B. DBMS</b>.<br><br>" +
+
+            "A Database Management System manages access to the database."
+
+        );
+
+        setActivity("QUIZ RETRY");
+
+    }
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab(){
+
+    setInfo(
+
+        "Welcome to the DBMS Lab!",
+
+        "Click the 3D components or choose a concept below to start learning."
+
+    );
+
+    setActivity("READY");
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+function goHome(){
+
+    window.location.href =
+        "dbms.html";
+
+}
+
+
+function goBack(){
+
+    window.history.back();
+
+}
+
+
+function goNext(){
+
+    window.location.href =
+        "relational-model.html";
+
+}
+
+
+/* =====================================================
+   WAIT
+===================================================== */
+
+function wait(ms){
+
+    return new Promise(
+
+        resolve => setTimeout(resolve,ms)
+
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

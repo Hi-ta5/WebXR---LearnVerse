@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>NLP - Sentiment Analysis VR Lab</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      background: #020617;
+    }
+
+    /* =========================================
+       CONTROL PANEL
+    ========================================= */
+
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 330px;
+      padding: 20px;
+      background: linear-gradient(145deg, rgba(4, 10, 28, 0.96), rgba(9, 20, 45, 0.88));
+      border-radius: 20px;
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      color: white;
+      z-index: 999;
+      box-shadow: 0 0 35px rgba(0, 255, 255, 0.18), inset 0 0 30px rgba(59, 130, 246, 0.05);
+      backdrop-filter: blur(14px);
+    }
+
+    .ui h2 {
+      margin-top: 0;
+      color: #00ffff;
+      font-size: 19px;
+      letter-spacing: 0.5px;
+    }
+
+    .ui p {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 8px 0 12px;
+    }
+
+    .ui textarea {
+      width: 100%;
+      height: 70px;
+      padding: 10px 12px;
+      margin-top: 6px;
+      box-sizing: border-box;
+      border: 1px solid #164e63;
+      border-radius: 10px;
+      background: #071426;
+      color: white;
+      font-size: 13px;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .ui textarea:focus {
+      border-color: #00ffff;
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+    }
+
+    .ui button {
+      width: 100%;
+      padding: 11px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 10px;
+      background: #00ffff;
+      color: #000000;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+    }
+
+    .ui button:hover {
+      background: #7fffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(0, 255, 255, 0.45);
+    }
+
+    .ui button.btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .ui button.btn-reset:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #00ffff;
+      border-color: #00ffff;
+    }
+
+    #status {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(2, 6, 23, 0.65);
+      border: 1px solid rgba(34, 211, 238, 0.15);
+      color: #86efac;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     CONTROL PANEL
+================================================== -->
+
+<div class="ui">
+
+  <h2>😊 SENTIMENT ANALYSIS</h2>
+
+  <p>
+    Enter a sentence and discover whether
+    the sentiment is Positive, Negative or Neutral.
+  </p>
+
+  <textarea id="textInput">I really love this amazing application!</textarea>
+
+
+  <button onclick="analyzeSentiment()">
+    🔍 Analyze Sentiment
+  </button>
+
+
+  <button onclick="positiveExample()">
+    😊 Positive Example
+  </button>
+
+
+  <button onclick="negativeExample()">
+    😡 Negative Example
+  </button>
+
+
+  <button onclick="neutralExample()">
+    😐 Neutral Example
+  </button>
+
+
+  <button class="btn-reset" onclick="resetLab()">
+    🔄 Reset
+  </button>
+
+
+  <div id="status">
+    Ready
+  </div>
+
+</div>
+
+
+<!-- ==================================================
+     VR SCENE
+================================================== -->
+
+<a-scene
+
+  background="color:#020617"
+
+  vr-mode-ui="enabled:true">
+
+
+  <!-- ==================================================
+       ASSETS
+  ================================================== -->
+
+  <a-assets>
+
+    <a-asset-item
+
+      id="robotModel"
+
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+
+    </a-asset-item>
+
+  </a-assets>
+
+
+  <!-- ==================================================
+       CAMERA
+  ================================================== -->
+
+  <a-camera
+
+    position="0 5 20">
+
+  </a-camera>
+
+
+  <!-- ==================================================
+       LIGHTS
+  ================================================== -->
+
+  <a-light
+
+    type="ambient"
+
+    intensity="1.5">
+
+  </a-light>
+
+
+  <a-light
+
+    type="point"
+
+    intensity="4"
+
+    position="0 12 5">
+
+  </a-light>
+
+
+  <!-- ==================================================
+       FLOOR
+  ================================================== -->
+
+  <a-plane
+
+    rotation="-90 0 0"
+
+    width="60"
+
+    height="60"
+
+    color="#111827">
+
+  </a-plane>
+
+
+  <!-- ==================================================
+       SKY
+  ================================================== -->
+
+  <a-sky
+
+    color="#020617">
+
+  </a-sky>
+
+
+  <!-- ==================================================
+       TITLE
+  ================================================== -->
+
+  <a-text
+
+    value="NLP SENTIMENT ANALYSIS LAB"
+
+    position="-7 10 -13"
+
+    scale="2.6 2.6 2.6"
+
+    color="#00ffff">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       LEFT ROBOT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="-12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property:rotation;
+      to:0 360 0;
+      loop:true;
+      dur:16000">
+
+  </a-gltf-model>
+
+
+  <!-- ==================================================
+       RIGHT ROBOT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property:rotation;
+      to:0 -360 0;
+      loop:true;
+      dur:16000">
+
+  </a-gltf-model>
+
+
+  <!-- ==================================================
+       EMOTION CONTAINER
+  ================================================== -->
+
+  <a-entity
+
+    id="emotionContainer">
+
+  </a-entity>
+
+
+  <!-- ==================================================
+       EMOTION FACE
+  ================================================== -->
+
+  <a-sphere
+
+    id="emotionFace"
+
+    position="0 5 -10"
+
+    radius="2"
+
+    color="#facc15"
+
+    material="
+      emissive:#facc15;
+      emissiveIntensity:0.3">
+
+  </a-sphere>
+
+
+  <!-- LEFT EYE -->
+
+  <a-sphere
+
+    id="leftEye"
+
+    position="-0.65 5.6 -11.7"
+
+    radius="0.18"
+
+    color="#020617">
+
+  </a-sphere>
+
+
+  <!-- RIGHT EYE -->
+
+  <a-sphere
+
+    id="rightEye"
+
+    position="0.65 5.6 -11.7"
+
+    radius="0.18"
+
+    color="#020617">
+
+  </a-sphere>
+
+
+  <!-- MOUTH -->
+
+  <a-torus
+
+    id="mouth"
+
+    position="0 4.4 -11.7"
+
+    radius="0.5"
+
+    radius-tubular="0.1"
+
+    rotation="0 0 180"
+
+    color="#020617">
+
+  </a-torus>
+
+
+  <!-- EMOTION TEXT -->
+
+  <a-text
+
+    id="emotionText"
+
+    value="NEUTRAL 😐"
+
+    position="-2.3 1.5 -9"
+
+    scale="2 2 2"
+
+    color="#facc15">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       SENTIMENT METER
+  ================================================== -->
+
+  <a-plane
+
+    position="0 -0.5 -9"
+
+    width="16"
+
+    height="1.2"
+
+    color="#0f172a">
+
+  </a-plane>
+
+
+  <!-- NEGATIVE SIDE -->
+
+  <a-text
+
+    value="😡 NEGATIVE"
+
+    position="-7 -0.4 -8.5"
+
+    scale="1.3 1.3 1.3"
+
+    color="#ef4444">
+
+  </a-text>
+
+
+  <!-- POSITIVE SIDE -->
+
+  <a-text
+
+    value="POSITIVE 😊"
+
+    position="4.8 -0.4 -8.5"
+
+    scale="1.3 1.3 1.3"
+
+    color="#22c55e">
+
+  </a-text>
+
+
+  <!-- METER LINE -->
+
+  <a-box
+
+    position="0 0.2 -8.5"
+
+    width="12"
+
+    height="0.15"
+
+    depth="0.15"
+
+    color="#64748b">
+
+  </a-box>
+
+
+  <!-- METER MARKERS -->
+
+  <a-sphere
+
+    position="-6 0.2 -8.5"
+
+    radius="0.25"
+
+    color="#ef4444">
+
+  </a-sphere>
+
+
+  <a-sphere
+
+    position="0 0.2 -8.5"
+
+    radius="0.25"
+
+    color="#facc15">
+
+  </a-sphere>
+
+
+  <a-sphere
+
+    position="6 0.2 -8.5"
+
+    radius="0.25"
+
+    color="#22c55e">
+
+  </a-sphere>
+
+
+  <!-- MOVING INDICATOR -->
+
+  <a-sphere
+
+    id="indicator"
+
+    position="0 0.2 -8.3"
+
+    radius="0.35"
+
+    color="#ffffff"
+
+    animation="
+      property:scale;
+      dir:alternate;
+      dur:800;
+      loop:true;
+      to:1.3 1.3 1.3">
+
+  </a-sphere>
+
+
+  <!-- ==================================================
+       SCORE
+  ================================================== -->
+
+  <a-text
+
+    id="scoreText"
+
+    value="Sentiment Score: 0"
+
+    position="-3.5 8 -10"
+
+    scale="1.5 1.5 1.5"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       WORD ANALYSIS
+  ================================================== -->
+
+  <a-text
+
+    id="wordAnalysis"
+
+    value="Positive Words: 0 | Negative Words: 0"
+
+    position="-5 7.2 -10"
+
+    scale="1 1 1"
+
+    color="#cbd5e1">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       INFORMATION
+  ================================================== -->
+
+  <a-text
+
+    id="explanation"
+
+    value="Sentiment Analysis determines the emotional tone of text."
+
+    position="-6.5 6.5 -10"
+
+    scale="1 1 1"
+
+    color="white">
+
+  </a-text>
+
+
+</a-scene>
+
+
+<script>
+
+
+/* =====================================================
+   POSITIVE WORDS
+===================================================== */
+
+const positiveWords = [
+
+  "good",
+  "great",
+  "excellent",
+  "amazing",
+  "awesome",
+  "love",
+  "loved",
+  "lovely",
+  "happy",
+  "happiness",
+  "beautiful",
+  "best",
+  "better",
+  "wonderful",
+  "fantastic",
+  "perfect",
+  "success",
+  "successful",
+  "win",
+  "winner",
+  "enjoy",
+  "enjoyed",
+  "nice",
+  "helpful",
+  "easy",
+  "fun",
+  "brilliant",
+  "smart",
+  "interesting",
+  "excited",
+  "thank",
+  "thanks"
+
+];
+
+
+/* =====================================================
+   NEGATIVE WORDS
+===================================================== */
+
+const negativeWords = [
+
+  "bad",
+  "terrible",
+  "awful",
+  "horrible",
+  "hate",
+  "hated",
+  "sad",
+  "sadness",
+  "worst",
+  "worse",
+  "angry",
+  "anger",
+  "problem",
+  "problems",
+  "difficult",
+  "failure",
+  "failed",
+  "fail",
+  "boring",
+  "boring",
+  "useless",
+  "poor",
+  "wrong",
+  "error",
+  "errors",
+  "disappointed",
+  "disappointing",
+  "annoying",
+  "annoyed",
+  "pain",
+  "painful",
+  "slow",
+  "hard"
+
+];
+
+
+/* =====================================================
+   NEGATION WORDS
+===================================================== */
+
+const negationWords = [
+
+  "not",
+  "never",
+  "no",
+  "don't",
+  "didn't",
+  "isn't",
+  "wasn't",
+  "can't",
+  "cannot"
+
+];
+
+
+/* =====================================================
+   CLEAN TEXT
+===================================================== */
+
+function cleanText(text) {
+
+  return text
+
+    .toLowerCase()
+
+    .replace(/[.,!?;:'"]/g, "")
+
+    .split(/\s+/)
+
+    .filter(word => word !== "");
+
+}
+
+
+/* =====================================================
+   ANALYZE SENTIMENT
+===================================================== */
+
+function analyzeSentiment() {
+
+  const text =
+
+    document
+      .getElementById(
+        "textInput"
+      )
+      .value
+      .trim();
+
+
+  if (!text) {
+
+    alert(
+      "Please enter a sentence."
+    );
+
+    return;
+
+  }
+
+
+  const words =
+    cleanText(text);
+
+
+  let score = 0;
+
+  let positiveCount = 0;
+
+  let negativeCount = 0;
+
+
+  /*
+     Check every word
+  */
+
+  words.forEach(
+    (word, index) => {
+
+      let value = 0;
+
+
+      if (
+        positiveWords
+          .includes(word)
+      ) {
+
+        value = 1;
+
+        positiveCount++;
+
+      }
+
+
+      if (
+        negativeWords
+          .includes(word)
+      ) {
+
+        value = -1;
+
+        negativeCount++;
+
+      }
+
+
+      /*
+        Simple negation handling
+      */
+
+      if (
+        index > 0 &&
+        negationWords
+          .includes(words[index - 1])
+      ) {
+
+        value *= -1;
+
+      }
+
+
+      score += value;
+
+    }
+  );
+
+
+  /*
+     Normalize score
+  */
+
+  let sentiment;
+
+
+  if (score > 0) {
+
+    sentiment = "POSITIVE";
+
+  }
+
+  else if (score < 0) {
+
+    sentiment = "NEGATIVE";
+
+  }
+
+  else {
+
+    sentiment = "NEUTRAL";
+
+  }
+
+
+  /*
+     Update VR
+  */
+
+  updateEmotion(
+
+    sentiment,
+
+    score
+
+  );
+
+
+  /*
+     Update counters
+  */
+
+  document
+    .getElementById(
+      "wordAnalysis"
+    )
+    .setAttribute(
+
+      "value",
+
+      "Positive Words: " +
+      positiveCount +
+      " | Negative Words: " +
+      negativeCount
+
+    );
+
+
+  document
+    .getElementById(
+      "scoreText"
+    )
+    .setAttribute(
+
+      "value",
+
+      "Sentiment Score: " +
+      score
+
+    );
+
+
+  document
+    .getElementById(
+      "status"
+    )
+    .innerText =
+
+      sentiment +
+      " Sentiment ✓";
+
+}
+
+
+/* =====================================================
+   UPDATE EMOTION
+===================================================== */
+
+function updateEmotion(
+
+  sentiment,
+
+  score
+
+) {
+
+  const face =
+
+    document.getElementById(
+      "emotionFace"
+    );
+
+
+  const emotionText =
+
+    document.getElementById(
+      "emotionText"
+    );
+
+
+  const indicator =
+
+    document.getElementById(
+      "indicator"
+    );
+
+
+  /*
+     POSITIVE
+  */
+
+  if (
+    sentiment ===
+    "POSITIVE"
+  ) {
+
+    face.setAttribute(
+      "color",
+      "#22c55e"
+    );
+
+
+    face.setAttribute(
+
+      "material",
+
+      "emissive:#22c55e; emissiveIntensity:0.5"
+
+    );
+
+
+    emotionText.setAttribute(
+
+      "value",
+
+      "POSITIVE 😊"
+
+    );
+
+
+    emotionText.setAttribute(
+
+      "color",
+
+      "#22c55e"
+
+    );
+
+
+    indicator.setAttribute(
+
+      "position",
+
+      "4 0.2 -8.3"
+
+    );
+
+
+    document
+      .getElementById(
+        "explanation"
+      )
+      .setAttribute(
+
+        "value",
+
+        "The text contains more positive words than negative words."
+
+      );
+
+  }
+
+
+  /*
+     NEGATIVE
+  */
+
+  else if (
+    sentiment ===
+    "NEGATIVE"
+  ) {
+
+    face.setAttribute(
+      "color",
+      "#ef4444"
+    );
+
+
+    face.setAttribute(
+
+      "material",
+
+      "emissive:#ef4444; emissiveIntensity:0.5"
+
+    );
+
+
+    emotionText.setAttribute(
+
+      "value",
+
+      "NEGATIVE 😡"
+
+    );
+
+
+    emotionText.setAttribute(
+
+      "color",
+
+      "#ef4444"
+
+    );
+
+
+    indicator.setAttribute(
+
+      "position",
+
+      "-4 0.2 -8.3"
+
+    );
+
+
+    document
+      .getElementById(
+        "explanation"
+      )
+      .setAttribute(
+
+        "value",
+
+        "The text contains more negative words than positive words."
+
+      );
+
+  }
+
+
+  /*
+     NEUTRAL
+  */
+
+  else {
+
+    face.setAttribute(
+      "color",
+      "#facc15"
+    );
+
+
+    face.setAttribute(
+
+      "material",
+
+      "emissive:#facc15; emissiveIntensity:0.5"
+
+    );
+
+
+    emotionText.setAttribute(
+
+      "value",
+
+      "NEUTRAL 😐"
+
+    );
+
+
+    emotionText.setAttribute(
+
+      "color",
+
+      "#facc15"
+
+    );
+
+
+    indicator.setAttribute(
+
+      "position",
+
+      "0 0.2 -8.3"
+
+    );
+
+
+    document
+      .getElementById(
+        "explanation"
+      )
+      .setAttribute(
+
+        "value",
+
+        "The text contains a balanced or neutral sentiment."
+
+      );
+
+  }
+
+}
+
+
+/* =====================================================
+   POSITIVE EXAMPLE
+===================================================== */
+
+function positiveExample() {
+
+  document
+    .getElementById(
+      "textInput"
+    )
+    .value =
+
+      "I absolutely love this amazing and wonderful application!";
+
+
+  analyzeSentiment();
+
+}
+
+
+/* =====================================================
+   NEGATIVE EXAMPLE
+===================================================== */
+
+function negativeExample() {
+
+  document
+    .getElementById(
+      "textInput"
+    )
+    .value =
+
+      "This application is terrible, slow and disappointing.";
+
+
+  analyzeSentiment();
+
+}
+
+
+/* =====================================================
+   NEUTRAL EXAMPLE
+===================================================== */
+
+function neutralExample() {
+
+  document
+    .getElementById(
+      "textInput"
+    )
+    .value =
+
+      "The application has five modules.";
+
+
+  analyzeSentiment();
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab() {
+
+  document
+    .getElementById(
+      "textInput"
+    )
+    .value =
+
+      "I really love this amazing application!";
+
+
+  document
+    .getElementById(
+      "emotionFace"
+    )
+    .setAttribute(
+      "color",
+      "#facc15"
+    );
+
+
+  document
+    .getElementById(
+      "emotionText"
+    )
+    .setAttribute(
+      "value",
+      "NEUTRAL 😐"
+    );
+
+
+  document
+    .getElementById(
+      "indicator"
+    )
+    .setAttribute(
+      "position",
+      "0 0.2 -8.3"
+    );
+
+
+  document
+    .getElementById(
+      "scoreText"
+    )
+    .setAttribute(
+      "value",
+      "Sentiment Score: 0"
+    );
+
+
+  document
+    .getElementById(
+      "wordAnalysis"
+    )
+    .setAttribute(
+      "value",
+      "Positive Words: 0 | Negative Words: 0"
+    );
+
+
+  document
+    .getElementById(
+      "status"
+    )
+    .innerText =
+      "Ready";
+
+}
+
+</script>
+
+</body>
+
+</html>

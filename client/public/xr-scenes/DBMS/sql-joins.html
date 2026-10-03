@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SQL Joins VR Lab</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    overflow:hidden;
+    background:#020617;
+}
+
+/* =========================
+   CONTROL PANEL
+========================= */
+
+.panel{
+
+    position:absolute;
+    z-index:20;
+
+    top:18px;
+    left:18px;
+
+    width:330px;
+
+    padding:20px;
+
+    background:rgba(2,6,23,.96);
+
+    color:white;
+
+    border-radius:18px;
+
+    border:1px solid #f59e0b;
+
+    box-shadow:
+        0 0 25px rgba(245,158,11,.25),
+        inset 0 0 20px rgba(245,158,11,.05);
+
+    backdrop-filter:blur(10px);
+}
+
+.panel h2{
+
+    margin:0;
+
+    color:#fbbf24;
+}
+
+.subtitle{
+
+    margin-top:5px;
+
+    color:#94a3b8;
+
+    font-size:13px;
+
+    line-height:1.4;
+}
+
+#info{
+
+    margin-top:15px;
+
+    padding:12px;
+
+    min-height:90px;
+
+    background:#0f172a;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    line-height:1.5;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+button{
+
+    width:100%;
+
+    padding:11px;
+
+    margin-top:7px;
+
+    border:none;
+
+    border-radius:9px;
+
+    background:#f59e0b;
+
+    color:#020617;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+button:hover{
+
+    background:#fbbf24;
+
+    transform:translateY(-2px);
+}
+
+.demo{
+
+    background:#7c3aed;
+
+    color:white;
+}
+
+.reset{
+
+    background:#334155;
+
+    color:white;
+}
+
+/* =========================
+   PROGRESS
+========================= */
+
+.progress{
+
+    margin-top:14px;
+
+    height:8px;
+
+    background:#1e293b;
+
+    border-radius:20px;
+
+    overflow:hidden;
+}
+
+#progressBar{
+
+    height:100%;
+
+    width:0%;
+
+    background:#f59e0b;
+
+    transition:.5s;
+}
+
+.stage{
+
+    text-align:center;
+
+    margin-top:7px;
+
+    color:#94a3b8;
+
+    font-size:12px;
+}
+
+/* =========================
+   LEGEND
+========================= */
+
+.legend{
+
+    position:absolute;
+
+    right:18px;
+
+    bottom:18px;
+
+    z-index:20;
+
+    padding:12px 16px;
+
+    background:rgba(2,6,23,.92);
+
+    color:white;
+
+    border-radius:12px;
+
+    border:1px solid #334155;
+
+    font-size:12px;
+}
+
+.legend div{
+
+    margin:5px 0;
+}
+
+.dot{
+
+    display:inline-block;
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+    margin-right:6px;
+}
+
+.orange{
+    background:#f59e0b;
+}
+
+.cyan{
+    background:#22d3ee;
+}
+
+.green{
+    background:#4ade80;
+}
+
+.purple{
+    background:#a78bfa;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     PANEL
+===================================================== -->
+
+<div class="panel">
+
+    <h2>🔗 SQL Joins VR Lab</h2>
+
+    <div class="subtitle">
+
+        Combine data from multiple tables using a common key.
+
+    </div>
+
+
+    <div id="info">
+
+        <b>Welcome!</b><br><br>
+
+        Select a JOIN to see how the records are combined.
+
+    </div>
+
+
+    <button onclick="join('INNER JOIN')">
+        🔵 INNER JOIN
+    </button>
+
+
+    <button onclick="join('LEFT JOIN')">
+        🟢 LEFT JOIN
+    </button>
+
+
+    <button onclick="join('RIGHT JOIN')">
+        🟣 RIGHT JOIN
+    </button>
+
+
+    <button onclick="join('FULL JOIN')">
+        🟠 FULL OUTER JOIN
+    </button>
+
+
+    <button
+        class="demo"
+        onclick="runDemo()">
+
+        ▶ Run JOIN Demo
+
+    </button>
+
+
+    <button
+        class="reset"
+        onclick="resetLab()">
+
+        ↻ Reset
+
+    </button>
+
+
+    <div class="progress">
+
+        <div id="progressBar"></div>
+
+    </div>
+
+
+    <div
+        id="stage"
+        class="stage">
+
+        Ready
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     LEGEND
+===================================================== -->
+
+<div class="legend">
+
+    <div>
+        <span class="dot cyan"></span>
+        Student Table
+    </div>
+
+    <div>
+        <span class="dot green"></span>
+        Course Table
+    </div>
+
+    <div>
+        <span class="dot orange"></span>
+        JOIN Operation
+    </div>
+
+    <div>
+        <span class="dot purple"></span>
+        Result
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     A-FRAME SCENE
+===================================================== -->
+
+<a-scene
+    background="color:#020617"
+    renderer="antialias:true"
+    cursor="rayOrigin:mouse"
+    raycaster="objects:.clickable">
+
+
+    <!-- CAMERA -->
+
+    <a-camera position="0 3.2 15">
+
+        <a-cursor
+            color="#f59e0b"
+            fuse="false">
+        </a-cursor>
+
+    </a-camera>
+
+
+    <!-- LIGHTS -->
+
+    <a-light
+        type="ambient"
+        intensity="1.5">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="0 8 5"
+        intensity="2.5"
+        color="#f59e0b">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="-7 5 -4"
+        intensity="1.5"
+        color="#22d3ee">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="7 5 -4"
+        intensity="1.5"
+        color="#4ade80">
+    </a-light>
+
+
+    <!-- FLOOR -->
+
+    <a-plane
+        rotation="-90 0 0"
+        width="40"
+        height="40"
+        color="#0f172a">
+    </a-plane>
+
+
+    <!-- GRID -->
+
+    <a-plane
+        rotation="-90 0 0"
+        position="0 .01 -5"
+        width="30"
+        height="30"
+        material="
+            color:#111827;
+            wireframe:true;
+            transparent:true;
+            opacity:.6">
+    </a-plane>
+
+
+    <a-sky color="#020617"></a-sky>
+
+
+    <!-- =================================================
+         TITLE
+    ================================================= -->
+
+    <a-text
+        value="SQL JOIN LAB"
+        position="-2.6 7.5 -9"
+        color="#f59e0b"
+        scale="2 2 2">
+    </a-text>
+
+
+    <a-text
+        value="STUDENT  +  COURSE  →  JOIN RESULT"
+        position="-3.3 6.8 -9"
+        color="#94a3b8"
+        scale=".9 .9 .9">
+    </a-text>
+
+
+    <!-- =================================================
+         STUDENT TABLE
+    ================================================= -->
+
+    <a-box
+        id="student"
+        position="-4.2 3.5 -8"
+        width="5"
+        height="4.2"
+        depth=".55"
+        color="#164e63">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.03 1.03 1.03"
+            direction="alternate"
+            dur="900"
+            repeat="indefinite">
+        </a-animation>
+
+    </a-box>
+
+
+    <a-text
+        value="STUDENT"
+        align="center"
+        position="-4.2 4.8 -7.65"
+        color="#22d3ee"
+        scale="1.4 1.4 1.4">
+    </a-text>
+
+
+    <a-text
+        value="ID       COURSE_ID"
+        position="-5.65 4.05 -7.65"
+        color="#94a3b8"
+        scale=".75 .75 .75">
+    </a-text>
+
+
+    <!-- STUDENT ROW 1 -->
+
+    <a-box
+        id="studentRow1"
+        class="clickable"
+        position="-4.2 3.45 -7.65"
+        width="4.5"
+        height=".55"
+        depth=".08"
+        color="#0e7490"
+        onclick="selectRow('student1')">
+    </a-box>
+
+
+    <a-text
+        value="1          C101"
+        position="-5.55 3.3 -7.5"
+        color="white"
+        scale=".75 .75 .75">
+    </a-text>
+
+
+    <!-- STUDENT ROW 2 -->
+
+    <a-box
+        id="studentRow2"
+        class="clickable"
+        position="-4.2 2.75 -7.65"
+        width="4.5"
+        height=".55"
+        depth=".08"
+        color="#0e7490"
+        onclick="selectRow('student2')">
+    </a-box>
+
+
+    <a-text
+        value="2          C102"
+        position="-5.55 2.6 -7.5"
+        color="white"
+        scale=".75 .75 .75">
+    </a-text>
+
+
+    <!-- =================================================
+         COURSE TABLE
+    ================================================= -->
+
+    <a-box
+        id="course"
+        position="4.2 3.5 -8"
+        width="5"
+        height="4.2"
+        depth=".55"
+        color="#064e3b">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.03 1.03 1.03"
+            direction="alternate"
+            dur="900"
+            repeat="indefinite">
+        </a-animation>
+
+    </a-box>
+
+
+    <a-text
+        value="COURSE"
+        align="center"
+        position="4.2 4.8 -7.65"
+        color="#4ade80"
+        scale="1.4 1.4 1.4">
+    </a-text>
+
+
+    <a-text
+        value="COURSE_ID     NAME"
+        position="2.75 4.05 -7.65"
+        color="#94a3b8"
+        scale=".7 .7 .7">
+    </a-text>
+
+
+    <!-- COURSE ROW 1 -->
+
+    <a-box
+        id="courseRow1"
+        class="clickable"
+        position="4.2 3.45 -7.65"
+        width="4.5"
+        height=".55"
+        depth=".08"
+        color="#047857"
+        onclick="selectRow('course1')">
+    </a-box>
+
+
+    <a-text
+        value="C101       DBMS"
+        position="2.8 3.3 -7.5"
+        color="white"
+        scale=".7 .7 .7">
+    </a-text>
+
+
+    <!-- COURSE ROW 2 -->
+
+    <a-box
+        id="courseRow2"
+        class="clickable"
+        position="4.2 2.75 -7.65"
+        width="4.5"
+        height=".55"
+        depth=".08"
+        color="#047857"
+        onclick="selectRow('course2')">
+    </a-box>
+
+
+    <a-text
+        value="C102       CN"
+        position="2.8 2.6 -7.5"
+        color="white"
+        scale=".7 .7 .7">
+    </a-text>
+
+
+    <!-- =================================================
+         JOIN OPERATION
+    ================================================= -->
+
+    <a-cylinder
+        id="joinLine"
+        position="0 3.5 -8"
+        radius=".12"
+        height="5"
+        rotation="0 0 90"
+        color="#f59e0b">
+
+        <a-animation
+            attribute="rotation"
+            from="0 0 90"
+            to="0 0 270"
+            dur="1500"
+            repeat="indefinite">
+        </a-animation>
+
+    </a-cylinder>
+
+
+    <a-sphere
+        id="joinCore"
+        position="0 3.5 -7.4"
+        radius=".4"
+        color="#f59e0b">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.3 1.3 1.3"
+            direction="alternate"
+            dur="600"
+            repeat="indefinite">
+        </a-animation>
+
+    </a-sphere>
+
+
+    <a-text
+        value="JOIN"
+        align="center"
+        position="-.55 4.15 -7.3"
+        color="#fbbf24"
+        scale=".8 .8 .8">
+    </a-text>
+
+
+    <!-- =================================================
+         RESULT
+    ================================================= -->
+
+    <a-box
+        id="resultBox"
+        position="0 .65 -8"
+        width="10"
+        height="1.7"
+        depth=".5"
+        color="#312e81">
+    </a-box>
+
+
+    <a-text
+        value="JOIN RESULT"
+        align="center"
+        position="0 1.05 -7.65"
+        color="#a78bfa"
+        scale="1 1 1">
+    </a-text>
+
+
+    <a-text
+        id="result"
+        value="Select a JOIN type"
+        align="center"
+        position="0 .6 -7.65"
+        color="white"
+        width="10">
+    </a-text>
+
+
+    <!-- RESULT ROWS -->
+
+    <a-text
+        id="resultData"
+        value=""
+        align="center"
+        position="0 .15 -7.65"
+        color="#f8fafc"
+        width="8">
+    </a-text>
+
+
+</a-scene>
+
+
+<script>
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let currentJoin = "";
+
+let demoRunning = false;
+
+
+/* =====================================================
+   JOIN DATA
+===================================================== */
+
+const joins = {
+
+    "INNER JOIN": {
+
+        text:
+        "Returns only rows where COURSE_ID matches.",
+
+        result:
+        "1 | C101 | DBMS\n" +
+        "2 | C102 | CN",
+
+        progress:25,
+
+        color:"#3b82f6"
+
+    },
+
+
+    "LEFT JOIN": {
+
+        text:
+        "Returns every row from STUDENT and matching COURSE rows.",
+
+        result:
+        "1 | C101 | DBMS\n" +
+        "2 | C102 | CN",
+
+        progress:50,
+
+        color:"#22c55e"
+
+    },
+
+
+    "RIGHT JOIN": {
+
+        text:
+        "Returns every row from COURSE and matching STUDENT rows.",
+
+        result:
+        "C101 | DBMS | Student 1\n" +
+        "C102 | CN | Student 2",
+
+        progress:75,
+
+        color:"#a78bfa"
+
+    },
+
+
+    "FULL JOIN": {
+
+        text:
+        "Returns all matching and non-matching rows from both tables.",
+
+        result:
+        "Student + Course records\n" +
+        "Matched + Unmatched rows",
+
+        progress:100,
+
+        color:"#f59e0b"
+
+    }
+
+};
+
+
+/* =====================================================
+   JOIN FUNCTION
+===================================================== */
+
+function join(type){
+
+    if(demoRunning)
+        return;
+
+
+    currentJoin = type;
+
+
+    const data = joins[type];
+
+
+    /* PANEL */
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>" + type + "</b><br><br>" +
+
+        data.text;
+
+
+    /* RESULT */
+
+    document
+        .getElementById("result")
+        .setAttribute(
+            "value",
+            type
+        );
+
+
+    document
+        .getElementById("resultData")
+        .setAttribute(
+            "value",
+            data.result
+        );
+
+
+    /* PROGRESS */
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        data.progress + "%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        type;
+
+
+    /* RESULT COLOR */
+
+    document
+        .getElementById("resultBox")
+        .setAttribute(
+            "color",
+            data.color
+        );
+
+
+    /* ANIMATE */
+
+    animateJoin();
+
+
+    /* HIGHLIGHT */
+
+    highlightRows(type);
+
+}
+
+
+/* =====================================================
+   HIGHLIGHT MATCHING ROWS
+===================================================== */
+
+function highlightRows(type){
+
+    const rows = [
+
+        "studentRow1",
+        "studentRow2",
+        "courseRow1",
+        "courseRow2"
+
+    ];
+
+
+    rows.forEach(id=>{
+
+        document
+            .getElementById(id)
+            .setAttribute(
+                "color",
+                "#0e7490"
+            );
+
+    });
+
+
+    if(type === "INNER JOIN"){
+
+        flashRow("studentRow1");
+        flashRow("studentRow2");
+
+        flashRow("courseRow1");
+        flashRow("courseRow2");
+
+    }
+
+
+    if(type === "LEFT JOIN"){
+
+        flashRow("studentRow1");
+        flashRow("studentRow2");
+
+    }
+
+
+    if(type === "RIGHT JOIN"){
+
+        flashRow("courseRow1");
+        flashRow("courseRow2");
+
+    }
+
+
+    if(type === "FULL JOIN"){
+
+        rows.forEach(id=>{
+
+            flashRow(id);
+
+        });
+
+    }
+
+}
+
+
+/* =====================================================
+   ROW ANIMATION
+===================================================== */
+
+function flashRow(id){
+
+    const row =
+        document.getElementById(id);
+
+
+    row.setAttribute(
+        "animation__highlight",
+        "property:scale;" +
+        "from:1 1 1;" +
+        "to:1.12 1.12 1.12;" +
+        "dur:400;" +
+        "dir:alternate;" +
+        "loop:3"
+    );
+
+
+    row.setAttribute(
+        "color",
+        "#f59e0b"
+    );
+
+}
+
+
+/* =====================================================
+   JOIN ANIMATION
+===================================================== */
+
+function animateJoin(){
+
+    const line =
+        document.getElementById("joinLine");
+
+    const core =
+        document.getElementById("joinCore");
+
+
+    line.setAttribute(
+        "animation__join",
+        "property:scale;" +
+        "from:1 1 1;" +
+        "to:1.25 1.25 1.25;" +
+        "dur:500;" +
+        "dir:alternate;" +
+        "loop:3"
+    );
+
+
+    core.setAttribute(
+        "animation__join",
+        "property:scale;" +
+        "from:1 1 1;" +
+        "to:1.6 1.6 1.6;" +
+        "dur:500;" +
+        "dir:alternate;" +
+        "loop:3"
+    );
+
+}
+
+
+/* =====================================================
+   SELECT ROW
+===================================================== */
+
+function selectRow(row){
+
+    let message = "";
+
+
+    if(row === "student1"){
+
+        message =
+        "<b>Student 1</b><br><br>" +
+        "COURSE_ID = C101<br>" +
+        "This matches DBMS.";
+
+    }
+
+
+    if(row === "student2"){
+
+        message =
+        "<b>Student 2</b><br><br>" +
+        "COURSE_ID = C102<br>" +
+        "This matches CN.";
+
+    }
+
+
+    if(row === "course1"){
+
+        message =
+        "<b>C101</b><br><br>" +
+        "Course = DBMS<br>" +
+        "Matches Student 1.";
+
+    }
+
+
+    if(row === "course2"){
+
+        message =
+        "<b>C102</b><br><br>" +
+        "Course = CN<br>" +
+        "Matches Student 2.";
+
+    }
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+        message;
+
+}
+
+
+/* =====================================================
+   RUN COMPLETE DEMO
+===================================================== */
+
+async function runDemo(){
+
+    if(demoRunning)
+        return;
+
+
+    demoRunning = true;
+
+
+    const sequence = [
+
+        "INNER JOIN",
+        "LEFT JOIN",
+        "RIGHT JOIN",
+        "FULL JOIN"
+
+    ];
+
+
+    for(let type of sequence){
+
+        join(type);
+
+        await wait(2500);
+
+    }
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>🎉 JOIN Demo Complete</b><br><br>" +
+
+        "You have explored INNER, LEFT, RIGHT and FULL JOIN.";
+
+    
+    document
+        .getElementById("stage")
+        .innerText =
+        "Demo Complete";
+
+
+    demoRunning = false;
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab(){
+
+    demoRunning = false;
+
+    currentJoin = "";
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>Welcome!</b><br><br>" +
+
+        "Select a JOIN to see how the records are combined.";
+
+
+    document
+        .getElementById("result")
+        .setAttribute(
+            "value",
+            "Select a JOIN type"
+        );
+
+
+    document
+        .getElementById("resultData")
+        .setAttribute(
+            "value",
+            ""
+        );
+
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        "0%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "Ready";
+
+
+    const rows = [
+
+        "studentRow1",
+        "studentRow2",
+        "courseRow1",
+        "courseRow2"
+
+    ];
+
+
+    rows.forEach(id=>{
+
+        document
+            .getElementById(id)
+            .setAttribute(
+                "color",
+                id.includes("student")
+                    ? "#0e7490"
+                    : "#047857"
+            );
+
+    });
+
+
+    document
+        .getElementById("resultBox")
+        .setAttribute(
+            "color",
+            "#312e81"
+        );
+
+}
+
+
+/* =====================================================
+   WAIT
+===================================================== */
+
+function wait(ms){
+
+    return new Promise(
+
+        resolve =>
+        setTimeout(resolve,ms)
+
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>NLP - POS Tagging VR Lab</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      background: #020617;
+    }
+
+    /* =========================
+       CONTROL PANEL
+    ========================= */
+
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 320px;
+      padding: 20px;
+      background: linear-gradient(145deg, rgba(4, 10, 28, 0.96), rgba(9, 20, 45, 0.88));
+      border-radius: 20px;
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      color: white;
+      z-index: 999;
+      box-shadow: 0 0 35px rgba(0, 255, 255, 0.18), inset 0 0 30px rgba(59, 130, 246, 0.05);
+      backdrop-filter: blur(14px);
+    }
+
+    .ui h2 {
+      margin-top: 0;
+      color: #00ffff;
+      font-size: 19px;
+      letter-spacing: 0.5px;
+    }
+
+    .ui p {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 8px 0 12px;
+    }
+
+    .ui input {
+      width: 100%;
+      padding: 12px 13px;
+      margin-top: 6px;
+      box-sizing: border-box;
+      border: 1px solid #164e63;
+      border-radius: 10px;
+      background: #071426;
+      color: white;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .ui input:focus {
+      border-color: #00ffff;
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+    }
+
+    .ui button {
+      width: 100%;
+      padding: 11px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 10px;
+      background: #00ffff;
+      color: #000000;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+    }
+
+    .ui button:hover {
+      background: #7fffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(0, 255, 255, 0.45);
+    }
+
+    .ui button.btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .ui button.btn-reset:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #00ffff;
+      border-color: #00ffff;
+    }
+
+    #status {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(2, 6, 23, 0.65);
+      border: 1px solid rgba(34, 211, 238, 0.15);
+      color: #86efac;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     CONTROL PANEL
+================================================== -->
+
+<div class="ui">
+
+  <h2>🏷️ POS TAGGING LAB</h2>
+
+  <p>
+    Enter a sentence and identify the
+    Part of Speech of each word.
+  </p>
+
+  <input
+    id="sentenceInput"
+    value="The student quickly solved the problem"
+    placeholder="Enter a sentence"
+  >
+
+  <button onclick="tagSentence()">
+    Tag Words
+  </button>
+
+  <button onclick="showNouns()">
+    Show Nouns
+  </button>
+
+  <button onclick="showVerbs()">
+    Show Verbs
+  </button>
+
+  <button onclick="showAdjectives()">
+    Show Adjectives
+  </button>
+
+  <button class="btn-reset" onclick="resetLab()">
+    Reset
+  </button>
+
+  <div id="status">
+    Ready
+  </div>
+
+</div>
+
+
+<!-- ==================================================
+     A-FRAME SCENE
+================================================== -->
+
+<a-scene
+  background="color:#020617"
+  vr-mode-ui="enabled:true">
+
+
+  <!-- ==================================================
+       ASSETS
+  ================================================== -->
+
+  <a-assets>
+
+    <a-asset-item
+      id="robotModel"
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+    </a-asset-item>
+
+  </a-assets>
+
+
+  <!-- ==================================================
+       CAMERA
+  ================================================== -->
+
+  <a-camera
+    position="0 5 20">
+  </a-camera>
+
+
+  <!-- ==================================================
+       LIGHTS
+  ================================================== -->
+
+  <a-light
+    type="ambient"
+    intensity="1.5">
+  </a-light>
+
+  <a-light
+    type="point"
+    intensity="4"
+    position="0 12 5">
+  </a-light>
+
+
+  <!-- ==================================================
+       FLOOR
+  ================================================== -->
+
+  <a-plane
+
+    rotation="-90 0 0"
+
+    width="60"
+
+    height="60"
+
+    color="#111827">
+
+  </a-plane>
+
+
+  <!-- ==================================================
+       SKY
+  ================================================== -->
+
+  <a-sky
+    color="#020617">
+  </a-sky>
+
+
+  <!-- ==================================================
+       TITLE
+  ================================================== -->
+
+  <a-text
+
+    value="NLP PART OF SPEECH LAB"
+
+    position="-6.5 10 -13"
+
+    scale="3 3 3"
+
+    color="#00ffff">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       LEFT ROBOT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="-12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 360 0;
+      loop: true;
+      dur: 16000">
+
+  </a-gltf-model>
+
+
+  <!-- ==================================================
+       RIGHT ROBOT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 -360 0;
+      loop: true;
+      dur: 16000">
+
+  </a-gltf-model>
+
+
+  <!-- ==================================================
+       NLP MACHINE
+  ================================================== -->
+
+  <a-cylinder
+
+    position="0 2 -10"
+
+    radius="2"
+
+    height="2"
+
+    color="#1e3a8a"
+
+    material="
+      emissive:#0066ff;
+      emissiveIntensity:0.5">
+
+  </a-cylinder>
+
+
+  <a-text
+
+    value="POS ANALYZER"
+
+    position="-1.5 2 -8"
+
+    scale="1.4 1.4 1.4"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       WORD CONTAINER
+  ================================================== -->
+
+  <a-entity
+    id="wordContainer">
+  </a-entity>
+
+
+  <!-- ==================================================
+       LEGEND
+  ================================================== -->
+
+  <a-text
+
+    value="NOUN = Object / Person     VERB = Action     ADJ = Description     ADV = How"
+
+    position="-7 7 -10"
+
+    scale="1.1 1.1 1.1"
+
+    color="#cbd5e1">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       INFORMATION PANEL
+  ================================================== -->
+
+  <a-plane
+
+    position="0 -0.5 -9"
+
+    width="15"
+
+    height="1.8"
+
+    color="#0f172a">
+
+  </a-plane>
+
+
+  <a-text
+
+    id="explanation"
+
+    value="POS Tagging identifies the grammatical role of each word."
+
+    position="-6.5 -0.3 -8.9"
+
+    scale="1.1 1.1 1.1"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       PARTICLES
+  ================================================== -->
+
+  <a-sphere
+
+    position="-8 7 -8"
+
+    radius="0.15"
+
+    color="#00ffff"
+
+    animation="
+      property:position;
+      dir:alternate;
+      to:-8 8 -8;
+      dur:2000;
+      loop:true">
+
+  </a-sphere>
+
+
+  <a-sphere
+
+    position="8 7 -8"
+
+    radius="0.15"
+
+    color="#ff00ff"
+
+    animation="
+      property:position;
+      dir:alternate;
+      to:8 6 -8;
+      dur:2500;
+      loop:true">
+
+  </a-sphere>
+
+
+</a-scene>
+
+
+<script>
+
+
+/* ==================================================
+   WORD LISTS
+================================================== */
+
+
+/*
+   These are simple educational
+   dictionaries.
+
+   They are NOT a full NLP model.
+*/
+
+
+const nouns = [
+
+  "student",
+  "students",
+  "teacher",
+  "teachers",
+  "computer",
+  "computers",
+  "dog",
+  "dogs",
+  "cat",
+  "cats",
+  "book",
+  "books",
+  "car",
+  "cars",
+  "problem",
+  "problems",
+  "school",
+  "college",
+  "university",
+  "india",
+  "ai",
+  "nlp",
+  "data",
+  "program",
+  "programming",
+  "language",
+  "model",
+  "models",
+  "computer",
+  "science"
+
+];
+
+
+const verbs = [
+
+  "is",
+  "am",
+  "are",
+  "was",
+  "were",
+  "be",
+  "been",
+  "have",
+  "has",
+  "had",
+  "do",
+  "does",
+  "did",
+  "run",
+  "runs",
+  "running",
+  "walk",
+  "walks",
+  "walking",
+  "love",
+  "loves",
+  "like",
+  "likes",
+  "learn",
+  "learns",
+  "learning",
+  "study",
+  "studies",
+  "studying",
+  "solve",
+  "solves",
+  "solved",
+  "create",
+  "creates",
+  "created",
+  "write",
+  "writes",
+  "wrote",
+  "eat",
+  "eats",
+  "play",
+  "plays"
+
+];
+
+
+const adjectives = [
+
+  "good",
+  "bad",
+  "big",
+  "small",
+  "large",
+  "beautiful",
+  "smart",
+  "intelligent",
+  "fast",
+  "slow",
+  "happy",
+  "sad",
+  "amazing",
+  "interesting",
+  "easy",
+  "difficult",
+  "new",
+  "old",
+  "young",
+  "red",
+  "blue",
+  "green"
+
+];
+
+
+const adverbs = [
+
+  "quickly",
+  "slowly",
+  "carefully",
+  "easily",
+  "happily",
+  "sadly",
+  "very",
+  "really",
+  "always",
+  "never",
+  "often",
+  "sometimes",
+  "well",
+  "fast"
+
+];
+
+
+const pronouns = [
+
+  "i",
+  "you",
+  "he",
+  "she",
+  "it",
+  "we",
+  "they",
+  "me",
+  "him",
+  "her",
+  "us",
+  "them",
+  "my",
+  "your",
+  "his",
+  "our",
+  "their"
+
+];
+
+
+const determiners = [
+
+  "the",
+  "a",
+  "an",
+  "this",
+  "that",
+  "these",
+  "those"
+
+];
+
+
+const prepositions = [
+
+  "in",
+  "on",
+  "at",
+  "by",
+  "for",
+  "from",
+  "with",
+  "to",
+  "of",
+  "into",
+  "over",
+  "under",
+  "between"
+
+];
+
+
+const conjunctions = [
+
+  "and",
+  "or",
+  "but",
+  "because",
+  "so",
+  "although",
+  "while"
+
+];
+
+
+/* ==================================================
+   TAG WORD
+================================================== */
+
+function getTag(word) {
+
+  const w =
+    word
+      .toLowerCase()
+      .replace(/[.,!?;:'"]/g, "");
+
+
+  if (nouns.includes(w)) {
+
+    return "NOUN";
+
+  }
+
+
+  if (verbs.includes(w)) {
+
+    return "VERB";
+
+  }
+
+
+  if (adjectives.includes(w)) {
+
+    return "ADJ";
+
+  }
+
+
+  if (adverbs.includes(w)) {
+
+    return "ADV";
+
+  }
+
+
+  if (pronouns.includes(w)) {
+
+    return "PRON";
+
+  }
+
+
+  if (determiners.includes(w)) {
+
+    return "DET";
+
+  }
+
+
+  if (prepositions.includes(w)) {
+
+    return "PREP";
+
+  }
+
+
+  if (conjunctions.includes(w)) {
+
+    return "CONJ";
+
+  }
+
+
+  /*
+     Simple rule-based guesses
+  */
+
+
+  if (w.endsWith("ly")) {
+
+    return "ADV";
+
+  }
+
+
+  if (
+    w.endsWith("ing") ||
+    w.endsWith("ed")
+  ) {
+
+    return "VERB";
+
+  }
+
+
+  return "OTHER";
+
+}
+
+
+/* ==================================================
+   TAG COLORS
+================================================== */
+
+function getColor(tag) {
+
+  switch(tag) {
+
+    case "NOUN":
+
+      return "#2563eb";
+
+    case "VERB":
+
+      return "#16a34a";
+
+    case "ADJ":
+
+      return "#f59e0b";
+
+    case "ADV":
+
+      return "#db2777";
+
+    case "PRON":
+
+      return "#8b5cf6";
+
+    case "DET":
+
+      return "#06b6d4";
+
+    case "PREP":
+
+      return "#ef4444";
+
+    case "CONJ":
+
+      return "#14b8a6";
+
+    default:
+
+      return "#64748b";
+
+  }
+
+}
+
+
+/* ==================================================
+   CREATE WORD
+================================================== */
+
+function createWord(
+
+  word,
+  tag,
+  x
+
+) {
+
+  const container =
+    document.getElementById(
+      "wordContainer"
+    );
+
+
+  /*
+    Main 3D object
+  */
+
+  const sphere =
+    document.createElement(
+      "a-sphere"
+    );
+
+
+  sphere.setAttribute(
+    "position",
+    `${x} 4 -9`
+  );
+
+
+  sphere.setAttribute(
+    "radius",
+    "0.9"
+  );
+
+
+  sphere.setAttribute(
+    "color",
+    getColor(tag)
+  );
+
+
+  sphere.setAttribute(
+    "material",
+    "emissive:#00ffff; emissiveIntensity:0.3"
+  );
+
+
+  /*
+    Floating animation
+  */
+
+  sphere.setAttribute(
+
+    "animation",
+
+    `
+      property: position;
+      dir: alternate;
+      dur: 1400;
+      loop: true;
+      to: ${x} 4.4 -9
+    `
+
+  );
+
+
+  /*
+    Word
+  */
+
+  const wordText =
+    document.createElement(
+      "a-text"
+    );
+
+
+  wordText.setAttribute(
+    "value",
+    word
+  );
+
+
+  wordText.setAttribute(
+    "align",
+    "center"
+  );
+
+
+  wordText.setAttribute(
+    "color",
+    "white"
+  );
+
+
+  wordText.setAttribute(
+    "position",
+    "0 0 1"
+  );
+
+
+  wordText.setAttribute(
+    "scale",
+    "1.4 1.4 1.4"
+  );
+
+
+  sphere.appendChild(
+    wordText
+  );
+
+
+  container.appendChild(
+    sphere
+  );
+
+
+  /*
+    POS tag
+  */
+
+  const tagText =
+    document.createElement(
+      "a-text"
+    );
+
+
+  tagText.setAttribute(
+    "value",
+    tag
+  );
+
+
+  tagText.setAttribute(
+    "align",
+    "center"
+  );
+
+
+  tagText.setAttribute(
+    "color",
+    getColor(tag)
+  );
+
+
+  tagText.setAttribute(
+    "position",
+    `${x} 2.5 -9`
+  );
+
+
+  tagText.setAttribute(
+    "scale",
+    "1.5 1.5 1.5"
+  );
+
+
+  container.appendChild(
+    tagText
+  );
+
+
+  /*
+    Connector
+  */
+
+  const line =
+    document.createElement(
+      "a-cylinder"
+    );
+
+
+  line.setAttribute(
+    "position",
+    `${x} 3.1 -9`
+  );
+
+
+  line.setAttribute(
+    "radius",
+    "0.03"
+  );
+
+
+  line.setAttribute(
+    "height",
+    "1.2"
+  );
+
+
+  line.setAttribute(
+    "color",
+    getColor(tag)
+  );
+
+
+  container.appendChild(
+    line
+  );
+
+}
+
+
+/* ==================================================
+   TAG SENTENCE
+================================================== */
+
+function tagSentence() {
+
+  const input =
+    document
+      .getElementById(
+        "sentenceInput"
+      )
+      .value
+      .trim();
+
+
+  if (!input) {
+
+    alert(
+      "Please enter a sentence."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Clear previous
+  */
+
+  document
+    .getElementById(
+      "wordContainer"
+    )
+    .innerHTML = "";
+
+
+  const words =
+    input.split(/\s+/);
+
+
+  /*
+    Limit visual words
+    so they fit in VR.
+  */
+
+  const displayWords =
+    words.slice(0, 10);
+
+
+  const startX =
+    -(displayWords.length - 1)
+    * 1.4;
+
+
+  displayWords.forEach(
+    (word, index) => {
+
+      const tag =
+        getTag(word);
+
+
+      createWord(
+
+        word,
+
+        tag,
+
+        startX + index * 2.8
+
+      );
+
+    }
+  );
+
+
+  document
+    .getElementById("status")
+    .innerText =
+      "POS Tagging Complete ✓";
+
+
+  document
+    .getElementById("explanation")
+    .setAttribute(
+
+      "value",
+
+      "Each word has been assigned a grammatical category."
+
+    );
+
+}
+
+
+/* ==================================================
+   FILTER TAGS
+================================================== */
+
+function showOnlyTag(targetTag) {
+
+  const input =
+    document
+      .getElementById(
+        "sentenceInput"
+      )
+      .value
+      .trim();
+
+
+  if (!input) return;
+
+
+  document
+    .getElementById(
+      "wordContainer"
+    )
+    .innerHTML = "";
+
+
+  const words =
+    input.split(/\s+/);
+
+
+  const matching =
+    words.filter(
+      word =>
+        getTag(word) === targetTag
+    );
+
+
+  if (matching.length === 0) {
+
+    document
+      .getElementById("status")
+      .innerText =
+        "No " + targetTag + " found.";
+
+    return;
+
+  }
+
+
+  const startX =
+    -(matching.length - 1)
+    * 1.5;
+
+
+  matching.forEach(
+    (word, index) => {
+
+      createWord(
+
+        word,
+
+        targetTag,
+
+        startX + index * 3
+
+      );
+
+    }
+  );
+
+
+  document
+    .getElementById("status")
+    .innerText =
+      targetTag + " Words ✓";
+
+}
+
+
+/* ==================================================
+   SHOW NOUNS
+================================================== */
+
+function showNouns() {
+
+  showOnlyTag("NOUN");
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+      "value",
+      "Nouns represent people, places, objects, or concepts."
+    );
+
+}
+
+
+/* ==================================================
+   SHOW VERBS
+================================================== */
+
+function showVerbs() {
+
+  showOnlyTag("VERB");
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+      "value",
+      "Verbs describe actions or states."
+    );
+
+}
+
+
+/* ==================================================
+   SHOW ADJECTIVES
+================================================== */
+
+function showAdjectives() {
+
+  showOnlyTag("ADJ");
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+      "value",
+      "Adjectives describe nouns."
+    );
+
+}
+
+
+/* ==================================================
+   RESET
+================================================== */
+
+function resetLab() {
+
+  document
+    .getElementById(
+      "wordContainer"
+    )
+    .innerHTML = "";
+
+
+  document
+    .getElementById(
+      "sentenceInput"
+    )
+    .value =
+      "The student quickly solved the problem";
+
+
+  document
+    .getElementById("status")
+    .innerText =
+      "Ready";
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+      "value",
+      "POS Tagging identifies the grammatical role of each word."
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

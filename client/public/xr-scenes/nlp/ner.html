@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>NLP - Named Entity Recognition VR Lab</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      background: #020617;
+    }
+
+    /* =========================================
+       CONTROL PANEL
+    ========================================= */
+
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 330px;
+      padding: 20px;
+      background: linear-gradient(145deg, rgba(4, 10, 28, 0.96), rgba(9, 20, 45, 0.88));
+      border-radius: 20px;
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      color: white;
+      z-index: 999;
+      box-shadow: 0 0 35px rgba(0, 255, 255, 0.18), inset 0 0 30px rgba(59, 130, 246, 0.05);
+      backdrop-filter: blur(14px);
+    }
+
+    .ui h2 {
+      margin-top: 0;
+      color: #00ffff;
+      font-size: 19px;
+      letter-spacing: 0.5px;
+    }
+
+    .ui p {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 8px 0 12px;
+    }
+
+    .ui textarea {
+      width: 100%;
+      height: 90px;
+      padding: 10px 12px;
+      margin-top: 6px;
+      box-sizing: border-box;
+      border: 1px solid #164e63;
+      border-radius: 10px;
+      background: #071426;
+      color: white;
+      font-size: 13px;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .ui textarea:focus {
+      border-color: #00ffff;
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+    }
+
+    .ui button {
+      width: 100%;
+      padding: 11px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 10px;
+      background: #00ffff;
+      color: #000000;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+    }
+
+    .ui button:hover {
+      background: #7fffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(0, 255, 255, 0.45);
+    }
+
+    .ui button.btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .ui button.btn-reset:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #00ffff;
+      border-color: #00ffff;
+    }
+
+    #status {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(2, 6, 23, 0.65);
+      border: 1px solid rgba(34, 211, 238, 0.15);
+      color: #86efac;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================
+     CONTROL PANEL
+========================================= -->
+
+<div class="ui">
+
+  <h2>🌐 NER LAB</h2>
+
+  <p>
+    Named Entity Recognition identifies
+    important entities in text.
+  </p>
+
+  <textarea id="textInput">Sakshi works at Banking sector in Mumbai. She visited Mumbai in 2026.</textarea>
+
+
+  <button onclick="analyzeText()">
+    🔍 Analyze Text
+  </button>
+
+
+  <button onclick="showPeople()">
+    👤 Show People
+  </button>
+
+
+  <button onclick="showLocations()">
+    📍 Show Locations
+  </button>
+
+
+  <button onclick="showOrganizations()">
+    🏢 Show Organizations
+  </button>
+
+
+  <button class="btn-reset" onclick="resetLab()">
+    🔄 Reset
+  </button>
+
+
+  <div id="status">
+    Ready
+  </div>
+
+</div>
+
+
+<!-- =========================================
+     A-FRAME SCENE
+========================================= -->
+
+<a-scene
+  background="color:#020617"
+  vr-mode-ui="enabled:true">
+
+
+  <!-- =========================================
+       ASSETS
+  ========================================= -->
+
+  <a-assets>
+
+    <!-- Robot model -->
+
+    <a-asset-item
+
+      id="robotModel"
+
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+
+    </a-asset-item>
+
+  </a-assets>
+
+
+  <!-- =========================================
+       CAMERA
+  ========================================= -->
+
+  <a-camera
+
+    position="0 5 20">
+
+  </a-camera>
+
+
+  <!-- =========================================
+       LIGHTS
+  ========================================= -->
+
+  <a-light
+
+    type="ambient"
+
+    intensity="1.5">
+
+  </a-light>
+
+
+  <a-light
+
+    type="point"
+
+    intensity="4"
+
+    position="0 12 5">
+
+  </a-light>
+
+
+  <!-- =========================================
+       FLOOR
+  ========================================= -->
+
+  <a-plane
+
+    rotation="-90 0 0"
+
+    width="60"
+
+    height="60"
+
+    color="#111827">
+
+  </a-plane>
+
+
+  <!-- =========================================
+       SKY
+  ========================================= -->
+
+  <a-sky
+
+    color="#020617">
+
+  </a-sky>
+
+
+  <!-- =========================================
+       TITLE
+  ========================================= -->
+
+  <a-text
+
+    value="NAMED ENTITY RECOGNITION"
+
+    position="-7 10 -13"
+
+    scale="2.8 2.8 2.8"
+
+    color="#00ffff">
+
+  </a-text>
+
+
+  <!-- =========================================
+       ROBOT LEFT
+  ========================================= -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="-12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 360 0;
+      loop: true;
+      dur: 16000">
+
+  </a-gltf-model>
+
+
+  <!-- =========================================
+       ROBOT RIGHT
+  ========================================= -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 -360 0;
+      loop: true;
+      dur: 16000">
+
+  </a-gltf-model>
+
+
+  <!-- =========================================
+       NER SCANNER
+  ========================================= -->
+
+  <a-torus
+
+    position="0 3 -10"
+
+    radius="2"
+
+    radius-tubular="0.15"
+
+    color="#00ffff"
+
+    animation="
+      property: rotation;
+      to: 360 360 0;
+      loop: true;
+      dur: 6000">
+
+  </a-torus>
+
+
+  <a-text
+
+    value="NER SCANNER"
+
+    position="-1.5 3 -9"
+
+    scale="1.3 1.3 1.3"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- =========================================
+       ENTITY CONTAINER
+  ========================================= -->
+
+  <a-entity
+
+    id="entityContainer">
+
+  </a-entity>
+
+
+  <!-- =========================================
+       LEGEND
+  ========================================= -->
+
+  <a-plane
+
+    position="0 7 -10"
+
+    width="15"
+
+    height="1.5"
+
+    color="#0f172a">
+
+  </a-plane>
+
+
+  <a-text
+
+    value="PERSON    ORGANIZATION    LOCATION    DATE    MONEY"
+
+    position="-6.2 7 -9.2"
+
+    scale="1.1 1.1 1.1"
+
+    color="#cbd5e1">
+
+  </a-text>
+
+
+  <!-- =========================================
+       INFORMATION PANEL
+  ========================================= -->
+
+  <a-plane
+
+    position="0 -0.5 -9"
+
+    width="15"
+
+    height="1.8"
+
+    color="#0f172a">
+
+  </a-plane>
+
+
+  <a-text
+
+    id="explanation"
+
+    value="NER identifies real-world entities in text."
+
+    position="-6.5 -0.3 -8.9"
+
+    scale="1.1 1.1 1.1"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- =========================================
+       FLOATING PARTICLES
+  ========================================= -->
+
+  <a-sphere
+
+    position="-8 7 -8"
+
+    radius="0.15"
+
+    color="#00ffff"
+
+    animation="
+      property:position;
+      dir:alternate;
+      to:-8 8 -8;
+      dur:2000;
+      loop:true">
+
+  </a-sphere>
+
+
+  <a-sphere
+
+    position="8 7 -8"
+
+    radius="0.15"
+
+    color="#ff00ff"
+
+    animation="
+      property:position;
+      dir:alternate;
+      to:8 6 -8;
+      dur:2500;
+      loop:true">
+
+  </a-sphere>
+
+
+</a-scene>
+
+
+<script>
+
+
+/* =====================================================
+   ENTITY DICTIONARIES
+===================================================== */
+
+
+/* PEOPLE */
+
+const people = [
+
+  "Divya",
+  "Rahul",
+  "Aarav",
+  "Priya",
+  "Neha",
+  "Rohan",
+  "Ananya",
+  "Amit",
+  "John",
+  "Mary",
+  "David",
+  "Robert"
+
+];
+
+
+/* ORGANIZATIONS */
+
+const organizations = [
+
+  "Google",
+  "Microsoft",
+  "Apple",
+  "Amazon",
+  "Meta",
+  "OpenAI",
+  "Deutsche Bank",
+  "Infosys",
+  "TCS",
+  "IBM",
+  "Deloitte",
+  "Accenture"
+
+];
+
+
+/* LOCATIONS */
+
+const locations = [
+
+  "Mumbai",
+  "Delhi",
+  "Pune",
+  "Bangalore",
+  "Bengaluru",
+  "Chennai",
+  "Hyderabad",
+  "London",
+  "Paris",
+  "New York",
+  "India",
+  "Germany",
+  "America",
+  "United States"
+
+];
+
+
+/* MONTHS */
+
+const months = [
+
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+
+];
+
+
+/* =====================================================
+   ENTITY COLORS
+===================================================== */
+
+function getEntityColor(type) {
+
+  switch(type) {
+
+    case "PERSON":
+
+      return "#3b82f6";
+
+
+    case "ORGANIZATION":
+
+      return "#a855f7";
+
+
+    case "LOCATION":
+
+      return "#22c55e";
+
+
+    case "DATE":
+
+      return "#f59e0b";
+
+
+    case "MONEY":
+
+      return "#eab308";
+
+
+    default:
+
+      return "#64748b";
+
+  }
+
+}
+
+
+/* =====================================================
+   ENTITY ICON
+===================================================== */
+
+function getEntityIcon(type) {
+
+  switch(type) {
+
+    case "PERSON":
+
+      return "👤";
+
+    case "ORGANIZATION":
+
+      return "🏢";
+
+    case "LOCATION":
+
+      return "📍";
+
+    case "DATE":
+
+      return "📅";
+
+    case "MONEY":
+
+      return "💰";
+
+    default:
+
+      return "🔹";
+
+  }
+
+}
+
+
+/* =====================================================
+   DETECT ENTITIES
+===================================================== */
+
+function detectEntities(text) {
+
+  let entities = [];
+
+
+  /* ================================================
+     ORGANIZATIONS
+  ================================================ */
+
+  organizations.forEach(org => {
+
+    if (
+      text
+        .toLowerCase()
+        .includes(org.toLowerCase())
+    ) {
+
+      entities.push({
+
+        text: org,
+
+        type: "ORGANIZATION"
+
+      });
+
+    }
+
+  });
+
+
+  /* ================================================
+     PEOPLE
+  ================================================ */
+
+  people.forEach(person => {
+
+    const regex =
+      new RegExp(
+        "\\b" +
+        person +
+        "\\b",
+        "i"
+      );
+
+
+    if (regex.test(text)) {
+
+      entities.push({
+
+        text: person,
+
+        type: "PERSON"
+
+      });
+
+    }
+
+  });
+
+
+  /* ================================================
+     LOCATIONS
+  ================================================ */
+
+  locations.forEach(location => {
+
+    const regex =
+      new RegExp(
+        "\\b" +
+        location +
+        "\\b",
+        "i"
+      );
+
+
+    if (regex.test(text)) {
+
+      entities.push({
+
+        text: location,
+
+        type: "LOCATION"
+
+      });
+
+    }
+
+  });
+
+
+  /* ================================================
+     DATES
+  ================================================ */
+
+  const yearMatches =
+
+    text.match(
+      /\b(19|20)\d{2}\b/g
+    );
+
+
+  if (yearMatches) {
+
+    yearMatches.forEach(year => {
+
+      entities.push({
+
+        text: year,
+
+        type: "DATE"
+
+      });
+
+    });
+
+  }
+
+
+  months.forEach(month => {
+
+    const regex =
+
+      new RegExp(
+        "\\b" +
+        month +
+        "\\b",
+        "i"
+      );
+
+
+    if (regex.test(text)) {
+
+      entities.push({
+
+        text: month,
+
+        type: "DATE"
+
+      });
+
+    }
+
+  });
+
+
+  /* ================================================
+     MONEY
+  ================================================ */
+
+  const moneyMatches =
+
+    text.match(
+      /(?:₹|\$|€|£)\s?\d+(?:,\d+)*(?:\.\d+)?/g
+    );
+
+
+  if (moneyMatches) {
+
+    moneyMatches.forEach(amount => {
+
+      entities.push({
+
+        text: amount,
+
+        type: "MONEY"
+
+      });
+
+    });
+
+  }
+
+
+  return entities;
+
+}
+
+
+/* =====================================================
+   CREATE ENTITY OBJECT
+===================================================== */
+
+function createEntity(
+
+  entity,
+  x,
+  y
+
+) {
+
+  const container =
+
+    document.getElementById(
+      "entityContainer"
+    );
+
+
+  const color =
+
+    getEntityColor(
+      entity.type
+    );
+
+
+  /* ================================================
+     BASE PLATFORM
+  ================================================ */
+
+  const base =
+
+    document.createElement(
+      "a-cylinder"
+    );
+
+
+  base.setAttribute(
+    "position",
+    `${x} 1.2 -9`
+  );
+
+
+  base.setAttribute(
+    "radius",
+    "1.3"
+  );
+
+
+  base.setAttribute(
+    "height",
+    "0.3"
+  );
+
+
+  base.setAttribute(
+    "color",
+    color
+  );
+
+
+  container.appendChild(base);
+
+
+  /* ================================================
+     3D ENTITY OBJECT
+  ================================================ */
+
+  let object;
+
+
+  if (entity.type === "PERSON") {
+
+    object =
+      document.createElement(
+        "a-sphere"
+      );
+
+
+    object.setAttribute(
+      "radius",
+      "0.8"
+    );
+
+  }
+
+
+  else if (
+    entity.type ===
+    "ORGANIZATION"
+  ) {
+
+    object =
+      document.createElement(
+        "a-box"
+      );
+
+
+    object.setAttribute(
+      "width",
+      "1.5"
+    );
+
+
+    object.setAttribute(
+      "height",
+      "1.8"
+    );
+
+
+    object.setAttribute(
+      "depth",
+      "1.5"
+    );
+
+  }
+
+
+  else if (
+    entity.type ===
+    "LOCATION"
+  ) {
+
+    object =
+      document.createElement(
+        "a-cone"
+      );
+
+
+    object.setAttribute(
+      "radius-bottom",
+      "0.8"
+    );
+
+
+    object.setAttribute(
+      "radius-top",
+      "0"
+    );
+
+
+    object.setAttribute(
+      "height",
+      "1.8"
+    );
+
+  }
+
+
+  else if (
+    entity.type ===
+    "DATE"
+  ) {
+
+    object =
+      document.createElement(
+        "a-box"
+      );
+
+
+    object.setAttribute(
+      "width",
+      "1.5"
+    );
+
+
+    object.setAttribute(
+      "height",
+      "1.3"
+    );
+
+
+    object.setAttribute(
+      "depth",
+      "0.5"
+    );
+
+  }
+
+
+  else if (
+    entity.type ===
+    "MONEY"
+  ) {
+
+    object =
+      document.createElement(
+        "a-cylinder"
+      );
+
+
+    object.setAttribute(
+      "radius",
+      "0.8"
+    );
+
+
+    object.setAttribute(
+      "height",
+      "0.3"
+    );
+
+
+    object.setAttribute(
+      "rotation",
+      "90 0 0"
+    );
+
+  }
+
+
+  /* ================================================
+     POSITION
+  ================================================ */
+
+  object.setAttribute(
+    "position",
+    `${x} 2.5 -9`
+  );
+
+
+  object.setAttribute(
+    "color",
+    color
+  );
+
+
+  object.setAttribute(
+
+    "material",
+
+    `
+      emissive:${color};
+      emissiveIntensity:0.5
+    `
+
+  );
+
+
+  /* ================================================
+     FLOATING ANIMATION
+  ================================================ */
+
+  object.setAttribute(
+
+    "animation",
+
+    `
+      property:position;
+      dir:alternate;
+      dur:1500;
+      loop:true;
+      to:${x} 3 -9
+    `
+
+  );
+
+
+  container.appendChild(object);
+
+
+  /* ================================================
+     ENTITY NAME
+  ================================================ */
+
+  const name =
+
+    document.createElement(
+      "a-text"
+    );
+
+
+  name.setAttribute(
+    "value",
+    entity.text
+  );
+
+
+  name.setAttribute(
+    "align",
+    "center"
+  );
+
+
+  name.setAttribute(
+    "color",
+    "white"
+  );
+
+
+  name.setAttribute(
+    "position",
+    `${x} 4.2 -9`
+  );
+
+
+  name.setAttribute(
+    "scale",
+    "1.3 1.3 1.3"
+  );
+
+
+  container.appendChild(name);
+
+
+  /* ================================================
+     TYPE LABEL
+  ================================================ */
+
+  const type =
+
+    document.createElement(
+      "a-text"
+    );
+
+
+  type.setAttribute(
+    "value",
+    getEntityIcon(entity.type)
+    + " "
+    + entity.type
+  );
+
+
+  type.setAttribute(
+    "align",
+    "center"
+  );
+
+
+  type.setAttribute(
+    "color",
+    color
+  );
+
+
+  type.setAttribute(
+    "position",
+    `${x} 0.5 -9`
+  );
+
+
+  type.setAttribute(
+    "scale",
+    "1.1 1.1 1.1"
+  );
+
+
+  container.appendChild(type);
+
+
+  /* ================================================
+     CONNECTION LINE
+  ================================================ */
+
+  const line =
+
+    document.createElement(
+      "a-cylinder"
+    );
+
+
+  line.setAttribute(
+    "position",
+    `${x} 1.8 -9`
+  );
+
+
+  line.setAttribute(
+    "radius",
+    "0.04"
+  );
+
+
+  line.setAttribute(
+    "height",
+    "1.2"
+  );
+
+
+  line.setAttribute(
+    "color",
+    color
+  );
+
+
+  container.appendChild(line);
+
+}
+
+
+/* =====================================================
+   ANALYZE TEXT
+===================================================== */
+
+function analyzeText() {
+
+  const text =
+
+    document
+      .getElementById(
+        "textInput"
+      )
+      .value
+      .trim();
+
+
+  if (!text) {
+
+    alert(
+      "Please enter some text."
+    );
+
+    return;
+
+  }
+
+
+  /* Clear previous */
+
+  document
+    .getElementById(
+      "entityContainer"
+    )
+    .innerHTML = "";
+
+
+  /* Detect */
+
+  const entities =
+    detectEntities(text);
+
+
+  if (entities.length === 0) {
+
+    document
+      .getElementById(
+        "status"
+      )
+      .innerText =
+        "No entities found.";
+
+    return;
+
+  }
+
+
+  /* Limit entities */
+
+  const visible =
+    entities.slice(0, 8);
+
+
+  const startX =
+    -(visible.length - 1)
+    * 1.7;
+
+
+  visible.forEach(
+    (entity, index) => {
+
+      createEntity(
+
+        entity,
+
+        startX +
+        index * 3.4,
+
+        3
+
+      );
+
+    }
+  );
+
+
+  document
+    .getElementById(
+      "status"
+    )
+    .innerText =
+      entities.length +
+      " Entities Found ✓";
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+
+      "value",
+
+      "NER found people, organizations, locations, dates, or money."
+
+    );
+
+}
+
+
+/* =====================================================
+   FILTER ENTITY
+===================================================== */
+
+function showOnly(type) {
+
+  const text =
+
+    document
+      .getElementById(
+        "textInput"
+      )
+      .value;
+
+
+  const entities =
+    detectEntities(text);
+
+
+  const filtered =
+    entities.filter(
+      entity =>
+        entity.type === type
+    );
+
+
+  document
+    .getElementById(
+      "entityContainer"
+    )
+    .innerHTML = "";
+
+
+  if (filtered.length === 0) {
+
+    document
+      .getElementById(
+        "status"
+      )
+      .innerText =
+        "No " + type + " found.";
+
+    return;
+
+  }
+
+
+  const startX =
+    -(filtered.length - 1)
+    * 1.7;
+
+
+  filtered.forEach(
+    (entity, index) => {
+
+      createEntity(
+
+        entity,
+
+        startX +
+        index * 3.4,
+
+        3
+
+      );
+
+    }
+  );
+
+
+  document
+    .getElementById(
+      "status"
+    )
+    .innerText =
+      type +
+      " Entities ✓";
+
+}
+
+
+/* =====================================================
+   SHOW PEOPLE
+===================================================== */
+
+function showPeople() {
+
+  showOnly("PERSON");
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+
+      "value",
+
+      "PERSON identifies names of people."
+
+    );
+
+}
+
+
+/* =====================================================
+   SHOW LOCATIONS
+===================================================== */
+
+function showLocations() {
+
+  showOnly("LOCATION");
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+
+      "value",
+
+      "LOCATION identifies places such as cities and countries."
+
+    );
+
+}
+
+
+/* =====================================================
+   SHOW ORGANIZATIONS
+===================================================== */
+
+function showOrganizations() {
+
+  showOnly("ORGANIZATION");
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+
+      "value",
+
+      "ORGANIZATION identifies companies and institutions."
+
+    );
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab() {
+
+  document
+    .getElementById(
+      "entityContainer"
+    )
+    .innerHTML = "";
+
+
+  document
+    .getElementById(
+      "textInput"
+    )
+    .value =
+      "Divya works at Deutsche Bank in Mumbai. She visited India in 2026.";
+
+
+  document
+    .getElementById(
+      "status"
+    )
+    .innerText =
+      "Ready";
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+
+      "value",
+
+      "NER identifies real-world entities in text."
+
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

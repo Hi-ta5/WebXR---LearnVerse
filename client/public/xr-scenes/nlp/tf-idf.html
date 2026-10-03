@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>NLP - TF-IDF VR Lab</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      background: #020617;
+    }
+
+    /* =========================================
+       UI PANEL
+    ========================================= */
+
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 330px;
+      padding: 20px;
+      background: linear-gradient(145deg, rgba(4, 10, 28, 0.96), rgba(9, 20, 45, 0.88));
+      border-radius: 20px;
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      color: white;
+      z-index: 999;
+      box-shadow: 0 0 35px rgba(0, 255, 255, 0.18), inset 0 0 30px rgba(59, 130, 246, 0.05);
+      backdrop-filter: blur(14px);
+    }
+
+    .ui h2 {
+      margin-top: 0;
+      color: #00ffff;
+      font-size: 19px;
+      letter-spacing: 0.5px;
+    }
+
+    .ui p {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 8px 0 12px;
+    }
+
+    .ui textarea {
+      width: 100%;
+      height: 90px;
+      padding: 10px 12px;
+      margin-top: 6px;
+      box-sizing: border-box;
+      border: 1px solid #164e63;
+      border-radius: 10px;
+      background: #071426;
+      color: white;
+      font-size: 13px;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .ui textarea:focus {
+      border-color: #00ffff;
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+    }
+
+    .ui button {
+      width: 100%;
+      padding: 11px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 10px;
+      background: #00ffff;
+      color: #000000;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+    }
+
+    .ui button:hover {
+      background: #7fffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(0, 255, 255, 0.45);
+    }
+
+    .ui button.btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .ui button.btn-reset:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #00ffff;
+      border-color: #00ffff;
+    }
+
+    #status {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(2, 6, 23, 0.65);
+      border: 1px solid rgba(34, 211, 238, 0.15);
+      color: #86efac;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     CONTROL PANEL
+================================================== -->
+
+<div class="ui">
+
+  <h2>📊 TF-IDF LAB</h2>
+
+  <p>
+    Enter multiple documents.
+    Put each document on a new line.
+  </p>
+
+  <textarea id="documents">
+
+I love NLP
+I love AI
+NLP is amazing
+
+  </textarea>
+
+
+  <button onclick="calculateTFIDF()">
+    Calculate TF-IDF
+  </button>
+
+
+  <button onclick="showTF()">
+    Show Term Frequency
+  </button>
+
+
+  <button onclick="showIDF()">
+    Show Inverse Document Frequency
+  </button>
+
+
+  <button class="btn-reset" onclick="resetLab()">
+    Reset
+  </button>
+
+
+  <div id="status">
+    Ready
+  </div>
+
+</div>
+
+
+<!-- ==================================================
+     VR SCENE
+================================================== -->
+
+<a-scene
+  background="color:#020617"
+  vr-mode-ui="enabled:true">
+
+
+  <!-- ==================================================
+       ASSETS
+  ================================================== -->
+
+  <a-assets>
+
+    <a-asset-item
+
+      id="robotModel"
+
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+
+    </a-asset-item>
+
+  </a-assets>
+
+
+  <!-- ==================================================
+       CAMERA
+  ================================================== -->
+
+  <a-camera
+
+    position="0 5 20">
+
+  </a-camera>
+
+
+  <!-- ==================================================
+       LIGHTS
+  ================================================== -->
+
+  <a-light
+
+    type="ambient"
+
+    intensity="1.5">
+
+  </a-light>
+
+
+  <a-light
+
+    type="point"
+
+    intensity="4"
+
+    position="0 12 5">
+
+  </a-light>
+
+
+  <!-- ==================================================
+       FLOOR
+  ================================================== -->
+
+  <a-plane
+
+    rotation="-90 0 0"
+
+    width="60"
+
+    height="60"
+
+    color="#111827">
+
+  </a-plane>
+
+
+  <!-- ==================================================
+       SKY
+  ================================================== -->
+
+  <a-sky
+
+    color="#020617">
+
+  </a-sky>
+
+
+  <!-- ==================================================
+       TITLE
+  ================================================== -->
+
+  <a-text
+
+    value="NLP TF-IDF LAB"
+
+    position="-5.5 10 -13"
+
+    scale="3 3 3"
+
+    color="#00ffff">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       LEFT ROBOT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="-12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 360 0;
+      loop: true;
+      dur: 16000">
+
+  </a-gltf-model>
+
+
+  <!-- ==================================================
+       RIGHT ROBOT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="12 0 -12"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 -360 0;
+      loop: true;
+      dur: 16000">
+
+  </a-gltf-model>
+
+
+  <!-- ==================================================
+       TF MACHINE
+  ================================================== -->
+
+  <a-box
+
+    position="-5 2.5 -10"
+
+    width="4"
+
+    height="2"
+
+    depth="2"
+
+    color="#2563eb"
+
+    material="
+      emissive:#00ffff;
+      emissiveIntensity:0.35">
+
+  </a-box>
+
+
+  <a-text
+
+    value="TF"
+
+    position="-5.4 2.3 -8.9"
+
+    scale="2 2 2"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       MULTIPLICATION SYMBOL
+  ================================================== -->
+
+  <a-text
+
+    value="×"
+
+    position="-1.8 2.5 -10"
+
+    scale="2 2 2"
+
+    color="#00ffff">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       IDF MACHINE
+  ================================================== -->
+
+  <a-box
+
+    position="2 2.5 -10"
+
+    width="4"
+
+    height="2"
+
+    depth="2"
+
+    color="#7c3aed"
+
+    material="
+      emissive:#ff00ff;
+      emissiveIntensity:0.35">
+
+  </a-box>
+
+
+  <a-text
+
+    value="IDF"
+
+    position="1.4 2.3 -8.9"
+
+    scale="2 2 2"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       EQUAL SIGN
+  ================================================== -->
+
+  <a-text
+
+    value="="
+
+    position="5 2.5 -10"
+
+    scale="2 2 2"
+
+    color="#00ffff">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       RESULT
+  ================================================== -->
+
+  <a-box
+
+    position="8 2.5 -10"
+
+    width="4"
+
+    height="2"
+
+    depth="2"
+
+    color="#16a34a"
+
+    material="
+      emissive:#00ff88;
+      emissiveIntensity:0.35">
+
+  </a-box>
+
+
+  <a-text
+
+    value="TF-IDF"
+
+    position="6.8 2.3 -8.9"
+
+    scale="1.5 1.5 1.5"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       GRAPH
+  ================================================== -->
+
+  <a-entity
+
+    id="graphContainer">
+
+  </a-entity>
+
+
+  <!-- ==================================================
+       INFORMATION PANEL
+  ================================================== -->
+
+  <a-plane
+
+    position="0 -0.5 -9"
+
+    width="15"
+
+    height="1.8"
+
+    color="#0f172a">
+
+  </a-plane>
+
+
+  <a-text
+
+    id="explanation"
+
+    value="TF-IDF measures how important a word is in a document."
+
+    position="-6.5 -0.3 -8.9"
+
+    scale="1.1 1.1 1.1"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- ==================================================
+       FLOATING PARTICLES
+  ================================================== -->
+
+  <a-sphere
+
+    position="-8 7 -8"
+
+    radius="0.15"
+
+    color="#00ffff"
+
+    animation="
+      property:position;
+      dir:alternate;
+      to:-8 8 -8;
+      dur:2000;
+      loop:true">
+
+  </a-sphere>
+
+
+  <a-sphere
+
+    position="8 7 -8"
+
+    radius="0.15"
+
+    color="#ff00ff"
+
+    animation="
+      property:position;
+      dir:alternate;
+      to:8 6 -8;
+      dur:2500;
+      loop:true">
+
+  </a-sphere>
+
+
+</a-scene>
+
+
+<script>
+
+
+/* ==================================================
+   GLOBAL DATA
+================================================== */
+
+let documents = [];
+
+let vocabulary = [];
+
+let tfValues = {};
+
+let idfValues = {};
+
+let tfidfValues = {};
+
+
+/* ==================================================
+   GET DOCUMENTS
+================================================== */
+
+function getDocuments() {
+
+  const text =
+    document
+      .getElementById("documents")
+      .value;
+
+
+  documents =
+    text
+      .split("\n")
+      .map(doc => doc.trim())
+      .filter(doc => doc.length > 0);
+
+
+  return documents;
+
+}
+
+
+/* ==================================================
+   CLEAN TEXT
+================================================== */
+
+function cleanText(text) {
+
+  return text
+
+    .toLowerCase()
+
+    .replace(/[.,!?;:'"]/g, "")
+
+    .split(/\s+/)
+
+    .filter(word => word !== "");
+
+}
+
+
+/* ==================================================
+   CALCULATE TF
+================================================== */
+
+function calculateTF(docWords) {
+
+  const frequency = {};
+
+  docWords.forEach(word => {
+
+    if (frequency[word]) {
+
+      frequency[word]++;
+
+    }
+
+    else {
+
+      frequency[word] = 1;
+
+    }
+
+  });
+
+
+  const totalWords =
+    docWords.length;
+
+
+  const tf = {};
+
+
+  Object.keys(frequency)
+    .forEach(word => {
+
+      tf[word] =
+        frequency[word] /
+        totalWords;
+
+    });
+
+
+  return tf;
+
+}
+
+
+/* ==================================================
+   CALCULATE IDF
+================================================== */
+
+function calculateIDF() {
+
+  const totalDocuments =
+    documents.length;
+
+
+  const idf = {};
+
+
+  vocabulary.forEach(word => {
+
+    let documentCount = 0;
+
+
+    documents.forEach(doc => {
+
+      const words =
+        cleanText(doc);
+
+
+      if (words.includes(word)) {
+
+        documentCount++;
+
+      }
+
+    });
+
+
+    /*
+      Educational IDF formula
+    */
+
+    idf[word] =
+      Math.log(
+        totalDocuments /
+        (1 + documentCount)
+      ) + 1;
+
+  });
+
+
+  return idf;
+
+}
+
+
+/* ==================================================
+   MAIN TF-IDF
+================================================== */
+
+function calculateTFIDF() {
+
+  getDocuments();
+
+
+  /*
+    Create vocabulary
+  */
+
+  const allWords = [];
+
+
+  documents.forEach(doc => {
+
+    const words =
+      cleanText(doc);
+
+
+    words.forEach(word => {
+
+      if (!allWords.includes(word)) {
+
+        allWords.push(word);
+
+      }
+
+    });
+
+  });
+
+
+  vocabulary =
+    allWords;
+
+
+  /*
+    Calculate IDF
+  */
+
+  idfValues =
+    calculateIDF();
+
+
+  /*
+    Calculate TF for
+    each document
+  */
+
+  tfValues = {};
+
+
+  documents.forEach(
+    (doc, index) => {
+
+      const words =
+        cleanText(doc);
+
+
+      tfValues[index] =
+        calculateTF(words);
+
+    }
+  );
+
+
+  /*
+    Calculate TF-IDF
+  */
+
+  tfidfValues = {};
+
+
+  documents.forEach(
+    (doc, index) => {
+
+      tfidfValues[index] = {};
+
+
+      vocabulary.forEach(word => {
+
+        const tf =
+          tfValues[index][word] || 0;
+
+
+        const idf =
+          idfValues[word];
+
+
+        tfidfValues[index][word] =
+          tf * idf;
+
+      });
+
+    }
+  );
+
+
+  /*
+    Show graph
+  */
+
+  showTFIDFGraph();
+
+
+  document
+    .getElementById("status")
+    .innerText =
+      "TF-IDF Calculated ✓";
+
+
+  document
+    .getElementById("explanation")
+    .setAttribute(
+      "value",
+      "Tall bars represent words with higher TF-IDF importance."
+    );
+
+}
+
+
+/* ==================================================
+   SHOW TF
+================================================== */
+
+function showTF() {
+
+  if (documents.length === 0) {
+
+    getDocuments();
+
+  }
+
+
+  if (documents.length === 0) {
+
+    return;
+
+  }
+
+
+  const firstDocument =
+    cleanText(documents[0]);
+
+
+  const tf =
+    calculateTF(firstDocument);
+
+
+  clearGraph();
+
+
+  const words =
+    Object.keys(tf);
+
+
+  words.forEach(
+    (word, index) => {
+
+      const x =
+        (index - (words.length - 1) / 2) * 2;
+
+
+      const value =
+        tf[word];
+
+
+      createBar(
+
+        word,
+
+        value * 10,
+
+        x,
+
+        "#2563eb"
+
+      );
+
+    }
+  );
+
+
+  document
+    .getElementById("status")
+    .innerText =
+      "Term Frequency Displayed ✓";
+
+
+  document
+    .getElementById("explanation")
+    .setAttribute(
+      "value",
+      "TF shows how frequently a word occurs inside a document."
+    );
+
+}
+
+
+/* ==================================================
+   SHOW IDF
+================================================== */
+
+function showIDF() {
+
+  if (vocabulary.length === 0) {
+
+    calculateTFIDF();
+
+  }
+
+
+  clearGraph();
+
+
+  const words =
+    Object.keys(idfValues);
+
+
+  words.forEach(
+    (word, index) => {
+
+      const x =
+        (index - (words.length - 1) / 2) * 2;
+
+
+      const value =
+        idfValues[word];
+
+
+      createBar(
+
+        word,
+
+        value,
+
+        x,
+
+        "#7c3aed"
+
+      );
+
+    }
+  );
+
+
+  document
+    .getElementById("status")
+    .innerText =
+      "IDF Displayed ✓";
+
+
+  document
+    .getElementById("explanation")
+    .setAttribute(
+      "value",
+      "IDF gives higher importance to words that appear in fewer documents."
+    );
+
+}
+
+
+/* ==================================================
+   SHOW TF-IDF GRAPH
+================================================== */
+
+function showTFIDFGraph() {
+
+  clearGraph();
+
+
+  if (documents.length === 0) {
+
+    return;
+
+  }
+
+
+  /*
+    Display first document
+  */
+
+  const first =
+    tfidfValues[0];
+
+
+  const words =
+    Object.keys(first);
+
+
+  /*
+    Sort by importance
+  */
+
+  words.sort(
+    (a, b) =>
+      first[b] - first[a]
+  );
+
+
+  /*
+    Show maximum 8 words
+  */
+
+  const displayWords =
+    words.slice(0, 8);
+
+
+  displayWords.forEach(
+    (word, index) => {
+
+      const x =
+        (index -
+        (displayWords.length - 1) / 2)
+        * 2;
+
+
+      const value =
+        first[word];
+
+
+      createBar(
+
+        word,
+
+        value * 6,
+
+        x,
+
+        "#16a34a"
+
+      );
+
+    }
+  );
+
+}
+
+
+/* ==================================================
+   CREATE BAR
+================================================== */
+
+function createBar(
+
+  word,
+
+  value,
+
+  x,
+
+  color
+
+) {
+
+  const container =
+    document.getElementById(
+      "graphContainer"
+    );
+
+
+  /*
+    Limit height
+  */
+
+  const height =
+    Math.max(
+      0.5,
+      Math.min(value, 6)
+    );
+
+
+  /*
+    3D bar
+  */
+
+  const bar =
+    document.createElement(
+      "a-box"
+    );
+
+
+  bar.setAttribute(
+    "position",
+    `${x} ${height / 2} -9`
+  );
+
+
+  bar.setAttribute(
+    "width",
+    "1.5"
+  );
+
+
+  bar.setAttribute(
+    "height",
+    height
+  );
+
+
+  bar.setAttribute(
+    "depth",
+    "1.5"
+  );
+
+
+  bar.setAttribute(
+    "color",
+    color
+  );
+
+
+  bar.setAttribute(
+    "material",
+    "emissive:#00ffff; emissiveIntensity:0.3"
+  );
+
+
+  /*
+    Animation
+  */
+
+  bar.setAttribute(
+
+    "animation",
+
+    `
+      property: scale;
+      from: 0.2 0.2 0.2;
+      to: 1 1 1;
+      dur: 1000;
+      easing: easeOutElastic
+    `
+
+  );
+
+
+  container.appendChild(bar);
+
+
+  /*
+    Word label
+  */
+
+  const label =
+    document.createElement(
+      "a-text"
+    );
+
+
+  label.setAttribute(
+    "value",
+    word
+  );
+
+
+  label.setAttribute(
+    "align",
+    "center"
+  );
+
+
+  label.setAttribute(
+    "position",
+    `${x} -0.6 -9`
+  );
+
+
+  label.setAttribute(
+    "scale",
+    "1.3 1.3 1.3"
+  );
+
+
+  label.setAttribute(
+    "color",
+    "white"
+  );
+
+
+  container.appendChild(label);
+
+
+  /*
+    Score label
+  */
+
+  const score =
+    document.createElement(
+      "a-text"
+    );
+
+
+  score.setAttribute(
+    "value",
+    value.toFixed(3)
+  );
+
+
+  score.setAttribute(
+    "align",
+    "center"
+  );
+
+
+  score.setAttribute(
+    "position",
+    `${x} ${height + 0.5} -9`
+  );
+
+
+  score.setAttribute(
+    "scale",
+    "1 1 1"
+  );
+
+
+  score.setAttribute(
+    "color",
+    "#22c55e"
+  );
+
+
+  container.appendChild(score);
+
+}
+
+
+/* ==================================================
+   CLEAR GRAPH
+================================================== */
+
+function clearGraph() {
+
+  document
+    .getElementById(
+      "graphContainer"
+    )
+    .innerHTML = "";
+
+}
+
+
+/* ==================================================
+   RESET
+================================================== */
+
+function resetLab() {
+
+  clearGraph();
+
+
+  documents = [];
+
+  vocabulary = [];
+
+  tfValues = {};
+
+  idfValues = {};
+
+  tfidfValues = {};
+
+
+  document
+    .getElementById("documents")
+    .value =
+`I love NLP
+I love AI
+NLP is amazing`;
+
+
+  document
+    .getElementById("status")
+    .innerText =
+      "Ready";
+
+
+  document
+    .getElementById("explanation")
+    .setAttribute(
+      "value",
+      "TF-IDF measures how important a word is in a document."
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

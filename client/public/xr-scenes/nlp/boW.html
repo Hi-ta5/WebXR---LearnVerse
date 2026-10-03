@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>NLP - Bag of Words VR Lab</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      background: #020617;
+    }
+
+    /* =========================================
+       CONTROL PANEL
+    ========================================= */
+
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 320px;
+      padding: 20px;
+      background: linear-gradient(145deg, rgba(4, 10, 28, 0.96), rgba(9, 20, 45, 0.88));
+      border-radius: 20px;
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      color: white;
+      z-index: 999;
+      box-shadow: 0 0 35px rgba(0, 255, 255, 0.18), inset 0 0 30px rgba(59, 130, 246, 0.05);
+      backdrop-filter: blur(14px);
+    }
+
+    .ui h2 {
+      margin-top: 0;
+      color: #00ffff;
+      font-size: 19px;
+      letter-spacing: 0.5px;
+    }
+
+    .ui p {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 8px 0 12px;
+    }
+
+    .ui textarea {
+      width: 100%;
+      height: 90px;
+      padding: 10px 12px;
+      margin-top: 6px;
+      box-sizing: border-box;
+      border: 1px solid #164e63;
+      border-radius: 10px;
+      background: #071426;
+      color: white;
+      font-size: 13px;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .ui textarea:focus {
+      border-color: #00ffff;
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+    }
+
+    .ui button {
+      width: 100%;
+      padding: 11px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 10px;
+      background: #00ffff;
+      color: #000000;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+    }
+
+    .ui button:hover {
+      background: #7fffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(0, 255, 255, 0.45);
+    }
+
+    .ui button.btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .ui button.btn-reset:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #00ffff;
+      border-color: #00ffff;
+    }
+
+    #status {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(2, 6, 23, 0.65);
+      border: 1px solid rgba(34, 211, 238, 0.15);
+      color: #86efac;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     CONTROL PANEL
+===================================================== -->
+
+<div class="ui">
+
+  <h2>📚 BAG OF WORDS</h2>
+
+  <p>
+    Enter multiple sentences.
+    Each sentence should be on a new line.
+  </p>
+
+  <textarea id="textInput">I love NLP
+I love AI
+NLP is amazing</textarea>
+
+
+  <button onclick="createBagOfWords()">
+    Create Bag of Words
+  </button>
+
+
+  <button onclick="showVocabulary()">
+    Show Vocabulary
+  </button>
+
+
+  <button class="btn-reset" onclick="resetLab()">
+    Reset
+  </button>
+
+
+  <div id="status">
+    Ready
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     A-FRAME SCENE
+===================================================== -->
+
+<a-scene
+  background="color: #020617"
+  vr-mode-ui="enabled: true">
+
+
+  <!-- =================================================
+       ASSETS
+  ================================================== -->
+
+  <a-assets>
+
+    <!-- Robot 3D Model -->
+
+    <a-asset-item
+      id="robotModel"
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+    </a-asset-item>
+
+  </a-assets>
+
+
+  <!-- =================================================
+       CAMERA
+  ================================================== -->
+
+  <a-camera
+    position="0 5 18">
+  </a-camera>
+
+
+  <!-- =================================================
+       LIGHTS
+  ================================================== -->
+
+  <a-light
+    type="ambient"
+    intensity="1.5">
+  </a-light>
+
+
+  <a-light
+    type="point"
+    intensity="3"
+    position="0 12 5">
+  </a-light>
+
+
+  <!-- =================================================
+       FLOOR
+  ================================================== -->
+
+  <a-plane
+
+    rotation="-90 0 0"
+
+    width="60"
+
+    height="60"
+
+    color="#111827">
+
+  </a-plane>
+
+
+  <!-- =================================================
+       SKY
+  ================================================== -->
+
+  <a-sky
+    color="#020617">
+  </a-sky>
+
+
+  <!-- =================================================
+       TITLE
+  ================================================== -->
+
+  <a-text
+
+    value="NLP BAG OF WORDS LAB"
+
+    position="-6.5 10 -12"
+
+    scale="3 3 3"
+
+    color="#00ffff">
+
+  </a-text>
+
+
+  <!-- =================================================
+       ROBOT LEFT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="-12 0 -11"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 360 0;
+      loop: true;
+      dur: 16000">
+
+  </a-gltf-model>
+
+
+  <!-- =================================================
+       ROBOT RIGHT
+  ================================================== -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="12 0 -11"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 -360 0;
+      loop: true;
+      dur: 16000">
+
+  </a-gltf-model>
+
+
+  <!-- =================================================
+       MACHINE
+  ================================================== -->
+
+  <a-box
+
+    position="0 2 -10"
+
+    width="4"
+
+    height="2"
+
+    depth="2"
+
+    color="#1e3a8a"
+
+    material="
+      emissive: #0066ff;
+      emissiveIntensity: 0.5">
+
+  </a-box>
+
+
+  <a-text
+
+    value="WORD COUNTER"
+
+    position="-1.6 2 -8.8"
+
+    scale="1.3 1.3 1.3"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- =================================================
+       GRAPH CONTAINER
+  ================================================== -->
+
+  <a-entity
+    id="graphContainer">
+  </a-entity>
+
+
+  <!-- =================================================
+       VOCABULARY CONTAINER
+  ================================================== -->
+
+  <a-entity
+    id="vocabularyContainer">
+  </a-entity>
+
+
+  <!-- =================================================
+       INFORMATION PANEL
+  ================================================== -->
+
+  <a-plane
+
+    position="0 -0.5 -9"
+
+    width="15"
+
+    height="1.8"
+
+    color="#0f172a">
+
+  </a-plane>
+
+
+  <a-text
+
+    id="explanation"
+
+    value="Bag of Words represents text using word frequencies."
+
+    position="-6.5 -0.3 -8.9"
+
+    scale="1.1 1.1 1.1"
+
+    color="white">
+
+  </a-text>
+
+
+  <!-- =================================================
+       FLOATING PARTICLES
+  ================================================== -->
+
+  <a-sphere
+
+    position="-8 6 -8"
+
+    radius="0.15"
+
+    color="#00ffff"
+
+    animation="
+      property: position;
+      dir: alternate;
+      to: -8 7 -8;
+      dur: 2000;
+      loop: true">
+
+  </a-sphere>
+
+
+  <a-sphere
+
+    position="8 7 -8"
+
+    radius="0.15"
+
+    color="#ff00ff"
+
+    animation="
+      property: position;
+      dir: alternate;
+      to: 8 6 -8;
+      dur: 2500;
+      loop: true">
+
+  </a-sphere>
+
+
+</a-scene>
+
+
+<script>
+
+
+/* =====================================================
+   GET INPUT
+===================================================== */
+
+function getText() {
+
+  return document
+    .getElementById("textInput")
+    .value;
+
+}
+
+
+/* =====================================================
+   CALCULATE WORD FREQUENCY
+===================================================== */
+
+function calculateFrequency() {
+
+  const text = getText();
+
+
+  /*
+    Convert everything to lowercase
+  */
+
+  const cleanedText =
+    text
+      .toLowerCase()
+      .replace(/[.,!?;:'"]/g, "");
+
+
+  /*
+    Split into words
+  */
+
+  const words =
+    cleanedText
+      .split(/\s+/)
+      .filter(word => word !== "");
+
+
+  /*
+    Create frequency object
+  */
+
+  const frequency = {};
+
+
+  words.forEach(word => {
+
+    if (frequency[word]) {
+
+      frequency[word]++;
+
+    }
+
+    else {
+
+      frequency[word] = 1;
+
+    }
+
+  });
+
+
+  return frequency;
+
+}
+
+
+/* =====================================================
+   CREATE BAG OF WORDS
+===================================================== */
+
+function createBagOfWords() {
+
+  /*
+    Clear old graph
+  */
+
+  document
+    .getElementById("graphContainer")
+    .innerHTML = "";
+
+
+  document
+    .getElementById("vocabularyContainer")
+    .innerHTML = "";
+
+
+  const frequency =
+    calculateFrequency();
+
+
+  const words =
+    Object.keys(frequency);
+
+
+  /*
+    Show status
+  */
+
+  document
+    .getElementById("status")
+    .innerText =
+      "Bag of Words Created ✓";
+
+
+  document
+    .getElementById("explanation")
+    .setAttribute(
+      "value",
+      "Each word is represented according to how many times it appears."
+    );
+
+
+  /*
+    Starting X position
+  */
+
+  const startX =
+    -(words.length - 1) * 1.3;
+
+
+  /*
+    Create bars
+  */
+
+  words.forEach((word, index) => {
+
+    const count =
+      frequency[word];
+
+
+    const x =
+      startX + index * 2.6;
+
+
+    createWordBar(
+      word,
+      count,
+      x
+    );
+
+  });
+
+}
+
+
+/* =====================================================
+   CREATE 3D WORD BAR
+===================================================== */
+
+function createWordBar(
+  word,
+  count,
+  x
+) {
+
+  const container =
+    document.getElementById(
+      "graphContainer"
+    );
+
+
+  /*
+    Maximum height
+  */
+
+  const height =
+    Math.min(count * 1.2, 6);
+
+
+  /*
+    Create stacked blocks
+  */
+
+  for (
+    let i = 0;
+    i < count;
+    i++
+  ) {
+
+    const block =
+      document.createElement(
+        "a-box"
+      );
+
+
+    block.setAttribute(
+      "position",
+      `${x} ${i * 1.1 + 0.5} -9`
+    );
+
+
+    block.setAttribute(
+      "width",
+      "1.8"
+    );
+
+
+    block.setAttribute(
+      "height",
+      "1"
+    );
+
+
+    block.setAttribute(
+      "depth",
+      "1.5"
+    );
+
+
+    block.setAttribute(
+      "color",
+      "#2563eb"
+    );
+
+
+    block.setAttribute(
+      "material",
+      "emissive: #00ffff; emissiveIntensity: 0.35"
+    );
+
+
+    /*
+      Floating animation
+    */
+
+    block.setAttribute(
+      "animation",
+      `
+        property: position;
+        dir: alternate;
+        dur: 1500;
+        loop: true;
+        to: ${x} ${i * 1.1 + 0.7} -9
+      `
+    );
+
+
+    container.appendChild(block);
+
+  }
+
+
+  /*
+    Word label
+  */
+
+  const label =
+    document.createElement(
+      "a-text"
+    );
+
+
+  label.setAttribute(
+    "value",
+    word
+  );
+
+
+  label.setAttribute(
+    "align",
+    "center"
+  );
+
+
+  label.setAttribute(
+    "color",
+    "white"
+  );
+
+
+  label.setAttribute(
+    "position",
+    `${x} -0.5 -9`
+  );
+
+
+  label.setAttribute(
+    "scale",
+    "1.5 1.5 1.5"
+  );
+
+
+  container.appendChild(label);
+
+
+  /*
+    Frequency label
+  */
+
+  const frequencyLabel =
+    document.createElement(
+      "a-text"
+    );
+
+
+  frequencyLabel.setAttribute(
+    "value",
+    "Count: " + count
+  );
+
+
+  frequencyLabel.setAttribute(
+    "align",
+    "center"
+  );
+
+
+  frequencyLabel.setAttribute(
+    "color",
+    "#22c55e"
+  );
+
+
+  frequencyLabel.setAttribute(
+    "position",
+    `${x} ${height + 1} -9`
+  );
+
+
+  frequencyLabel.setAttribute(
+    "scale",
+    "1.2 1.2 1.2"
+  );
+
+
+  container.appendChild(
+    frequencyLabel
+  );
+
+}
+
+
+/* =====================================================
+   SHOW VOCABULARY
+===================================================== */
+
+function showVocabulary() {
+
+  document
+    .getElementById(
+      "vocabularyContainer"
+    )
+    .innerHTML = "";
+
+
+  const frequency =
+    calculateFrequency();
+
+
+  const words =
+    Object.keys(frequency);
+
+
+  /*
+    Create title
+  */
+
+  const title =
+    document.createElement(
+      "a-text"
+    );
+
+
+  title.setAttribute(
+    "value",
+    "VOCABULARY"
+  );
+
+
+  title.setAttribute(
+    "position",
+    "-4 7 -8"
+  );
+
+
+  title.setAttribute(
+    "scale",
+    "2 2 2"
+  );
+
+
+  title.setAttribute(
+    "color",
+    "#00ffff"
+  );
+
+
+  document
+    .getElementById(
+      "vocabularyContainer"
+    )
+    .appendChild(title);
+
+
+  /*
+    Show words
+  */
+
+  words.forEach(
+    (word, index) => {
+
+      const item =
+        document.createElement(
+          "a-text"
+        );
+
+
+      item.setAttribute(
+        "value",
+        (index + 1) +
+        ". " +
+        word +
+        "  →  " +
+        frequency[word]
+      );
+
+
+      item.setAttribute(
+        "position",
+        `-4 ${6 - index * 0.6} -8`
+      );
+
+
+      item.setAttribute(
+        "scale",
+        "1.2 1.2 1.2"
+      );
+
+
+      item.setAttribute(
+        "color",
+        "white"
+      );
+
+
+      document
+        .getElementById(
+          "vocabularyContainer"
+        )
+        .appendChild(item);
+
+    }
+  );
+
+
+  document
+    .getElementById("status")
+    .innerText =
+      "Vocabulary Generated ✓";
+
+
+  document
+    .getElementById("explanation")
+    .setAttribute(
+      "value",
+      "The vocabulary contains all unique words found in the documents."
+    );
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab() {
+
+  document
+    .getElementById(
+      "graphContainer"
+    )
+    .innerHTML = "";
+
+
+  document
+    .getElementById(
+      "vocabularyContainer"
+    )
+    .innerHTML = "";
+
+
+  document
+    .getElementById(
+      "textInput"
+    )
+    .value =
+      "I love NLP\nI love AI\nNLP is amazing";
+
+
+  document
+    .getElementById(
+      "status"
+    )
+    .innerText =
+      "Ready";
+
+
+  document
+    .getElementById(
+      "explanation"
+    )
+    .setAttribute(
+      "value",
+      "Bag of Words represents text using word frequencies."
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

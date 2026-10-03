@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DSA WebXR Array Visualization</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial;
+    }
+
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+      background: rgba(0,0,0,0.85);
+      padding: 15px;
+      border-radius: 12px;
+      color: white;
+      width: 260px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .ui h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #00ffff;
+    }
+
+    button {
+      margin-top: 8px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      background: #00ffff;
+      color: black;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #00cccc;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: none;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="ui">
+  <h2>DSA Array Lab</h2>
+
+  <input type="number" id="valueInput" placeholder="Enter Value">
+
+  <button onclick="insertElement()">Insert</button>
+  <button onclick="deleteElement()">Delete</button>
+  <button onclick="traverseArray()">Traverse</button>
+  <button onclick="searchElement()">Search</button>
+  <button onclick="sortArray()">Bubble Sort</button>
+</div>
+
+<a-scene background="color: #050816" vr-mode-ui="enabled: true">
+
+  <!-- Assets -->
+  <a-assets>
+
+    <!-- Robot Model -->
+    <a-asset-item
+      id="robotModel"
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+    </a-asset-item>
+
+  </a-assets>
+
+  <!-- Camera -->
+  <a-camera position="0 2 10"></a-camera>
+
+  <!-- Lights -->
+  <a-light type="ambient" intensity="1"></a-light>
+  <a-light type="point" intensity="2" position="0 10 5"></a-light>
+
+  <!-- Floor -->
+  <a-plane
+    rotation="-90 0 0"
+    width="40"
+    height="40"
+    color="#0f172a">
+  </a-plane>
+
+  <!-- Environment -->
+  <a-sky color="#020617"></a-sky>
+
+  <!-- Neon Panels -->
+  <a-box position="0 5 -12" width="18" height="6" depth="0.3" color="#111827"></a-box>
+
+  <a-text
+    value="ARRAY VISUALIZATION LAB"
+    position="-4 5 -11.5"
+    color="#00ffff"
+    scale="3 3 3">
+  </a-text>
+
+  <!-- Decorative Models -->
+  <a-gltf-model
+    src="#robotModel"
+    position="-7 0 -8"
+    scale="0.7 0.7 0.7"
+    rotation="0 40 0"
+    animation="property: rotation; to: 0 400 0; loop: true; dur: 20000">
+  </a-gltf-model>
+
+  <a-gltf-model
+    src="#robotModel"
+    position="7 0 -8"
+    scale="0.7 0.7 0.7"
+    rotation="0 -40 0"
+    animation="property: rotation; to: 0 -400 0; loop: true; dur: 20000">
+  </a-gltf-model>
+
+  <!-- Array Container -->
+  <a-entity id="arrayContainer"></a-entity>
+
+</a-scene>
+
+<script>
+
+let array = [12, 7, 25, 4, 18];
+
+const container = document.querySelector('#arrayContainer');
+
+function renderArray(highlight = -1, found = false) {
+
+  container.innerHTML = '';
+
+  array.forEach((value, index) => {
+
+    let color = '#3b82f6';
+
+    if(index === highlight) {
+      color = found ? '#22c55e' : '#ef4444';
+    }
+
+    // Main Box
+    const box = document.createElement('a-box');
+
+    box.setAttribute('position', `${index * 2 - 4} 1.5 -6`);
+    box.setAttribute('depth', '1');
+    box.setAttribute('height', '1');
+    box.setAttribute('width', '1');
+    box.setAttribute('color', color);
+
+    // Floating Animation
+    box.setAttribute('animation', `
+      property: position;
+      dir: alternate;
+      dur: 1200;
+      loop: true;
+      to: ${index * 2 - 4} 1.8 -6
+    `);
+
+    // Glow Effect
+    box.setAttribute('material', 'emissive: #00ffff; emissiveIntensity: 0.4');
+
+    // Number Label
+    const text = document.createElement('a-text');
+
+    text.setAttribute('value', value);
+    text.setAttribute('align', 'center');
+    text.setAttribute('color', 'white');
+    text.setAttribute('position', '0 0.85 0');
+    text.setAttribute('scale', '3 3 3');
+
+    // Index Label
+    const indexText = document.createElement('a-text');
+
+    indexText.setAttribute('value', `Index ${index}`);
+    indexText.setAttribute('align', 'center');
+    indexText.setAttribute('color', '#00ffff');
+    indexText.setAttribute('position', '0 -0.9 0');
+    indexText.setAttribute('scale', '1.5 1.5 1.5');
+
+    box.appendChild(text);
+    box.appendChild(indexText);
+
+    container.appendChild(box);
+  });
+}
+
+function insertElement() {
+
+  const value = parseInt(document.getElementById('valueInput').value);
+
+  if(!isNaN(value)) {
+    array.push(value);
+    renderArray();
+  }
+}
+
+function deleteElement() {
+
+  array.pop();
+  renderArray();
+}
+
+async function traverseArray() {
+
+  for(let i = 0; i < array.length; i++) {
+
+    renderArray(i);
+
+    await new Promise(resolve => setTimeout(resolve, 700));
+  }
+
+  renderArray();
+}
+
+async function searchElement() {
+
+  const value = parseInt(document.getElementById('valueInput').value);
+
+  for(let i = 0; i < array.length; i++) {
+
+    renderArray(i);
+
+    await new Promise(resolve => setTimeout(resolve, 700));
+
+    if(array[i] === value) {
+
+      renderArray(i, true);
+      return;
+    }
+  }
+
+  alert('Element Not Found');
+  renderArray();
+}
+
+async function sortArray() {
+
+  for(let i = 0; i < array.length; i++) {
+
+    for(let j = 0; j < array.length - i - 1; j++) {
+
+      renderArray(j);
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      if(array[j] > array[j + 1]) {
+
+        let temp = array[j];
+        array[j] = array[j + 1];
+        array[j + 1] = temp;
+
+        renderArray(j + 1);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+  }
+
+  renderArray();
+}
+
+renderArray();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NLP - Text Preprocessing Lab</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js">
+// Keep the 3D display synchronized when the learner edits the input.
+document.getElementById("textInput").addEventListener("keydown", function(e){
+  if(e.key === "Enter") resetText();
+});
+
+// Make the sentence respond visually after every operation.
+const sentenceEl = document.getElementById("sentenceDisplay");
+if (sentenceEl) {
+  sentenceEl.setAttribute("animation__pulse",
+    "property:scale; from:1.5 1.5 1.5; to:1.7 1.7 1.7; dur:250; dir:alternate");
+}
+
+// Subtle floating motion for the processor.
+const processor = document.querySelector('a-box[position="0 2.5 -10"]');
+if (processor) {
+  processor.setAttribute("animation__float",
+    "property:position; dir:alternate; to:0 2.7 -10; dur:2200; loop:true; easing:easeInOutSine");
+}
+
+</script>
+
+  <style>
+:root{
+  --cyan:#22d3ee; --blue:#3b82f6; --purple:#a855f7; --green:#22c55e;
+  --panel:rgba(4,10,28,.88); --border:rgba(34,211,238,.28);
+}
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;font-family:Inter,Segoe UI,Arial,sans-serif;background:#020617}
+.ui{
+  position:absolute;top:18px;left:18px;width:340px;max-height:calc(100vh - 36px);
+  overflow:auto;padding:20px;border:1px solid var(--border);border-radius:22px;
+  color:#eefcff;z-index:999;background:linear-gradient(145deg,rgba(4,10,28,.96),rgba(9,20,45,.88));
+  box-shadow:0 0 35px rgba(34,211,238,.18),inset 0 0 30px rgba(59,130,246,.05);
+  backdrop-filter:blur(14px)
+}
+.ui::-webkit-scrollbar{width:5px}.ui::-webkit-scrollbar-thumb{background:#155e75;border-radius:8px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#0891b2,#7c3aed);box-shadow:0 0 20px rgba(34,211,238,.35)}
+.ui h2{margin:0;color:#67e8f9;font-size:20px;letter-spacing:.5px}
+.subtitle{margin:6px 0 16px;color:#94a3b8;font-size:12px;line-height:1.45}
+label{display:block;color:#a5f3fc;font-size:12px;font-weight:700;margin:12px 0 6px}
+.ui input{width:100%;padding:12px 13px;border:1px solid #164e63;border-radius:11px;
+  background:#071426;color:white;outline:none;font-size:14px}
+.ui input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+.step-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.ui button{width:100%;padding:11px 9px;border:none;border-radius:10px;
+  background:#00ffff;color:#000000;font-weight:bold;font-size:12px;cursor:pointer;
+  transition:all .2s ease;box-shadow:0 0 15px rgba(0,240,255,.2)}
+.ui button:hover{background:#7fffff;transform:translateY(-2px);box-shadow:0 0 22px rgba(0,240,255,.4)}
+.ui button:active{transform:translateY(0)}
+.step-grid button:last-child{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#ffffff;box-shadow:none}
+.step-grid button:last-child:hover{background:rgba(255,255,255,.15);color:#00ffff;border-color:#00ffff}
+.status{
+  margin-top:14px;padding:11px 12px;border-radius:12px;background:rgba(2,6,23,.65);
+  border:1px solid rgba(34,211,238,.12);font-size:12px;line-height:1.5
+}
+#result{color:#86efac;font-weight:700;word-break:break-word}
+.progress{height:5px;background:#0f172a;border-radius:10px;margin-top:9px;overflow:hidden}
+#progressBar{height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#a855f7);transition:width .35s}
+.tip{margin-top:12px;padding:10px;border-left:3px solid #22d3ee;color:#94a3b8;font-size:11px;line-height:1.45}
+@media(max-width:700px){.ui{width:290px;top:10px;left:10px;max-height:70vh}}
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ============================= -->
+<!-- CONTROL PANEL -->
+<!-- ============================= -->
+
+<div class="ui">
+  <div class="brand">
+    <div class="icon">🧠</div>
+    <div><h2>NLP Text Lab</h2><div style="font-size:10px;color:#67e8f9">WEBXR LEARNING STATION</div></div>
+  </div>
+  <div class="subtitle">Transform raw language step-by-step and watch each NLP operation update the 3D word space.</div>
+
+  <label for="textInput">ENTER A SENTENCE</label>
+  <input id="textInput" type="text" value="The Students are Learning NLP!" placeholder="Type a sentence...">
+
+  <label>PREPROCESSING PIPELINE</label>
+  <div class="step-grid">
+    <button onclick="lowercaseText()">01 · Lowercase</button>
+    <button onclick="removePunctuation()">02 · Punctuation</button>
+    <button onclick="removeStopWords()">03 · Stop Words</button>
+    <button onclick="stemText()">04 · Stemming</button>
+    <button onclick="lemmatizeText()">05 · Lemmatize</button>
+    <button onclick="resetText()">↺ · Reset</button>
+  </div>
+
+  <div class="status">
+    <div style="color:#67e8f9;font-size:11px;font-weight:800;margin-bottom:4px">CURRENT OUTPUT</div>
+    <div id="result">Ready for preprocessing</div>
+    <div class="progress"><div id="progressBar"></div></div>
+  </div>
+
+  <div class="tip">💡 Tip: Use the buttons in order to see how raw text becomes cleaner and more useful for an NLP model.</div>
+</div>
+
+</div>
+
+
+<!-- ============================= -->
+<!-- A-FRAME SCENE -->
+<!-- ============================= -->
+
+<a-scene
+  background="color: #020617"
+  vr-mode-ui="enabled: true">
+
+
+  <!-- ============================= -->
+  <!-- ASSETS -->
+  <!-- ============================= -->
+
+  <a-assets>
+
+    <a-asset-item
+      id="robotModel"
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+    </a-asset-item>
+
+  </a-assets>
+
+
+  <!-- ============================= -->
+  <!-- CAMERA -->
+  <!-- ============================= -->
+
+  <a-camera
+    position="0 4 17">
+  </a-camera>
+
+
+  <!-- ============================= -->
+  <!-- LIGHTS -->
+  <!-- ============================= -->
+
+  <a-light
+    type="ambient"
+    intensity="1.5">
+  </a-light>
+
+  <a-light
+    type="point"
+    intensity="3"
+    position="0 10 5">
+  </a-light>
+
+
+  <!-- ============================= -->
+  <!-- FUTURISTIC ENVIRONMENT -->
+  <!-- ============================= -->
+  <a-ring position="0 0.03 -9" rotation="-90 0 0" radius-inner="5.5" radius-outer="5.58"
+          color="#22d3ee" material="emissive:#22d3ee; emissiveIntensity:1.2"
+          animation="property:rotation; to:-90 360 0; loop:true; dur:30000"></a-ring>
+
+  <a-ring position="0 0.04 -9" rotation="-90 0 0" radius-inner="8" radius-outer="8.035"
+          color="#7c3aed" material="emissive:#7c3aed; emissiveIntensity:1.1"
+          animation="property:rotation; to:-90 -360 0; loop:true; dur:45000"></a-ring>
+
+  <a-entity id="pipelineDecor">
+    <a-cylinder position="-6 1.1 -10" radius="0.9" height="0.18" color="#0ea5e9"
+      material="emissive:#0ea5e9; emissiveIntensity:.8"
+      animation="property:rotation; to:0 360 0; loop:true; dur:6000"></a-cylinder>
+    <a-cylinder position="6 1.1 -10" radius="0.9" height="0.18" color="#a855f7"
+      material="emissive:#a855f7; emissiveIntensity:.8"
+      animation="property:rotation; to:0 -360 0; loop:true; dur:7000"></a-cylinder>
+  </a-entity>
+
+  <!-- ============================= -->
+  <!-- FLOOR -->
+  <!-- ============================= -->
+
+  <a-plane
+    rotation="-90 0 0"
+    width="60"
+    height="60"
+    color="#111827">
+  </a-plane>
+
+
+  <!-- ============================= -->
+  <!-- SKY -->
+  <!-- ============================= -->
+
+  <a-sky
+    color="#020617">
+  </a-sky>
+
+
+  <!-- ============================= -->
+  <!-- TITLE -->
+  <!-- ============================= -->
+
+  <a-text
+    value="NLP  •  TEXT PREPROCESSING LAB"
+    position="-7 9 -12"
+    scale="3 3 3"
+    color="#00ffff">
+  </a-text>
+
+
+  <!-- ============================= -->
+  <!-- ROBOT 1 -->
+  <!-- ============================= -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="-10 0 -10"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 360 0;
+      loop: true;
+      dur: 15000">
+
+  </a-gltf-model>
+
+
+  <!-- ============================= -->
+  <!-- ROBOT 2 -->
+  <!-- ============================= -->
+
+  <a-gltf-model
+
+    src="#robotModel"
+
+    position="10 0 -10"
+
+    scale="1 1 1"
+
+    animation="
+      property: rotation;
+      to: 0 -360 0;
+      loop: true;
+      dur: 15000">
+
+  </a-gltf-model>
+
+
+  <!-- ============================= -->
+  <!-- PROCESSING MACHINE -->
+  <!-- ============================= -->
+
+  <a-box
+
+    position="0 2.5 -10"
+
+    width="5.6"
+
+    height="2.2"
+
+    depth="2"
+
+    color="#102a63"
+
+    material="
+      emissive: #0066ff;
+      emissiveIntensity: 0.65">
+
+  </a-box>
+
+
+  <a-text
+
+    value="TEXT PROCESSOR"
+
+    position="-2.1 3.5 -9"
+
+    scale="1.5 1.5 1.5"
+
+    color="white">
+
+  </a-text>
+
+
+  <a-text value="RAW TEXT  →  CLEAN TEXT  →  NLP MODEL"
+          position="-4.3 4.55 -9.5" scale="0.7 0.7 0.7" color="#94a3b8"></a-text>
+
+  <!-- ============================= -->
+  <!-- INPUT SENTENCE -->
+  <!-- ============================= -->
+
+  <a-text
+
+    id="sentenceDisplay"
+
+    value="The Students are Learning NLP!"
+
+    position="-6 6 -10"
+
+    scale="1.5 1.5 1.5"
+
+    color="#ffffff">
+
+  </a-text>
+
+
+  <!-- ============================= -->
+  <!-- WORD CONTAINER -->
+  <!-- ============================= -->
+
+  <a-entity
+    id="wordContainer">
+  </a-entity>
+
+
+  <!-- ============================= -->
+  <!-- PARTICLES -->
+  <!-- ============================= -->
+
+  <a-sphere
+
+    position="-7 5 -8"
+
+    radius="0.15"
+
+    color="#00ffff"
+
+    animation="
+      property: position;
+      dir: alternate;
+      to: -7 6 -8;
+      dur: 2000;
+      loop: true">
+
+  </a-sphere>
+
+
+  <a-sphere
+
+    position="7 6 -8"
+
+    radius="0.15"
+
+    color="#ff00ff"
+
+    animation="
+      property: position;
+      dir: alternate;
+      to: 7 5 -8;
+      dur: 2500;
+      loop: true">
+
+  </a-sphere>
+
+
+  <!-- ============================= -->
+  <!-- EXPLANATION PANEL -->
+  <!-- ============================= -->
+
+  <a-plane
+
+    position="0 -0.5 -9"
+
+    width="14"
+
+    height="1.8"
+
+    color="#0f172a">
+
+  </a-plane>
+
+
+  <a-text
+
+    id="explanation"
+
+    value="Text preprocessing prepares raw text for NLP models."
+
+    position="-6.2 -0.3 -8.9"
+
+    scale="1.1 1.1 1.1"
+
+    color="white">
+
+  </a-text>
+
+
+</a-scene>
+
+
+<script>
+
+
+/* ===================================
+   ORIGINAL TEXT
+=================================== */
+
+let originalText =
+  "The Students are Learning NLP!";
+
+
+/* ===================================
+   CURRENT TEXT
+=================================== */
+
+let currentText =
+  originalText;
+
+
+/* ===================================
+   DISPLAY WORDS
+=================================== */
+
+function displayWords(text) {
+
+  const container =
+    document.getElementById("wordContainer");
+
+  container.innerHTML = "";
+
+
+  const words =
+    text.split(" ");
+
+
+  words.forEach((word, index) => {
+
+    if (word.trim() === "") return;
+
+
+    const box =
+      document.createElement("a-box");
+
+
+    const x =
+      (index - (words.length - 1) / 2) * 1.7;
+
+
+    box.setAttribute(
+      "position",
+      `${x} 1 -8`
+    );
+
+
+    box.setAttribute(
+      "width",
+      "1.5"
+    );
+
+
+    box.setAttribute(
+      "height",
+      "1"
+    );
+
+
+    box.setAttribute(
+      "depth",
+      "1"
+    );
+
+
+    box.setAttribute(
+      "color",
+      "#2563eb"
+    );
+
+
+    box.setAttribute(
+      "material",
+      "emissive: #00ffff; emissiveIntensity: 0.4"
+    );
+
+
+    /* Floating animation */
+
+    box.setAttribute(
+      "animation",
+      `
+      property: position;
+      dir: alternate;
+      dur: 1200;
+      loop: true;
+      to: ${x} 1.3 -8
+      `
+    );
+
+
+    /* Word */
+
+    const textElement =
+      document.createElement("a-text");
+
+
+    textElement.setAttribute(
+      "value",
+      word
+    );
+
+
+    textElement.setAttribute(
+      "align",
+      "center"
+    );
+
+
+    textElement.setAttribute(
+      "color",
+      "white"
+    );
+
+
+    textElement.setAttribute(
+      "position",
+      "0 0 0.6"
+    );
+
+
+    textElement.setAttribute(
+      "scale",
+      "1.5 1.5 1.5"
+    );
+
+
+    box.appendChild(textElement);
+
+
+    container.appendChild(box);
+
+  });
+
+}
+
+
+/* ===================================
+   LOWERCASE
+=================================== */
+
+function lowercaseText() {
+
+  currentText =
+    currentText.toLowerCase();
+
+
+  updateScene(
+    "Lowercasing",
+    "All letters are converted to lowercase."
+  );
+
+}
+
+
+/* ===================================
+   REMOVE PUNCTUATION
+=================================== */
+
+function removePunctuation() {
+
+  currentText =
+    currentText.replace(
+      /[.,!?;:'"]/g,
+      ""
+    );
+
+
+  updateScene(
+    "Removing Punctuation",
+    "Punctuation marks are removed from the text."
+  );
+
+}
+
+
+/* ===================================
+   STOP WORDS
+=================================== */
+
+function removeStopWords() {
+
+  const stopWords = [
+
+    "the",
+    "is",
+    "are",
+    "a",
+    "an",
+    "and",
+    "in",
+    "on",
+    "of",
+    "to",
+    "for",
+    "was",
+    "were"
+
+  ];
+
+
+  currentText =
+    currentText
+      .split(" ")
+      .filter(
+        word =>
+          !stopWords.includes(
+            word.toLowerCase()
+          )
+      )
+      .join(" ");
+
+
+  updateScene(
+    "Removing Stop Words",
+    "Common words that add little meaning are removed."
+  );
+
+}
+
+
+/* ===================================
+   STEMMING
+=================================== */
+
+function stemText() {
+
+  let words =
+    currentText.split(" ");
+
+
+  words =
+    words.map(word => {
+
+      if (word.endsWith("ing")) {
+
+        return word.slice(
+          0,
+          -3
+        );
+
+      }
+
+      if (word.endsWith("ed")) {
+
+        return word.slice(
+          0,
+          -2
+        );
+
+      }
+
+      if (word.endsWith("s")
+          && word.length > 3) {
+
+        return word.slice(
+          0,
+          -1
+        );
+
+      }
+
+      return word;
+
+    });
+
+
+  currentText =
+    words.join(" ");
+
+
+  updateScene(
+    "Stemming",
+    "Words are reduced to their basic word stem."
+  );
+
+}
+
+
+/* ===================================
+   LEMMATIZATION
+=================================== */
+
+function lemmatizeText() {
+
+  const dictionary = {
+
+    "students": "student",
+
+    "learning": "learn",
+
+    "learned": "learn",
+
+    "running": "run",
+
+    "ran": "run",
+
+    "better": "good",
+
+    "children": "child",
+
+    "cars": "car",
+
+    "dogs": "dog"
+
+  };
+
+
+  let words =
+    currentText.split(" ");
+
+
+  words =
+    words.map(word => {
+
+      const lower =
+        word.toLowerCase();
+
+
+      return dictionary[lower]
+        || word;
+
+    });
+
+
+  currentText =
+    words.join(" ");
+
+
+  updateScene(
+    "Lemmatization",
+    "Words are converted to their meaningful base form."
+  );
+
+}
+
+
+/* ===================================
+   UPDATE SCENE
+=================================== */
+
+function updateScene(
+  operation,
+  description
+) {
+  const steps = {
+    "Lowercasing": 20,
+    "Removing Punctuation": 40,
+    "Removing Stop Words": 60,
+    "Stemming": 80,
+    "Lemmatization": 100
+  };
+
+  const result = document.getElementById("result");
+  result.innerText = "Current: " + currentText;
+  result.style.color = "#86efac";
+
+  document.getElementById("progressBar").style.width = (steps[operation] || 0) + "%";
+
+  document.getElementById(
+    "result"
+  ).innerText =
+    "Current: " + currentText;
+
+
+  document.getElementById(
+    "sentenceDisplay"
+  ).setAttribute(
+    "value",
+    currentText
+  );
+
+
+  document.getElementById(
+    "explanation"
+  ).setAttribute(
+    "value",
+    operation + ": " + description
+  );
+
+
+  displayWords(
+    currentText
+  );
+
+}
+
+
+/* ===================================
+   RESET
+=================================== */
+
+function resetText() {
+
+  currentText =
+    document.getElementById(
+      "textInput"
+    ).value;
+
+
+  document.getElementById(
+    "result"
+  ).innerText =
+    "Ready for preprocessing";
+  document.getElementById("progressBar").style.width = "0%";
+
+
+  document.getElementById(
+    "sentenceDisplay"
+  ).setAttribute(
+    "value",
+    currentText
+  );
+
+
+  document.getElementById(
+    "explanation"
+  ).setAttribute(
+    "value",
+    "Text preprocessing prepares raw text for NLP models."
+  );
+
+
+  displayWords(
+    currentText
+  );
+
+}
+
+
+/* ===================================
+   INITIAL DISPLAY
+=================================== */
+
+document.getElementById("textInput").value = originalText;
+displayWords(originalText);
+
+
+// Keep the 3D display synchronized when the learner edits the input.
+document.getElementById("textInput").addEventListener("keydown", function(e){
+  if(e.key === "Enter") resetText();
+});
+
+// Make the sentence respond visually after every operation.
+const sentenceEl = document.getElementById("sentenceDisplay");
+if (sentenceEl) {
+  sentenceEl.setAttribute("animation__pulse",
+    "property:scale; from:1.5 1.5 1.5; to:1.7 1.7 1.7; dur:250; dir:alternate");
+}
+
+// Subtle floating motion for the processor.
+const processor = document.querySelector('a-box[position="0 2.5 -10"]');
+if (processor) {
+  processor.setAttribute("animation__float",
+    "property:position; dir:alternate; to:0 2.7 -10; dur:2200; loop:true; easing:easeInOutSine");
+}
+
+</script>
+
+</body>
+
+</html>

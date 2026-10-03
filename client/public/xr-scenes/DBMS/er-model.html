@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ER Model VR Lab</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    overflow:hidden;
+    background:#020617;
+}
+
+/* ================================
+   CONTROL PANEL
+================================ */
+
+.panel{
+
+    position:absolute;
+    z-index:20;
+
+    top:18px;
+    left:18px;
+
+    width:330px;
+
+    padding:20px;
+
+    background:rgba(5,10,25,.96);
+
+    color:white;
+
+    border-radius:18px;
+
+    border:1px solid #a78bfa;
+
+    box-shadow:
+        0 0 30px rgba(167,139,250,.25),
+        inset 0 0 20px rgba(167,139,250,.05);
+
+    backdrop-filter:blur(10px);
+}
+
+.panel h2{
+
+    margin:0;
+
+    color:#c4b5fd;
+
+}
+
+.subtitle{
+
+    color:#94a3b8;
+
+    font-size:13px;
+
+    line-height:1.4;
+
+    margin-top:5px;
+
+}
+
+#info{
+
+    margin-top:15px;
+
+    padding:13px;
+
+    min-height:105px;
+
+    background:#0f172a;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    line-height:1.5;
+
+}
+
+
+/* ================================
+   BUTTONS
+================================ */
+
+button{
+
+    width:100%;
+
+    padding:11px;
+
+    margin-top:7px;
+
+    border:0;
+
+    border-radius:9px;
+
+    background:#a78bfa;
+
+    color:#0f172a;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+button:hover{
+
+    background:#c4b5fd;
+
+    transform:translateY(-2px);
+
+}
+
+.demo{
+
+    background:#f59e0b;
+
+}
+
+.demo:hover{
+
+    background:#fbbf24;
+
+}
+
+.reset{
+
+    background:#334155;
+
+    color:white;
+
+}
+
+
+/* ================================
+   PROGRESS
+================================ */
+
+.progress{
+
+    margin-top:14px;
+
+    height:8px;
+
+    background:#1e293b;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+}
+
+#progressBar{
+
+    width:0%;
+
+    height:100%;
+
+    background:#a78bfa;
+
+    transition:.5s;
+
+}
+
+.stage{
+
+    text-align:center;
+
+    color:#94a3b8;
+
+    font-size:12px;
+
+    margin-top:7px;
+
+}
+
+
+/* ================================
+   LEGEND
+================================ */
+
+.legend{
+
+    position:absolute;
+
+    z-index:20;
+
+    right:18px;
+
+    bottom:18px;
+
+    padding:14px 17px;
+
+    background:rgba(2,6,23,.93);
+
+    border:1px solid #334155;
+
+    border-radius:12px;
+
+    color:white;
+
+    font-size:12px;
+
+}
+
+.legend div{
+
+    margin:5px 0;
+
+}
+
+.dot{
+
+    display:inline-block;
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+    margin-right:6px;
+
+}
+
+.entityDot{
+
+    background:#8b5cf6;
+}
+
+.attributeDot{
+
+    background:#ec4899;
+}
+
+.relationshipDot{
+
+    background:#f59e0b;
+}
+
+.connectionDot{
+
+    background:#22d3ee;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     CONTROL PANEL
+===================================================== -->
+
+<div class="panel">
+
+    <h2>🔗 ER Model VR Lab</h2>
+
+    <div class="subtitle">
+
+        Explore entities, attributes, relationships
+        and cardinality using an interactive ER diagram.
+
+    </div>
+
+
+    <div id="info">
+
+        <b>Welcome to the ER Lab!</b><br><br>
+
+        Click any object in the virtual ER diagram
+        or select a concept below.
+
+    </div>
+
+
+    <button onclick="showConcept('ENTITY')">
+
+        🟣 Entity
+
+    </button>
+
+
+    <button onclick="showConcept('ATTRIBUTE')">
+
+        🩷 Attribute
+
+    </button>
+
+
+    <button onclick="showConcept('RELATIONSHIP')">
+
+        🟠 Relationship
+
+    </button>
+
+
+    <button onclick="showConcept('CARDINALITY')">
+
+        🔢 Cardinality
+
+    </button>
+
+
+    <button
+        class="demo"
+        onclick="runDemo()">
+
+        ▶ Run ER Model Demo
+
+    </button>
+
+
+    <button
+        class="reset"
+        onclick="resetLab()">
+
+        ↻ Reset
+
+    </button>
+
+
+    <div class="progress">
+
+        <div id="progressBar"></div>
+
+    </div>
+
+
+    <div
+        id="stage"
+        class="stage">
+
+        ER MODEL READY
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     LEGEND
+===================================================== -->
+
+<div class="legend">
+
+    <div>
+        <span class="dot entityDot"></span>
+        Entity
+    </div>
+
+    <div>
+        <span class="dot attributeDot"></span>
+        Attribute
+    </div>
+
+    <div>
+        <span class="dot relationshipDot"></span>
+        Relationship
+    </div>
+
+    <div>
+        <span class="dot connectionDot"></span>
+        Connection
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     A-FRAME SCENE
+===================================================== -->
+
+<a-scene
+    background="color:#020617"
+    renderer="antialias:true"
+    cursor="rayOrigin:mouse"
+    raycaster="objects:.clickable">
+
+
+    <!-- CAMERA -->
+
+    <a-camera position="0 3 14">
+
+        <a-cursor
+            color="#a78bfa"
+            fuse="false">
+        </a-cursor>
+
+    </a-camera>
+
+
+    <!-- LIGHTING -->
+
+    <a-light
+        type="ambient"
+        intensity="1.5">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="0 8 2"
+        intensity="2.5"
+        color="#a78bfa">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="-7 5 -5"
+        intensity="1.5"
+        color="#8b5cf6">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="7 5 -5"
+        intensity="1.5"
+        color="#06b6d4">
+    </a-light>
+
+
+    <!-- FLOOR -->
+
+    <a-plane
+        rotation="-90 0 0"
+        width="40"
+        height="40"
+        color="#111827">
+    </a-plane>
+
+
+    <!-- GRID -->
+
+    <a-plane
+        rotation="-90 0 0"
+        position="0 .01 -5"
+        width="30"
+        height="30"
+        material="
+            color:#1e293b;
+            wireframe:true;
+            transparent:true;
+            opacity:.5">
+    </a-plane>
+
+
+    <a-sky color="#020617"></a-sky>
+
+
+    <!-- =================================================
+         TITLE
+    ================================================= -->
+
+    <a-text
+        value="ENTITY RELATIONSHIP MODEL"
+        align="center"
+        position="0 7.4 -9"
+        color="#c4b5fd"
+        scale="1.8 1.8 1.8">
+    </a-text>
+
+
+    <a-text
+        value="ENTITY  •  ATTRIBUTE  •  RELATIONSHIP  •  CARDINALITY"
+        align="center"
+        position="0 6.75 -9"
+        color="#94a3b8"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- =================================================
+         STUDENT ENTITY
+    ================================================= -->
+
+    <a-box
+        id="studentEntity"
+        class="clickable"
+        position="-4.2 3.4 -8"
+        width="3.4"
+        height="2"
+        depth=".6"
+        color="#8b5cf6"
+        onclick="selectEntity('STUDENT')">
+
+    </a-box>
+
+
+    <a-text
+        value="STUDENT"
+        align="center"
+        position="-4.2 3.35 -7.65"
+        color="white"
+        scale="1.2 1.2 1.2">
+    </a-text>
+
+
+    <a-text
+        value="ENTITY"
+        align="center"
+        position="-4.2 2.8 -7.65"
+        color="#ddd6fe"
+        scale=".5 .5 .5">
+    </a-text>
+
+
+    <!-- =================================================
+         COURSE ENTITY
+    ================================================= -->
+
+    <a-box
+        id="courseEntity"
+        class="clickable"
+        position="4.2 3.4 -8"
+        width="3.4"
+        height="2"
+        depth=".6"
+        color="#06b6d4"
+        onclick="selectEntity('COURSE')">
+
+    </a-box>
+
+
+    <a-text
+        value="COURSE"
+        align="center"
+        position="4.2 3.35 -7.65"
+        color="white"
+        scale="1.2 1.2 1.2">
+    </a-text>
+
+
+    <a-text
+        value="ENTITY"
+        align="center"
+        position="4.2 2.8 -7.65"
+        color="#cffafe"
+        scale=".5 .5 .5">
+    </a-text>
+
+
+    <!-- =================================================
+         RELATIONSHIP DIAMOND
+    ================================================= -->
+
+    <a-dodecahedron
+        id="relationship"
+        class="clickable"
+        position="0 3.4 -8"
+        radius="1.25"
+        color="#f59e0b"
+        onclick="selectRelationship()">
+
+        <a-animation
+            attribute="rotation"
+            from="0 0 0"
+            to="0 360 0"
+            dur="6000"
+            loop="true">
+        </a-animation>
+
+    </a-dodecahedron>
+
+
+    <a-text
+        value="ENROLLS"
+        align="center"
+        position="0 3.35 -6.75"
+        color="white"
+        scale=".7 .7 .7">
+    </a-text>
+
+
+    <a-text
+        value="RELATIONSHIP"
+        align="center"
+        position="0 2.65 -6.75"
+        color="#fcd34d"
+        scale=".45 .45 .45">
+    </a-text>
+
+
+    <!-- =================================================
+         CONNECTIONS
+    ================================================= -->
+
+    <a-cylinder
+        id="leftConnection"
+        position="-2.1 3.4 -8"
+        radius=".07"
+        height="2"
+        rotation="0 0 90"
+        color="#f59e0b">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.12 1.12 1.12"
+            direction="alternate"
+            loop="true"
+            dur="900">
+        </a-animation>
+
+    </a-cylinder>
+
+
+    <a-cylinder
+        id="rightConnection"
+        position="2.1 3.4 -8"
+        radius=".07"
+        height="2"
+        rotation="0 0 90"
+        color="#f59e0b">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.12 1.12 1.12"
+            direction="alternate"
+            loop="true"
+            dur="900">
+        </a-animation>
+
+    </a-cylinder>
+
+
+    <!-- =================================================
+         STUDENT ATTRIBUTE
+    ================================================= -->
+
+    <a-sphere
+        id="studentAttribute"
+        class="clickable"
+        position="-5.1 5.65 -8"
+        radius=".65"
+        color="#ec4899"
+        onclick="selectAttribute('STUDENT_ID')">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.12 1.12 1.12"
+            direction="alternate"
+            loop="true"
+            dur="1000">
+        </a-animation>
+
+    </a-sphere>
+
+
+    <a-text
+        value="Student_ID"
+        align="center"
+        position="-5.1 6.45 -8"
+        color="white"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- ATTRIBUTE CONNECTION -->
+
+    <a-cylinder
+        position="-4.65 4.55 -8"
+        radius=".04"
+        height="1.4"
+        rotation="0 0 -35"
+        color="#ec4899">
+    </a-cylinder>
+
+
+    <!-- =================================================
+         COURSE ATTRIBUTE
+    ================================================= -->
+
+    <a-sphere
+        id="courseAttribute"
+        class="clickable"
+        position="5.1 5.65 -8"
+        radius=".65"
+        color="#ec4899"
+        onclick="selectAttribute('COURSE_ID')">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.12 1.12 1.12"
+            direction="alternate"
+            loop="true"
+            dur="1000">
+        </a-animation>
+
+    </a-sphere>
+
+
+    <a-text
+        value="Course_ID"
+        align="center"
+        position="5.1 6.45 -8"
+        color="white"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <a-cylinder
+        position="4.65 4.55 -8"
+        radius=".04"
+        height="1.4"
+        rotation="0 0 35"
+        color="#ec4899">
+    </a-cylinder>
+
+
+    <!-- =================================================
+         PRIMARY KEY SYMBOLS
+    ================================================= -->
+
+    <a-text
+        value="🔑"
+        position="-5.45 5.3 -7.7"
+        scale=".55 .55 .55">
+    </a-text>
+
+
+    <a-text
+        value="🔑"
+        position="4.75 5.3 -7.7"
+        scale=".55 .55 .55">
+    </a-text>
+
+
+    <!-- =================================================
+         CARDINALITY
+    ================================================= -->
+
+    <a-text
+        id="leftCardinality"
+        value="1"
+        align="center"
+        position="-2.65 3.85 -7.55"
+        color="#22d3ee"
+        scale="1 1 1">
+    </a-text>
+
+
+    <a-text
+        id="rightCardinality"
+        value="N"
+        align="center"
+        position="2.65 3.85 -7.55"
+        color="#22d3ee"
+        scale="1 1 1">
+    </a-text>
+
+
+    <a-text
+        value="1 : N"
+        align="center"
+        position="0 1.45 -7.5"
+        color="#22d3ee"
+        scale="1.1 1.1 1.1">
+    </a-text>
+
+
+    <a-text
+        value="ONE STUDENT → MANY COURSES"
+        align="center"
+        position="0 .9 -7.5"
+        color="#94a3b8"
+        scale=".55 .55 .55">
+    </a-text>
+
+
+    <!-- =================================================
+         STATUS
+    ================================================= -->
+
+    <a-text
+        id="status"
+        value="ER MODEL READY"
+        align="center"
+        position="0 6.1 -8"
+        color="#a78bfa"
+        scale=".75 .75 .75">
+    </a-text>
+
+
+</a-scene>
+
+
+<script>
+
+/* =====================================================
+   STATE
+===================================================== */
+
+let demoRunning = false;
+
+
+/* =====================================================
+   CONCEPT DATA
+===================================================== */
+
+const concepts = {
+
+    ENTITY: {
+
+        title:"Entity",
+
+        text:
+        "An entity represents a real-world object.<br><br>" +
+        "Examples: STUDENT and COURSE are entities.",
+
+        progress:25
+
+    },
+
+
+    ATTRIBUTE: {
+
+        title:"Attribute",
+
+        text:
+        "An attribute describes an entity.<br><br>" +
+        "Student_ID identifies a student and Course_ID " +
+        "identifies a course.",
+
+        progress:50
+
+    },
+
+
+    RELATIONSHIP: {
+
+        title:"Relationship",
+
+        text:
+        "A relationship describes how two entities are connected.<br><br>" +
+        "ENROLLS connects STUDENT with COURSE.",
+
+        progress:75
+
+    },
+
+
+    CARDINALITY: {
+
+        title:"Cardinality",
+
+        text:
+        "Cardinality tells us how many entities can participate " +
+        "in a relationship.<br><br>" +
+        "This example demonstrates a 1:N relationship.",
+
+        progress:100
+
+    }
+
+};
+
+
+/* =====================================================
+   SHOW CONCEPT
+===================================================== */
+
+function showConcept(type){
+
+    if(demoRunning)
+        return;
+
+
+    const data =
+        concepts[type];
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>" + data.title + "</b><br><br>" +
+
+        data.text;
+
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        data.progress + "%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        data.title.toUpperCase();
+
+
+    resetHighlights();
+
+
+    if(type === "ENTITY"){
+
+        pulse("studentEntity");
+        pulse("courseEntity");
+
+    }
+
+
+    if(type === "ATTRIBUTE"){
+
+        pulse("studentAttribute");
+        pulse("courseAttribute");
+
+    }
+
+
+    if(type === "RELATIONSHIP"){
+
+        pulse("relationship");
+        pulse("leftConnection");
+        pulse("rightConnection");
+
+    }
+
+
+    if(type === "CARDINALITY"){
+
+        pulse("leftCardinality");
+        pulse("rightCardinality");
+
+    }
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            data.title.toUpperCase() + " ✓"
+        );
+
+}
+
+
+/* =====================================================
+   SELECT ENTITY
+===================================================== */
+
+function selectEntity(entity){
+
+    if(demoRunning)
+        return;
+
+
+    resetHighlights();
+
+
+    let objectId = "";
+
+    if(entity === "STUDENT"){
+
+        objectId = "studentEntity";
+
+        document
+            .getElementById("info")
+            .innerHTML =
+
+            "<b>STUDENT</b><br><br>" +
+
+            "STUDENT is an entity representing " +
+
+            "a real-world student.<br><br>" +
+
+            "Its Student_ID can uniquely identify " +
+
+            "each student.";
+
+    }
+
+
+    if(entity === "COURSE"){
+
+        objectId = "courseEntity";
+
+        document
+            .getElementById("info")
+            .innerHTML =
+
+            "<b>COURSE</b><br><br>" +
+
+            "COURSE is an entity representing " +
+
+            "a subject or course.<br><br>" +
+
+            "Course_ID uniquely identifies each course.";
+
+    }
+
+
+    pulse(objectId);
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        entity + " ENTITY SELECTED";
+
+}
+
+
+/* =====================================================
+   SELECT ATTRIBUTE
+===================================================== */
+
+function selectAttribute(attribute){
+
+    if(demoRunning)
+        return;
+
+
+    resetHighlights();
+
+
+    let objectId = "";
+
+
+    if(attribute === "STUDENT_ID"){
+
+        objectId =
+            "studentAttribute";
+
+
+        document
+            .getElementById("info")
+            .innerHTML =
+
+            "<b>Student_ID</b><br><br>" +
+
+            "This attribute identifies each student " +
+
+            "uniquely.<br><br>" +
+
+            "It can act as a Primary Key.";
+
+    }
+
+
+    if(attribute === "COURSE_ID"){
+
+        objectId =
+            "courseAttribute";
+
+
+        document
+            .getElementById("info")
+            .innerHTML =
+
+            "<b>Course_ID</b><br><br>" +
+
+            "This attribute identifies each course " +
+
+            "uniquely.<br><br>" +
+
+            "It can act as a Primary Key.";
+
+    }
+
+
+    pulse(objectId);
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        attribute + " SELECTED";
+
+}
+
+
+/* =====================================================
+   RELATIONSHIP
+===================================================== */
+
+function selectRelationship(){
+
+    if(demoRunning)
+        return;
+
+
+    resetHighlights();
+
+
+    pulse("relationship");
+    pulse("leftConnection");
+    pulse("rightConnection");
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>ENROLLS</b><br><br>" +
+
+        "ENROLLS is a relationship between " +
+
+        "STUDENT and COURSE.<br><br>" +
+
+        "It represents the fact that a student " +
+
+        "enrolls in a course.";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "ENROLLS RELATIONSHIP";
+
+}
+
+
+/* =====================================================
+   PULSE OBJECT
+===================================================== */
+
+function pulse(id){
+
+    const object =
+        document.getElementById(id);
+
+
+    object.setAttribute(
+
+        "animation__highlight",
+
+        "property:scale;" +
+
+        "from:1 1 1;" +
+
+        "to:1.3 1.3 1.3;" +
+
+        "dur:450;" +
+
+        "direction:alternate;" +
+
+        "loop:3"
+
+    );
+
+}
+
+
+/* =====================================================
+   RESET HIGHLIGHTS
+===================================================== */
+
+function resetHighlights(){
+
+    const ids = [
+
+        "studentEntity",
+        "courseEntity",
+        "relationship",
+        "studentAttribute",
+        "courseAttribute"
+
+    ];
+
+
+    ids.forEach(function(id){
+
+        const object =
+            document.getElementById(id);
+
+
+        object.removeAttribute(
+            "animation__highlight"
+        );
+
+
+        object.setAttribute(
+            "scale",
+            "1 1 1"
+        );
+
+    });
+
+}
+
+
+/* =====================================================
+   RUN DEMO
+===================================================== */
+
+async function runDemo(){
+
+    if(demoRunning)
+        return;
+
+
+    demoRunning = true;
+
+
+    /* STEP 1 */
+
+    showConcept("ENTITY");
+
+    await wait(2500);
+
+
+    /* STEP 2 */
+
+    showConcept("ATTRIBUTE");
+
+    await wait(2500);
+
+
+    /* STEP 3 */
+
+    showConcept("RELATIONSHIP");
+
+    await wait(2500);
+
+
+    /* STEP 4 */
+
+    showConcept("CARDINALITY");
+
+    await wait(2500);
+
+
+    /* STEP 5 */
+
+    selectEntity("STUDENT");
+
+    await wait(1800);
+
+
+    /* STEP 6 */
+
+    selectRelationship();
+
+    await wait(1800);
+
+
+    /* COMPLETE */
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>🎉 ER Model Demo Complete!</b><br><br>" +
+
+        "You explored:<br>" +
+
+        "Entity → Attribute → Relationship → Cardinality";
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "ER MODEL COMPLETE ✓"
+        );
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "DEMO COMPLETE";
+
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        "100%";
+
+
+    demoRunning = false;
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab(){
+
+    demoRunning = false;
+
+
+    resetHighlights();
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>Welcome to the ER Lab!</b><br><br>" +
+
+        "Click any object in the virtual ER diagram " +
+
+        "or select a concept below.";
+
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        "0%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "ER MODEL READY";
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "ER MODEL READY"
+        );
+
+}
+
+
+/* =====================================================
+   WAIT
+===================================================== */
+
+function wait(ms){
+
+    return new Promise(
+
+        resolve =>
+        setTimeout(resolve,ms)
+
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Relational Model VR Lab</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    overflow:hidden;
+    background:#020617;
+}
+
+/* =========================================
+   CONTROL PANEL
+========================================= */
+
+.panel{
+
+    position:absolute;
+    z-index:20;
+
+    top:18px;
+    left:18px;
+
+    width:330px;
+
+    padding:20px;
+
+    background:rgba(2,6,23,.96);
+
+    color:white;
+
+    border-radius:18px;
+
+    border:1px solid #22c55e;
+
+    box-shadow:
+        0 0 30px rgba(34,197,94,.22),
+        inset 0 0 20px rgba(34,197,94,.05);
+
+    backdrop-filter:blur(10px);
+}
+
+.panel h2{
+
+    margin:0;
+
+    color:#22c55e;
+
+}
+
+.subtitle{
+
+    margin-top:5px;
+
+    color:#94a3b8;
+
+    font-size:13px;
+
+    line-height:1.4;
+
+}
+
+#info{
+
+    margin-top:15px;
+
+    padding:13px;
+
+    min-height:100px;
+
+    background:#0f172a;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    line-height:1.5;
+
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+button{
+
+    width:100%;
+
+    padding:11px;
+
+    margin-top:7px;
+
+    border:none;
+
+    border-radius:9px;
+
+    background:#22c55e;
+
+    color:#020617;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+button:hover{
+
+    background:#4ade80;
+
+    transform:translateY(-2px);
+
+}
+
+.demo{
+
+    background:#8b5cf6;
+
+    color:white;
+
+}
+
+.reset{
+
+    background:#334155;
+
+    color:white;
+
+}
+
+
+/* =========================================
+   PROGRESS
+========================================= */
+
+.progress{
+
+    margin-top:14px;
+
+    height:8px;
+
+    background:#1e293b;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+}
+
+#progressBar{
+
+    height:100%;
+
+    width:0%;
+
+    background:#22c55e;
+
+    transition:.5s;
+
+}
+
+.stage{
+
+    text-align:center;
+
+    margin-top:7px;
+
+    color:#94a3b8;
+
+    font-size:12px;
+
+}
+
+
+/* =========================================
+   LEGEND
+========================================= */
+
+.legend{
+
+    position:absolute;
+
+    z-index:20;
+
+    right:18px;
+
+    bottom:18px;
+
+    padding:13px 16px;
+
+    background:rgba(2,6,23,.93);
+
+    border:1px solid #334155;
+
+    border-radius:12px;
+
+    color:white;
+
+    font-size:12px;
+
+}
+
+.legend div{
+
+    margin:5px 0;
+
+}
+
+.dot{
+
+    display:inline-block;
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+    margin-right:6px;
+
+}
+
+.green{
+
+    background:#22c55e;
+
+}
+
+.cyan{
+
+    background:#22d3ee;
+
+}
+
+.yellow{
+
+    background:#facc15;
+
+}
+
+.purple{
+
+    background:#8b5cf6;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     CONTROL PANEL
+===================================================== -->
+
+<div class="panel">
+
+    <h2>📊 Relational Model VR</h2>
+
+    <div class="subtitle">
+
+        Explore tables, tuples, primary keys and foreign keys.
+
+    </div>
+
+
+    <div id="info">
+
+        <b>Welcome!</b><br><br>
+
+        Click an element of the relational model
+        to learn how it works.
+
+    </div>
+
+
+    <button onclick="showConcept('TABLE')">
+
+        🗃️ Table / Relation
+
+    </button>
+
+
+    <button onclick="showConcept('TUPLE')">
+
+        📄 Tuple / Row
+
+    </button>
+
+
+    <button onclick="showConcept('PRIMARY')">
+
+        🔑 Primary Key
+
+    </button>
+
+
+    <button onclick="showConcept('FOREIGN')">
+
+        🔗 Foreign Key
+
+    </button>
+
+
+    <button
+        class="demo"
+        onclick="runDemo()">
+
+        ▶ Run Relationship Demo
+
+    </button>
+
+
+    <button
+        class="reset"
+        onclick="resetLab()">
+
+        ↻ Reset
+
+    </button>
+
+
+    <div class="progress">
+
+        <div id="progressBar"></div>
+
+    </div>
+
+
+    <div
+        id="stage"
+        class="stage">
+
+        MODEL READY
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     LEGEND
+===================================================== -->
+
+<div class="legend">
+
+    <div>
+        <span class="dot green"></span>
+        Student Relation
+    </div>
+
+    <div>
+        <span class="dot cyan"></span>
+        Course Relation
+    </div>
+
+    <div>
+        <span class="dot yellow"></span>
+        Key Relationship
+    </div>
+
+    <div>
+        <span class="dot purple"></span>
+        Selected Element
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     A-FRAME SCENE
+===================================================== -->
+
+<a-scene
+    background="color:#020617"
+    renderer="antialias:true"
+    cursor="rayOrigin:mouse"
+    raycaster="objects:.clickable">
+
+
+    <!-- CAMERA -->
+
+    <a-camera position="0 3.3 15">
+
+        <a-cursor
+            color="#22c55e"
+            fuse="false">
+        </a-cursor>
+
+    </a-camera>
+
+
+    <!-- LIGHTS -->
+
+    <a-light
+        type="ambient"
+        intensity="1.5">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="0 8 4"
+        intensity="2.5"
+        color="#22c55e">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="-7 5 -5"
+        intensity="1.5"
+        color="#22c55e">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="7 5 -5"
+        intensity="1.5"
+        color="#22d3ee">
+    </a-light>
+
+
+    <!-- FLOOR -->
+
+    <a-plane
+        rotation="-90 0 0"
+        width="40"
+        height="40"
+        color="#0f172a">
+    </a-plane>
+
+
+    <!-- GRID -->
+
+    <a-plane
+        rotation="-90 0 0"
+        position="0 .01 -5"
+        width="30"
+        height="30"
+        material="
+            color:#111827;
+            wireframe:true;
+            transparent:true;
+            opacity:.55">
+    </a-plane>
+
+
+    <a-sky color="#020617"></a-sky>
+
+
+    <!-- =================================================
+         TITLE
+    ================================================= -->
+
+    <a-text
+        value="RELATIONAL DATABASE MODEL"
+        position="-4.8 7.5 -9"
+        color="#22c55e"
+        scale="1.8 1.8 1.8">
+    </a-text>
+
+
+    <a-text
+        value="TABLES  •  TUPLES  •  KEYS  •  RELATIONSHIPS"
+        position="-3.5 6.8 -9"
+        color="#94a3b8"
+        scale=".75 .75 .75">
+    </a-text>
+
+
+    <!-- =================================================
+         STUDENT TABLE
+    ================================================= -->
+
+    <a-box
+        id="studentTable"
+        position="-4.2 3.4 -8"
+        width="6"
+        height="4.5"
+        depth=".55"
+        color="#064e3b"
+        class="clickable"
+        onclick="showConcept('TABLE')">
+
+    </a-box>
+
+
+    <!-- STUDENT HEADER -->
+
+    <a-text
+        value="STUDENT"
+        align="center"
+        position="-4.2 5 -7.65"
+        color="#4ade80"
+        scale="1.5 1.5 1.5">
+    </a-text>
+
+
+    <a-text
+        value="STUDENT RELATION"
+        align="center"
+        position="-4.2 4.55 -7.65"
+        color="#86efac"
+        scale=".55 .55 .55">
+    </a-text>
+
+
+    <!-- COLUMN HEADER -->
+
+    <a-text
+        value="ID       NAME       COURSE_ID"
+        position="-6.65 4.05 -7.65"
+        color="#cbd5e1"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- STUDENT ROW 1 -->
+
+    <a-box
+        id="studentRow1"
+        class="clickable"
+        position="-4.2 3.45 -7.65"
+        width="5.4"
+        height=".55"
+        depth=".08"
+        color="#065f46"
+        onclick="selectTuple(1)">
+
+    </a-box>
+
+
+    <a-text
+        value="1        Divya        C101"
+        position="-6.55 3.3 -7.5"
+        color="white"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- STUDENT ROW 2 -->
+
+    <a-box
+        id="studentRow2"
+        class="clickable"
+        position="-4.2 2.8 -7.65"
+        width="5.4"
+        height=".55"
+        depth=".08"
+        color="#065f46"
+        onclick="selectTuple(2)">
+
+    </a-box>
+
+
+    <a-text
+        value="2        Riya         C102"
+        position="-6.55 2.65 -7.5"
+        color="white"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- STUDENT ROW 3 -->
+
+    <a-box
+        id="studentRow3"
+        class="clickable"
+        position="-4.2 2.15 -7.65"
+        width="5.4"
+        height=".55"
+        depth=".08"
+        color="#065f46"
+        onclick="selectTuple(3)">
+
+    </a-box>
+
+
+    <a-text
+        value="3        Aisha        C101"
+        position="-6.55 2 -7.5"
+        color="white"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- PRIMARY KEY BADGE -->
+
+    <a-sphere
+        id="primaryBadge"
+        position="-6.5 1.25 -7.6"
+        radius=".3"
+        color="#facc15">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.3 1.3 1.3"
+            direction="alternate"
+            loop="true"
+            dur="800">
+        </a-animation>
+
+    </a-sphere>
+
+
+    <a-text
+        value="🔑 ID = PRIMARY KEY"
+        position="-5.95 1.15 -7.6"
+        color="#facc15"
+        scale=".55 .55 .55">
+    </a-text>
+
+
+    <!-- =================================================
+         COURSE TABLE
+    ================================================= -->
+
+    <a-box
+        id="courseTable"
+        position="4.2 3.4 -8"
+        width="5.5"
+        height="4.1"
+        depth=".55"
+        color="#164e63"
+        class="clickable"
+        onclick="showConcept('TABLE')">
+
+    </a-box>
+
+
+    <a-text
+        value="COURSE"
+        align="center"
+        position="4.2 4.95 -7.65"
+        color="#22d3ee"
+        scale="1.5 1.5 1.5">
+    </a-text>
+
+
+    <a-text
+        value="COURSE RELATION"
+        align="center"
+        position="4.2 4.5 -7.65"
+        color="#67e8f9"
+        scale=".55 .55 .55">
+    </a-text>
+
+
+    <a-text
+        value="COURSE_ID       COURSE"
+        position="2.2 4 -7.65"
+        color="#cbd5e1"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- COURSE ROW 1 -->
+
+    <a-box
+        id="courseRow1"
+        class="clickable"
+        position="4.2 3.35 -7.65"
+        width="4.8"
+        height=".55"
+        depth=".08"
+        color="#155e75"
+        onclick="selectCourse('C101')">
+
+    </a-box>
+
+
+    <a-text
+        value="C101             DBMS"
+        position="2.35 3.2 -7.5"
+        color="white"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- COURSE ROW 2 -->
+
+    <a-box
+        id="courseRow2"
+        class="clickable"
+        position="4.2 2.7 -7.65"
+        width="4.8"
+        height=".55"
+        depth=".08"
+        color="#155e75"
+        onclick="selectCourse('C102')">
+
+    </a-box>
+
+
+    <a-text
+        value="C102             CN"
+        position="2.35 2.55 -7.5"
+        color="white"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- FOREIGN KEY BADGE -->
+
+    <a-sphere
+        id="foreignBadge"
+        position="2.05 1.6 -7.6"
+        radius=".3"
+        color="#facc15">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.3 1.3 1.3"
+            direction="alternate"
+            loop="true"
+            dur="800">
+        </a-animation>
+
+    </a-sphere>
+
+
+    <a-text
+        value="🔗 COURSE_ID = FOREIGN KEY"
+        position="2.45 1.5 -7.6"
+        color="#facc15"
+        scale=".52 .52 .52">
+    </a-text>
+
+
+    <!-- =================================================
+         RELATIONSHIP LINE
+    ================================================= -->
+
+    <a-cylinder
+        id="relationLine"
+        position="0 3.35 -7.95"
+        radius=".08"
+        height="3"
+        rotation="0 0 90"
+        color="#facc15">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.15 1.15 1.15"
+            direction="alternate"
+            loop="true"
+            dur="700">
+        </a-animation>
+
+    </a-cylinder>
+
+
+    <!-- RELATIONSHIP CORE -->
+
+    <a-sphere
+        id="relationCore"
+        position="0 3.35 -7.55"
+        radius=".38"
+        color="#facc15">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.5 1.5 1.5"
+            direction="alternate"
+            loop="true"
+            dur="700">
+        </a-animation>
+
+    </a-sphere>
+
+
+    <a-text
+        value="RELATIONSHIP"
+        align="center"
+        position="-.85 4.05 -7.4"
+        color="#facc15"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- =================================================
+         RELATIONSHIP LABEL
+    ================================================= -->
+
+    <a-text
+        id="relationshipText"
+        value="COURSE_ID → COURSE_ID"
+        align="center"
+        position="-2.4 .55 -7.4"
+        color="#facc15"
+        scale=".7 .7 .7">
+    </a-text>
+
+
+    <!-- =================================================
+         STATUS
+    ================================================= -->
+
+    <a-text
+        id="status"
+        value="RELATIONAL MODEL READY"
+        align="center"
+        position="-.0 6.05 -8"
+        color="#22c55e"
+        scale=".75 .75 .75">
+    </a-text>
+
+
+</a-scene>
+
+
+<script>
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let demoRunning = false;
+
+
+/* =====================================================
+   CONCEPT INFORMATION
+===================================================== */
+
+const concepts = {
+
+    TABLE: {
+
+        title:"Table / Relation",
+
+        text:
+        "A relation is represented as a table containing rows and columns.<br><br>" +
+        "Example: STUDENT and COURSE are relations.",
+
+        progress:25
+
+    },
+
+
+    TUPLE: {
+
+        title:"Tuple",
+
+        text:
+        "A tuple is one complete row in a relational table.<br><br>" +
+        "Example: (1, Divya, C101) is one tuple.",
+
+        progress:50
+
+    },
+
+
+    PRIMARY: {
+
+        title:"Primary Key",
+
+        text:
+        "A primary key uniquely identifies each record.<br><br>" +
+        "In STUDENT, ID is the primary key.",
+
+        progress:75
+
+    },
+
+
+    FOREIGN: {
+
+        title:"Foreign Key",
+
+        text:
+        "A foreign key connects tables.<br><br>" +
+        "COURSE_ID in STUDENT references COURSE_ID in COURSE.",
+
+        progress:100
+
+    }
+
+};
+
+
+/* =====================================================
+   SHOW CONCEPT
+===================================================== */
+
+function showConcept(type){
+
+    if(demoRunning)
+        return;
+
+
+    const data =
+        concepts[type];
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>" + data.title + "</b><br><br>" +
+
+        data.text;
+
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        data.progress + "%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        data.title.toUpperCase();
+
+
+    /* Highlight corresponding object */
+
+    resetHighlights();
+
+
+    if(type === "TABLE"){
+
+        pulse("studentTable");
+        pulse("courseTable");
+
+    }
+
+
+    if(type === "TUPLE"){
+
+        pulse("studentRow1");
+
+    }
+
+
+    if(type === "PRIMARY"){
+
+        pulse("primaryBadge");
+        pulse("studentRow1");
+        pulse("studentRow2");
+        pulse("studentRow3");
+
+    }
+
+
+    if(type === "FOREIGN"){
+
+        pulse("foreignBadge");
+        pulse("relationLine");
+        pulse("relationCore");
+
+    }
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            data.title.toUpperCase() + " ✓"
+        );
+
+}
+
+
+/* =====================================================
+   SELECT STUDENT TUPLE
+===================================================== */
+
+function selectTuple(id){
+
+    resetHighlights();
+
+
+    const row =
+        document.getElementById(
+            "studentRow" + id
+        );
+
+
+    row.setAttribute(
+        "color",
+        "#8b5cf6"
+    );
+
+
+    row.setAttribute(
+        "animation__select",
+        "property:scale;" +
+        "from:1 1 1;" +
+        "to:1.12 1.12 1.12;" +
+        "dur:400;" +
+        "dir:alternate;" +
+        "loop:3"
+    );
+
+
+    let course = "";
+
+    let student = "";
+
+
+    if(id === 1){
+
+        student = "Divya";
+        course = "C101";
+
+    }
+
+    if(id === 2){
+
+        student = "Riya";
+        course = "C102";
+
+    }
+
+    if(id === 3){
+
+        student = "Aisha";
+        course = "C101";
+
+    }
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>Tuple Selected</b><br><br>" +
+
+        "Student: " + student + "<br>" +
+
+        "ID: " + id + "<br>" +
+
+        "COURSE_ID: " + course + "<br><br>" +
+
+        "This complete row is one tuple.";
+
+
+    highlightCourse(course);
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "TUPLE " + id + " SELECTED";
+
+}
+
+
+/* =====================================================
+   SELECT COURSE
+===================================================== */
+
+function selectCourse(course){
+
+    resetHighlights();
+
+
+    let rowId =
+        course === "C101"
+        ? "courseRow1"
+        : "courseRow2";
+
+
+    document
+        .getElementById(rowId)
+        .setAttribute(
+            "color",
+            "#8b5cf6"
+        );
+
+
+    document
+        .getElementById(rowId)
+        .setAttribute(
+            "animation__select",
+            "property:scale;" +
+            "from:1 1 1;" +
+            "to:1.12 1.12 1.12;" +
+            "dur:400;" +
+            "dir:alternate;" +
+            "loop:3"
+        );
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>Course Selected</b><br><br>" +
+
+        "COURSE_ID: " + course + "<br><br>" +
+
+        "This value can be referenced by " +
+
+        "the foreign key in the STUDENT table.";
+
+
+    highlightStudents(course);
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        course + " SELECTED";
+
+}
+
+
+/* =====================================================
+   HIGHLIGHT COURSE
+===================================================== */
+
+function highlightCourse(course){
+
+    let rowId =
+        course === "C101"
+        ? "courseRow1"
+        : "courseRow2";
+
+
+    document
+        .getElementById(rowId)
+        .setAttribute(
+            "color",
+            "#facc15"
+        );
+
+
+    document
+        .getElementById("relationLine")
+        .setAttribute(
+            "color",
+            "#facc15"
+        );
+
+
+    document
+        .getElementById("relationCore")
+        .setAttribute(
+            "color",
+            "#facc15"
+        );
+
+}
+
+
+/* =====================================================
+   HIGHLIGHT STUDENTS
+===================================================== */
+
+function highlightStudents(course){
+
+    if(course === "C101"){
+
+        document
+            .getElementById("studentRow1")
+            .setAttribute(
+                "color",
+                "#facc15"
+            );
+
+
+        document
+            .getElementById("studentRow3")
+            .setAttribute(
+                "color",
+                "#facc15"
+            );
+
+    }
+
+
+    if(course === "C102"){
+
+        document
+            .getElementById("studentRow2")
+            .setAttribute(
+                "color",
+                "#facc15"
+            );
+
+    }
+
+}
+
+
+/* =====================================================
+   PULSE
+===================================================== */
+
+function pulse(id){
+
+    const object =
+        document.getElementById(id);
+
+
+    object.setAttribute(
+        "animation__pulse",
+        "property:scale;" +
+        "from:1 1 1;" +
+        "to:1.3 1.3 1.3;" +
+        "dur:500;" +
+        "dir:alternate;" +
+        "loop:3"
+    );
+
+}
+
+
+/* =====================================================
+   RESET HIGHLIGHTS
+===================================================== */
+
+function resetHighlights(){
+
+    document
+        .getElementById("studentTable")
+        .setAttribute(
+            "color",
+            "#064e3b"
+        );
+
+
+    document
+        .getElementById("courseTable")
+        .setAttribute(
+            "color",
+            "#164e63"
+        );
+
+
+    document
+        .getElementById("studentRow1")
+        .setAttribute(
+            "color",
+            "#065f46"
+        );
+
+
+    document
+        .getElementById("studentRow2")
+        .setAttribute(
+            "color",
+            "#065f46"
+        );
+
+
+    document
+        .getElementById("studentRow3")
+        .setAttribute(
+            "color",
+            "#065f46"
+        );
+
+
+    document
+        .getElementById("courseRow1")
+        .setAttribute(
+            "color",
+            "#155e75"
+        );
+
+
+    document
+        .getElementById("courseRow2")
+        .setAttribute(
+            "color",
+            "#155e75"
+        );
+
+
+    document
+        .getElementById("relationLine")
+        .setAttribute(
+            "color",
+            "#facc15"
+        );
+
+
+    document
+        .getElementById("relationCore")
+        .setAttribute(
+            "color",
+            "#facc15"
+        );
+
+}
+
+
+/* =====================================================
+   RUN DEMO
+===================================================== */
+
+async function runDemo(){
+
+    if(demoRunning)
+        return;
+
+
+    demoRunning = true;
+
+
+    /* STEP 1 */
+
+    showConcept("TABLE");
+
+    await wait(2500);
+
+
+    /* STEP 2 */
+
+    showConcept("TUPLE");
+
+    selectTuple(1);
+
+    await wait(2500);
+
+
+    /* STEP 3 */
+
+    showConcept("PRIMARY");
+
+    await wait(2500);
+
+
+    /* STEP 4 */
+
+    showConcept("FOREIGN");
+
+    await wait(2500);
+
+
+    /* STEP 5 */
+
+    selectTuple(1);
+
+    await wait(1800);
+
+
+    selectTuple(2);
+
+    await wait(1800);
+
+
+    selectTuple(3);
+
+    await wait(1800);
+
+
+    /* COMPLETE */
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>🎉 Relationship Demo Complete</b><br><br>" +
+
+        "You explored:<br>" +
+
+        "Table → Tuple → Primary Key → Foreign Key";
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "RELATIONAL MODEL COMPLETE ✓"
+        );
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "DEMO COMPLETE";
+
+
+    demoRunning = false;
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab(){
+
+    demoRunning = false;
+
+
+    resetHighlights();
+
+
+    document
+        .getElementById("info")
+        .innerHTML =
+
+        "<b>Welcome!</b><br><br>" +
+
+        "Click an element of the relational model " +
+
+        "to learn how it works.";
+
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        "0%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "MODEL READY";
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "RELATIONAL MODEL READY"
+        );
+
+}
+
+
+/* =====================================================
+   WAIT
+===================================================== */
+
+function wait(ms){
+
+    return new Promise(
+
+        resolve =>
+        setTimeout(resolve,ms)
+
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

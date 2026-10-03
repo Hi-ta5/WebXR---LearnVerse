@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NLP Virtual Lab — Interactive Pipeline</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+<style>
+:root{
+  --cyan:#22d3ee;--blue:#3b82f6;--purple:#a855f7;--pink:#ec4899;
+  --green:#22c55e;--panel:rgba(3,9,25,.90);--line:rgba(34,211,238,.25)
+}
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;font-family:Inter,Segoe UI,Arial,sans-serif;background:#020617}
+.ui{
+  position:absolute;top:18px;left:18px;width:350px;max-height:calc(100vh - 36px);
+  overflow:auto;padding:20px;border:1px solid var(--line);border-radius:22px;color:#f8fafc;
+  z-index:999;background:linear-gradient(145deg,rgba(3,9,25,.97),rgba(9,20,45,.88));
+  box-shadow:0 0 35px rgba(34,211,238,.16),inset 0 0 30px rgba(59,130,246,.06);
+  backdrop-filter:blur(14px)
+}
+.ui::-webkit-scrollbar{width:5px}.ui::-webkit-scrollbar-thumb{background:#155e75;border-radius:8px}
+.brand{display:flex;gap:11px;align-items:center}
+.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#0891b2,#7c3aed);box-shadow:0 0 22px rgba(34,211,238,.3);font-size:21px}
+h2{margin:0;color:#67e8f9;font-size:20px;letter-spacing:.4px}
+.tag{font-size:9px;color:#a5f3fc;letter-spacing:1.4px;margin-top:3px}
+.desc{color:#94a3b8;font-size:12px;line-height:1.5;margin:13px 0 16px}
+label{font-size:11px;color:#a5f3fc;font-weight:800;letter-spacing:.7px}
+input{
+  width:100%;margin-top:7px;padding:12px 13px;border-radius:11px;border:1px solid #164e63;
+  background:#071426;color:white;outline:none;font-size:14px
+}
+input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+button{
+  width:100%;padding:12px;margin-top:9px;border:none;
+  border-radius:10px;background:#00ffff;
+  color:#000000;font-weight:bold;font-size:13px;cursor:pointer;transition:all .2s ease;
+  box-shadow:0 0 15px rgba(0,240,255,.25);
+}
+button:hover{background:#7fffff;transform:translateY(-2px);box-shadow:0 0 25px rgba(0,240,255,.45)}
+.reset{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.2)!important;color:#ffffff!important;box-shadow:none!important}
+.reset:hover{background:rgba(255,255,255,.15)!important;color:#00ffff!important;border-color:#00ffff!important}
+.status{
+  margin-top:14px;padding:12px;border-radius:12px;background:rgba(2,6,23,.72);
+  border:1px solid rgba(34,211,238,.13);font-size:12px;line-height:1.5
+}
+#status{color:#86efac;font-weight:800}
+.progress{height:5px;background:#0f172a;border-radius:10px;margin-top:9px;overflow:hidden}
+#progressBar{width:0;height:100%;background:linear-gradient(90deg,#22d3ee,#a855f7,#ec4899);transition:width .45s}
+.tip{margin-top:12px;padding:10px 11px;border-left:3px solid #22d3ee;color:#94a3b8;font-size:11px;line-height:1.45}
+</style>
+</head>
+
+<body>
+
+<div class="ui">
+  <div class="brand">
+    <div class="logo">🧠</div>
+    <div>
+      <h2>NLP VIRTUAL LAB</h2>
+      <div class="tag">HUMAN LANGUAGE → MACHINE UNDERSTANDING</div>
+    </div>
+  </div>
+
+  <div class="desc">
+    Enter a sentence and watch it travel through the complete NLP pipeline in 3D.
+    Each station lights up as the computer processes your language.
+  </div>
+
+  <label for="sentenceInput">INPUT SENTENCE</label>
+  <input id="sentenceInput" type="text" value="I love learning NLP"
+         placeholder="Enter a sentence...">
+
+  <button onclick="startNLP()">▶ Start NLP Process</button>
+  <button class="reset" onclick="resetLab()">↺ Reset Lab</button>
+
+  <div class="status">
+    <div style="color:#67e8f9;font-size:10px;font-weight:900;letter-spacing:1px">SYSTEM STATUS</div>
+    <div id="status">Ready — waiting for input</div>
+    <div class="progress"><div id="progressBar"></div></div>
+  </div>
+
+  <div class="tip">
+    💡 <b>Learning tip:</b> Follow the glowing station from left to right:
+    Input → Preprocessing → Tokenization → NLP Model → Output.
+  </div>
+</div>
+
+<a-scene background="color:#020617" vr-mode-ui="enabled:true"
+         renderer="antialias:true;colorManagement:true">
+
+  <a-assets>
+    <a-asset-item id="robot"
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+    </a-asset-item>
+  </a-assets>
+
+  <a-camera position="0 4.2 17"></a-camera>
+
+  <a-light type="ambient" intensity="1.2"></a-light>
+  <a-light type="point" intensity="2.8" position="0 9 3" color="#67e8f9"></a-light>
+  <a-light type="point" intensity="2" position="-9 4 -9" color="#3b82f6"></a-light>
+  <a-light type="point" intensity="2" position="9 4 -9" color="#a855f7"></a-light>
+
+  <a-plane rotation="-90 0 0" width="60" height="60" color="#080f23"
+           material="roughness:.82"></a-plane>
+
+  <a-sky color="#020617"></a-sky>
+
+  <!-- Decorative circular floor rings -->
+  <a-ring position="0 .04 -10" rotation="-90 0 0" radius-inner="6"
+          radius-outer="6.06" color="#22d3ee"
+          material="emissive:#22d3ee;emissiveIntensity:1"
+          animation="property:rotation;to:-90 360 0;loop:true;dur:30000"></a-ring>
+  <a-ring position="0 .05 -10" rotation="-90 0 0" radius-inner="11"
+          radius-outer="11.035" color="#7c3aed"
+          material="emissive:#7c3aed;emissiveIntensity:.8"
+          animation="property:rotation;to:-90 -360 0;loop:true;dur:45000"></a-ring>
+
+  <a-text value="NLP  •  VIRTUAL LEARNING LAB" position="-6.5 9.15 -12"
+          scale="3 3 3" color="#67e8f9"></a-text>
+  <a-text value="WATCH HUMAN LANGUAGE MOVE THROUGH THE NLP PIPELINE"
+          position="-4.8 8.35 -12" scale="1.05 1.05 1.05" color="#94a3b8"></a-text>
+
+  <!-- Robots -->
+  <a-gltf-model src="#robot" position="-10 0 -10" scale="1.05 1.05 1.05"
+    animation="property:rotation;to:0 360 0;loop:true;dur:15000"></a-gltf-model>
+  <a-gltf-model src="#robot" position="10 0 -10" scale="1.05 1.05 1.05"
+    animation="property:rotation;to:0 -360 0;loop:true;dur:15000"></a-gltf-model>
+
+  <!-- Pipeline connector beam -->
+  <a-box position="0 3 -10" width="20" height=".07" depth=".07"
+         color="#22d3ee" material="emissive:#22d3ee;emissiveIntensity:1"></a-box>
+
+  <a-entity id="pipeline">
+
+    <!-- INPUT -->
+    <a-box id="inputBox" position="-8 3 -10" width="3" height="2" depth="2"
+           color="#2563eb" material="emissive:#2563eb;emissiveIntensity:.25"
+           animation__float="property:position;dir:alternate;to:-8 3.18 -10;dur:1800;loop:true"></a-box>
+    <a-text value="01  INPUT TEXT" position="-9.35 4.5 -10"
+            scale="1.3 1.3 1.3" color="white"></a-text>
+    <a-text id="inputLabel" value="Your sentence" position="-9.15 2.72 -8.9"
+            scale=".72 .72 .72" color="#bae6fd" align="center"></a-text>
+
+    <!-- PREPROCESSING -->
+    <a-box id="preprocessBox" position="-4 3 -10" width="3" height="2" depth="2"
+           color="#7c3aed" material="emissive:#7c3aed;emissiveIntensity:.25"
+           animation__float="property:position;dir:alternate;to:-4 3.18 -10;dur:2100;loop:true"></a-box>
+    <a-text value="02  PREPROCESSING" position="-5.3 4.5 -10"
+            scale="1.16 1.16 1.16" color="white"></a-text>
+    <a-text value="Clean the text" position="-4.95 2.72 -8.9"
+            scale=".72 .72 .72" color="#ddd6fe" align="center"></a-text>
+
+    <!-- TOKENIZATION -->
+    <a-box id="tokenBox" position="0 3 -10" width="3" height="2" depth="2"
+           color="#0891b2" material="emissive:#0891b2;emissiveIntensity:.25"
+           animation__float="property:position;dir:alternate;to:0 3.18 -10;dur:1900;loop:true"></a-box>
+    <a-text value="03  TOKENIZATION" position="-1.3 4.5 -10"
+            scale="1.18 1.18 1.18" color="white"></a-text>
+    <a-text value="Split into tokens" position="-1.05 2.72 -8.9"
+            scale=".72 .72 .72" color="#a5f3fc" align="center"></a-text>
+
+    <!-- MODEL -->
+    <a-box id="modelBox" position="4 3 -10" width="3" height="2" depth="2"
+           color="#db2777" material="emissive:#db2777;emissiveIntensity:.25"
+           animation__float="property:position;dir:alternate;to:4 3.18 -10;dur:2300;loop:true"></a-box>
+    <a-text value="04  NLP MODEL" position="3.1 4.5 -10"
+            scale="1.25 1.25 1.25" color="white"></a-text>
+    <a-text value="Analyze meaning" position="3.25 2.72 -8.9"
+            scale=".72 .72 .72" color="#fbcfe8" align="center"></a-text>
+
+    <!-- OUTPUT -->
+    <a-box id="outputBox" position="8 3 -10" width="3" height="2" depth="2"
+           color="#16a34a" material="emissive:#16a34a;emissiveIntensity:.25"
+           animation__float="property:position;dir:alternate;to:8 3.18 -10;dur:2000;loop:true"></a-box>
+    <a-text value="05  OUTPUT" position="7.4 4.5 -10"
+            scale="1.35 1.35 1.35" color="white"></a-text>
+    <a-text id="outputLabel" value="Result / prediction" position="7.1 2.72 -8.9"
+            scale=".72 .72 .72" color="#bbf7d0" align="center"></a-text>
+
+    <!-- Moving data packets -->
+    <a-sphere id="packet" position="-8 3 -9.1" radius=".12" color="#fff"
+              material="emissive:#fff;emissiveIntensity:1"></a-sphere>
+
+  </a-entity>
+
+  <!-- Floating particles -->
+  <a-sphere position="-6 6 -8" radius=".15" color="#22d3ee"
+    material="emissive:#22d3ee;emissiveIntensity:1"
+    animation="property:position;dir:alternate;to:-6 7 -8;dur:2000;loop:true"></a-sphere>
+  <a-sphere position="5 7 -8" radius=".15" color="#ec4899"
+    material="emissive:#ec4899;emissiveIntensity:1"
+    animation="property:position;dir:alternate;to:5 6 -8;dur:2500;loop:true"></a-sphere>
+  <a-sphere position="0 7 -11" radius=".1" color="#a855f7"
+    material="emissive:#a855f7;emissiveIntensity:1"
+    animation="property:position;dir:alternate;to:0 7.7 -11;dur:1800;loop:true"></a-sphere>
+
+  <!-- TOP INFORMATION / EXPLANATION PANEL -->
+  <a-plane position="0 6.25 -9" width="15.5" height="1.65" color="#0b1329"
+           material="opacity:.96;transparent:true;emissive:#06152d;emissiveIntensity:.25"></a-plane>
+
+  <a-text value="LIVE NLP EXPLANATION"
+          position="-6.75 6.72 -8.85"
+          scale=".72 .72 .72"
+          color="#67e8f9"></a-text>
+
+  <a-text id="stepTitle"
+          value="NLP PIPELINE READY"
+          position="-6.75 6.38 -8.85"
+          scale=".82 .82 .82"
+          color="#a5f3fc"></a-text>
+
+  <a-text id="explanation"
+          value="NLP allows computers to understand and process human language."
+          position="-6.75 6.08 -8.85"
+          scale=".9 .9 .9"
+          color="#ffffff"></a-text>
+
+</a-scene>
+
+<script>
+let running = false;
+
+async function startNLP(){
+  if(running) return;
+
+  const sentence = document.getElementById("sentenceInput").value.trim();
+  if(!sentence){
+    alert("Please enter a sentence.");
+    return;
+  }
+
+  running = true;
+  const status = document.getElementById("status");
+  const explanation = document.getElementById("explanation");
+  const title = document.getElementById("stepTitle");
+  const progress = document.getElementById("progressBar");
+
+  document.getElementById("inputLabel").setAttribute("value", sentence.slice(0,24));
+
+  const steps = [
+    ["Step 1: Reading input","INPUT TEXT","The computer receives the human sentence.", "inputBox",10],
+    ["Step 2: Preprocessing","PREPROCESSING","The text is cleaned before further processing.", "preprocessBox",30],
+    ["Step 3: Tokenization","TOKENIZATION","The sentence is divided into smaller tokens.", "tokenBox",50],
+    ["Step 4: NLP Model","NLP MODEL","The NLP model analyzes the processed text.", "modelBox",75],
+    ["Step 5: Result","OUTPUT","The NLP system produces an understanding or prediction.", "outputBox",100]
+  ];
+
+  for(const [statusText, titleText, description, boxId, pct] of steps){
+    status.innerText = statusText;
+    title.setAttribute("value", titleText);
+    explanation.setAttribute("value", description);
+    progress.style.width = pct + "%";
+    highlight(boxId);
+    await animatePacket(boxId);
+    await wait(1000);
+  }
+
+  document.getElementById("outputLabel").setAttribute("value","Understanding ✓");
+  status.innerText = "NLP Process Completed ✓";
+  title.setAttribute("value","PIPELINE COMPLETE");
+  explanation.setAttribute("value","The machine has transformed human language into a form it can analyze.");
+  running = false;
+}
+
+function highlight(id){
+  const box = document.getElementById(id);
+  box.setAttribute("animation__pulse",
+    "property:scale;from:1 1 1;to:1.18 1.18 1.18;dur:400;dir:alternate;loop:3");
+  setTimeout(()=>{
+    box.setAttribute("animation__pulse",
+      "property:scale;from:1 1 1;to:1.08 1.08 1.08;dur:500;dir:alternate;loop:true");
+  },1300);
+}
+
+function animatePacket(boxId){
+  const positions = {
+    inputBox:"-8 3 -9.1", preprocessBox:"-4 3 -9.1",
+    tokenBox:"0 3 -9.1", modelBox:"4 3 -9.1", outputBox:"8 3 -9.1"
+  };
+  const packet = document.getElementById("packet");
+  return new Promise(resolve=>{
+    packet.setAttribute("position", positions[boxId]);
+    packet.setAttribute("animation__travel",
+      "property:scale;from:.7 .7 .7;to:1.5 1.5 1.5;dur:450;dir:alternate");
+    setTimeout(resolve,500);
+  });
+}
+
+function resetLab(){
+  running = false;
+  document.getElementById("status").innerText = "Ready — waiting for input";
+  document.getElementById("progressBar").style.width = "0%";
+  document.getElementById("stepTitle").setAttribute("value","NLP PIPELINE READY");
+  document.getElementById("explanation").setAttribute(
+    "value","NLP allows computers to understand and process human language."
+  );
+  document.getElementById("outputLabel").setAttribute("value","Result / prediction");
+  document.getElementById("inputLabel").setAttribute("value","Your sentence");
+  document.getElementById("packet").setAttribute("position","-8 3 -9.1");
+}
+
+function wait(ms){ return new Promise(resolve=>setTimeout(resolve,ms)); }
+
+document.getElementById("sentenceInput").addEventListener("keydown", e=>{
+  if(e.key==="Enter") startNLP();
+});
+</script>
+</body>
+</html>

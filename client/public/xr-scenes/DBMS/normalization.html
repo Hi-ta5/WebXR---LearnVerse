@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Normalization VR Lab</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    overflow:hidden;
+    background:#020617;
+}
+
+/* =========================================
+   MAIN PANEL
+========================================= */
+
+.panel{
+
+    position:absolute;
+    z-index:20;
+
+    top:18px;
+    left:18px;
+
+    width:330px;
+
+    padding:20px;
+
+    background:rgba(2,6,23,.95);
+
+    color:white;
+
+    border-radius:18px;
+
+    border:1px solid #ec4899;
+
+    box-shadow:
+        0 0 25px rgba(236,72,153,.25),
+        inset 0 0 20px rgba(236,72,153,.05);
+
+    backdrop-filter:blur(10px);
+}
+
+.panel h2{
+    margin:0 0 5px;
+    color:#f472b6;
+}
+
+.subtitle{
+    color:#94a3b8;
+    font-size:13px;
+    margin-bottom:15px;
+}
+
+#info{
+
+    min-height:75px;
+
+    padding:12px;
+
+    background:#0f172a;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    line-height:1.5;
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+button{
+
+    width:100%;
+
+    padding:11px;
+
+    margin-top:7px;
+
+    border:0;
+
+    border-radius:9px;
+
+    background:#ec4899;
+
+    color:white;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+button:hover{
+
+    background:#f472b6;
+
+    color:#020617;
+
+    transform:translateY(-2px);
+}
+
+.demoBtn{
+    background:#7c3aed;
+}
+
+.resetBtn{
+    background:#475569;
+}
+
+/* =========================================
+   PROGRESS
+========================================= */
+
+.progress{
+
+    margin-top:13px;
+
+    height:8px;
+
+    background:#1e293b;
+
+    border-radius:20px;
+
+    overflow:hidden;
+}
+
+#progressBar{
+
+    width:0%;
+
+    height:100%;
+
+    background:#ec4899;
+
+    transition:.5s;
+}
+
+.stage{
+
+    margin-top:7px;
+
+    color:#94a3b8;
+
+    text-align:center;
+
+    font-size:12px;
+}
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+.navigation{
+
+    position:absolute;
+
+    z-index:20;
+
+    right:18px;
+
+    top:18px;
+
+    display:flex;
+
+    gap:7px;
+}
+
+.navigation button{
+
+    width:auto;
+
+    margin:0;
+
+    padding:9px 14px;
+
+    background:#1e293b;
+
+    color:white;
+
+    border:1px solid #475569;
+}
+
+/* =========================================
+   LEGEND
+========================================= */
+
+.legend{
+
+    position:absolute;
+
+    z-index:20;
+
+    right:18px;
+
+    bottom:18px;
+
+    padding:12px 15px;
+
+    background:rgba(2,6,23,.9);
+
+    color:white;
+
+    border-radius:12px;
+
+    border:1px solid #334155;
+
+    font-size:12px;
+}
+
+.legend div{
+    margin:5px 0;
+}
+
+.dot{
+
+    display:inline-block;
+
+    width:10px;
+    height:10px;
+
+    border-radius:50%;
+
+    margin-right:6px;
+}
+
+.pink{
+    background:#ec4899;
+}
+
+.green{
+    background:#22c55e;
+}
+
+.blue{
+    background:#38bdf8;
+}
+
+.yellow{
+    background:#facc15;
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width:700px){
+
+    .panel{
+
+        width:280px;
+
+        max-height:90vh;
+
+        overflow:auto;
+    }
+
+    .navigation{
+        display:none;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     CONTROL PANEL
+===================================================== -->
+
+<div class="panel">
+
+    <h2>🧩 Database Normalization</h2>
+
+    <div class="subtitle">
+        Transform an unnormalized table into well-structured relational tables.
+    </div>
+
+
+    <div id="info">
+
+        <b>Welcome!</b><br><br>
+
+        Select a normal form to see how the database structure changes.
+
+    </div>
+
+
+    <button onclick="normal('UNF')">
+        0️⃣ UNF — Unnormalized
+    </button>
+
+
+    <button onclick="normal('1NF')">
+        1️⃣ 1NF — Atomic Values
+    </button>
+
+
+    <button onclick="normal('2NF')">
+        2️⃣ 2NF — Remove Partial Dependency
+    </button>
+
+
+    <button onclick="normal('3NF')">
+        3️⃣ 3NF — Remove Transitive Dependency
+    </button>
+
+
+    <button
+        class="demoBtn"
+        onclick="runDemo()">
+
+        ▶ Run Normalization Demo
+
+    </button>
+
+
+    <button
+        class="resetBtn"
+        onclick="resetLab()">
+
+        ↻ Reset
+
+    </button>
+
+
+    <div class="progress">
+
+        <div id="progressBar"></div>
+
+    </div>
+
+
+    <div
+        id="stage"
+        class="stage">
+
+        Current Stage: UNF
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
+
+<div class="navigation">
+
+    <button onclick="goHome()">🏠 Home</button>
+
+    <button onclick="goBack()">← Back</button>
+
+    <button onclick="goNext()">Next →</button>
+
+</div>
+
+
+<!-- =====================================================
+     LEGEND
+===================================================== -->
+
+<div class="legend">
+
+    <div>
+        <span class="dot pink"></span>
+        Current Form
+    </div>
+
+    <div>
+        <span class="dot green"></span>
+        Normalized Table
+    </div>
+
+    <div>
+        <span class="dot blue"></span>
+        Related Table
+    </div>
+
+    <div>
+        <span class="dot yellow"></span>
+        Key / Relationship
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     A-FRAME
+===================================================== -->
+
+<a-scene
+    background="color:#020617"
+    renderer="antialias:true"
+    cursor="rayOrigin:mouse"
+    raycaster="objects:.clickable">
+
+
+    <!-- CAMERA -->
+
+    <a-camera position="0 3.2 14">
+
+        <a-cursor
+            color="#ec4899"
+            fuse="false">
+        </a-cursor>
+
+    </a-camera>
+
+
+    <!-- LIGHTING -->
+
+    <a-light
+        type="ambient"
+        intensity="1.5">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="0 8 4"
+        intensity="2.5"
+        color="#ec4899">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="-7 5 -4"
+        intensity="1.5"
+        color="#7c3aed">
+    </a-light>
+
+
+    <!-- FLOOR -->
+
+    <a-plane
+        rotation="-90 0 0"
+        width="40"
+        height="40"
+        color="#0f172a">
+    </a-plane>
+
+
+    <!-- GRID -->
+
+    <a-plane
+        rotation="-90 0 0"
+        position="0 .01 -5"
+        width="30"
+        height="30"
+        material="
+            color:#111827;
+            wireframe:true;
+            transparent:true;
+            opacity:.7
+        ">
+    </a-plane>
+
+
+    <a-sky color="#020617"></a-sky>
+
+
+    <!-- =================================================
+         TITLE
+    ================================================= -->
+
+    <a-text
+        value="DATABASE NORMALIZATION"
+        position="-4.5 7.5 -9"
+        color="#ec4899"
+        scale="2 2 2">
+    </a-text>
+
+
+    <a-text
+        value="UNF → 1NF → 2NF → 3NF"
+        position="-2.4 6.85 -9"
+        color="#94a3b8"
+        scale=".9 .9 .9">
+    </a-text>
+
+
+    <!-- =================================================
+         NORMALIZATION PIPELINE
+    ================================================= -->
+
+    <a-text
+        value="NORMALIZATION PROCESS"
+        position="-2.2 5.8 -8"
+        color="#e2e8f0"
+        scale="1.1 1.1 1.1">
+    </a-text>
+
+
+    <!-- UNF NODE -->
+
+    <a-sphere
+        id="nodeUNF"
+        class="clickable"
+        position="-6 4.7 -8"
+        radius=".65"
+        color="#ec4899"
+        onclick="normal('UNF')">
+
+        <a-text
+            value="UNF"
+            align="center"
+            position="0 0 .6"
+            color="white"
+            width="4">
+        </a-text>
+
+    </a-sphere>
+
+
+    <!-- ARROW -->
+
+    <a-cylinder
+        position="-4.5 4.7 -8"
+        radius=".06"
+        height="1.6"
+        rotation="0 0 90"
+        color="#475569">
+    </a-cylinder>
+
+
+    <!-- 1NF -->
+
+    <a-sphere
+        id="node1NF"
+        class="clickable"
+        position="-2.2 4.7 -8"
+        radius=".65"
+        color="#ec4899"
+        onclick="normal('1NF')">
+
+        <a-text
+            value="1NF"
+            align="center"
+            position="0 0 .6"
+            color="white"
+            width="4">
+        </a-text>
+
+    </a-sphere>
+
+
+    <a-cylinder
+        position="-0.7 4.7 -8"
+        radius=".06"
+        height="1.6"
+        rotation="0 0 90"
+        color="#475569">
+    </a-cylinder>
+
+
+    <!-- 2NF -->
+
+    <a-sphere
+        id="node2NF"
+        class="clickable"
+        position="1.6 4.7 -8"
+        radius=".65"
+        color="#ec4899"
+        onclick="normal('2NF')">
+
+        <a-text
+            value="2NF"
+            align="center"
+            position="0 0 .6"
+            color="white"
+            width="4">
+        </a-text>
+
+    </a-sphere>
+
+
+    <a-cylinder
+        position="3.1 4.7 -8"
+        radius=".06"
+        height="1.6"
+        rotation="0 0 90"
+        color="#475569">
+    </a-cylinder>
+
+
+    <!-- 3NF -->
+
+    <a-sphere
+        id="node3NF"
+        class="clickable"
+        position="5.4 4.7 -8"
+        radius=".65"
+        color="#ec4899"
+        onclick="normal('3NF')">
+
+        <a-text
+            value="3NF"
+            align="center"
+            position="0 0 .6"
+            color="white"
+            width="4">
+        </a-text>
+
+    </a-sphere>
+
+
+    <!-- =================================================
+         TABLE AREA
+    ================================================= -->
+
+    <a-entity id="tableArea">
+
+        <!-- MAIN TABLE -->
+
+        <a-box
+            id="mainTable"
+            position="0 2.4 -8"
+            width="8"
+            height="3.3"
+            depth=".55"
+            color="#4c1d95">
+        </a-box>
+
+
+        <a-text
+            id="tableTitle"
+            value="UNNORMALIZED TABLE"
+            align="center"
+            position="0 3.75 -7.65"
+            color="#f0abfc"
+            scale="1.15 1.15 1.15">
+        </a-text>
+
+
+        <a-text
+            id="tableData"
+            value="ID     NAME      COURSES
+1      Divya     DBMS, CN
+2      Riya      OS, DBMS"
+            align="left"
+            position="-3.1 2.8 -7.65"
+            color="white"
+            scale=".75 .75 .75">
+        </a-text>
+
+
+        <!-- TABLE HEADER -->
+
+        <a-box
+            id="header"
+            position="0 3.25 -7.62"
+            width="7.7"
+            height=".45"
+            depth=".05"
+            color="#701a75">
+        </a-box>
+
+
+        <!-- SPLIT TABLE 1 -->
+
+        <a-box
+            id="studentTable"
+            position="-2.8 2.4 -8"
+            width="4"
+            height="3"
+            depth=".45"
+            color="#064e3b"
+            visible="false">
+        </a-box>
+
+
+        <a-text
+            id="studentTitle"
+            value="STUDENT"
+            align="center"
+            position="-2.8 3.45 -7.65"
+            color="#86efac"
+            width="5"
+            visible="false">
+        </a-text>
+
+
+        <a-text
+            id="studentData"
+            value="ID       NAME
+1        Divya
+2        Riya"
+            align="left"
+            position="-4.25 2.7 -7.65"
+            color="white"
+            scale=".7 .7 .7"
+            visible="false">
+        </a-text>
+
+
+        <!-- SPLIT TABLE 2 -->
+
+        <a-box
+            id="courseTable"
+            position="2.8 2.4 -8"
+            width="4"
+            height="3"
+            depth=".45"
+            color="#164e63"
+            visible="false">
+        </a-box>
+
+
+        <a-text
+            id="courseTitle"
+            value="COURSE"
+            align="center"
+            position="2.8 3.45 -7.65"
+            color="#67e8f9"
+            width="5"
+            visible="false">
+        </a-text>
+
+
+        <a-text
+            id="courseData"
+            value="COURSE_ID    COURSE
+101          DBMS
+102          CN
+103          OS"
+            align="left"
+            position="1.35 2.7 -7.65"
+            color="white"
+            scale=".6 .6 .6"
+            visible="false">
+        </a-text>
+
+
+    </a-entity>
+
+
+    <!-- =================================================
+         EXPLANATION
+    ================================================= -->
+
+    <a-plane
+        position="0 .7 -8"
+        width="9"
+        height=".9"
+        color="#0f172a"
+        material="
+            transparent:true;
+            opacity:.85
+        ">
+    </a-plane>
+
+
+    <a-text
+        id="result"
+        value="Choose a normal form to begin."
+        align="center"
+        position="0 .75 -7.9"
+        color="#facc15"
+        width="9">
+    </a-text>
+
+
+</a-scene>
+
+
+<script>
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let currentLevel = "UNF";
+let demoRunning = false;
+
+
+/* =====================================================
+   DATA
+===================================================== */
+
+const levels = {
+
+    UNF: {
+
+        title:
+        "UNNORMALIZED TABLE",
+
+        data:
+        "ID     NAME      COURSES\n" +
+        "1      Divya     DBMS, CN\n" +
+        "2      Riya      OS, DBMS",
+
+        explanation:
+        "<b>UNF:</b> The table contains repeating or non-atomic values. " +
+        "For example, a student can have multiple courses stored inside one field.",
+
+        progress:0
+
+    },
+
+
+    "1NF": {
+
+        title:
+        "FIRST NORMAL FORM",
+
+        data:
+        "ID     NAME      COURSE\n" +
+        "1      Divya     DBMS\n" +
+        "1      Divya     CN\n" +
+        "2      Riya      OS\n" +
+        "2      Riya      DBMS",
+
+        explanation:
+        "<b>1NF:</b> Repeating groups are removed and every field contains an atomic value.",
+
+        progress:33
+
+    },
+
+
+    "2NF": {
+
+        title:
+        "SECOND NORMAL FORM",
+
+        data:
+        "STUDENT\n" +
+        "ID | NAME\n\n" +
+        "ENROLLMENT\n" +
+        "ID | COURSE",
+
+        explanation:
+        "<b>2NF:</b> Partial dependencies are removed by separating attributes that depend only on part of a composite key.",
+
+        progress:66
+
+    },
+
+
+    "3NF": {
+
+        title:
+        "THIRD NORMAL FORM",
+
+        data:
+        "STUDENT\n" +
+        "ID | NAME\n\n" +
+        "COURSE\n" +
+        "COURSE_ID | COURSE_NAME",
+
+        explanation:
+        "<b>3NF:</b> Transitive dependencies are removed so non-key attributes depend only on the key.",
+
+        progress:100
+
+    }
+
+};
+
+
+/* =====================================================
+   INFORMATION
+===================================================== */
+
+function setInfo(title,text){
+
+    document
+        .getElementById("info")
+        .innerHTML =
+        "<b>" + title + "</b><br><br>" + text;
+
+}
+
+
+/* =====================================================
+   NORMAL FORM FUNCTION
+===================================================== */
+
+function normal(level){
+
+    if(demoRunning) return;
+
+    currentLevel = level;
+
+    const data = levels[level];
+
+
+    /* TITLE */
+
+    document
+        .getElementById("tableTitle")
+        .setAttribute(
+            "value",
+            data.title
+        );
+
+
+    /* TABLE DATA */
+
+    document
+        .getElementById("tableData")
+        .setAttribute(
+            "value",
+            data.data
+        );
+
+
+    /* PROGRESS */
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        data.progress + "%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "Current Stage: " + level;
+
+
+    /* RESULT */
+
+    document
+        .getElementById("result")
+        .setAttribute(
+            "value",
+            stripHTML(data.explanation)
+        );
+
+
+    /* UPDATE VISUAL STRUCTURE */
+
+    updateTables(level);
+
+
+    /* HIGHLIGHT NODE */
+
+    highlightNode(level);
+
+
+    /* PANEL */
+
+    setInfo(
+        "📚 " + data.title,
+        data.explanation
+    );
+
+}
+
+
+/* =====================================================
+   UPDATE TABLE VISUALS
+===================================================== */
+
+function updateTables(level){
+
+    const main =
+        document.getElementById("mainTable");
+
+    const mainTitle =
+        document.getElementById("tableTitle");
+
+    const mainData =
+        document.getElementById("tableData");
+
+    const header =
+        document.getElementById("header");
+
+
+    const student =
+        document.getElementById("studentTable");
+
+    const studentTitle =
+        document.getElementById("studentTitle");
+
+    const studentData =
+        document.getElementById("studentData");
+
+
+    const course =
+        document.getElementById("courseTable");
+
+    const courseTitle =
+        document.getElementById("courseTitle");
+
+    const courseData =
+        document.getElementById("courseData");
+
+
+    /* DEFAULT */
+
+    main.setAttribute(
+        "visible",
+        "true"
+    );
+
+    mainTitle.setAttribute(
+        "visible",
+        "true"
+    );
+
+    mainData.setAttribute(
+        "visible",
+        "true"
+    );
+
+    header.setAttribute(
+        "visible",
+        "true"
+    );
+
+
+    student.setAttribute(
+        "visible",
+        "false"
+    );
+
+    studentTitle.setAttribute(
+        "visible",
+        "false"
+    );
+
+    studentData.setAttribute(
+        "visible",
+        "false"
+    );
+
+
+    course.setAttribute(
+        "visible",
+        "false"
+    );
+
+    courseTitle.setAttribute(
+        "visible",
+        "false"
+    );
+
+    courseData.setAttribute(
+        "visible",
+        "false"
+    );
+
+
+    /* UNF */
+
+    if(level === "UNF"){
+
+        main.setAttribute(
+            "color",
+            "#4c1d95"
+        );
+
+        main.setAttribute(
+            "animation__change",
+            "property:scale;to:1.05 1.05 1.05;dur:250;dir:alternate;loop:2"
+        );
+
+    }
+
+
+    /* 1NF */
+
+    if(level === "1NF"){
+
+        main.setAttribute(
+            "color",
+            "#7c2d92"
+        );
+
+        main.setAttribute(
+            "animation__change",
+            "property:scale;to:1.05 1.05 1.05;dur:250;dir:alternate;loop:2"
+        );
+
+    }
+
+
+    /* 2NF */
+
+    if(level === "2NF"){
+
+        main.setAttribute(
+            "visible",
+            "false"
+        );
+
+        mainTitle.setAttribute(
+            "visible",
+            "false"
+        );
+
+        mainData.setAttribute(
+            "visible",
+            "false"
+        );
+
+        header.setAttribute(
+            "visible",
+            "false"
+        );
+
+
+        student.setAttribute(
+            "visible",
+            "true"
+        );
+
+        studentTitle.setAttribute(
+            "visible",
+            "true"
+        );
+
+        studentData.setAttribute(
+            "visible",
+            "true"
+        );
+
+
+        course.setAttribute(
+            "visible",
+            "true"
+        );
+
+        courseTitle.setAttribute(
+            "visible",
+            "true"
+        );
+
+        courseData.setAttribute(
+            "visible",
+            "true"
+        );
+
+
+        animateSplit(
+            student,
+            course
+        );
+
+    }
+
+
+    /* 3NF */
+
+    if(level === "3NF"){
+
+        main.setAttribute(
+            "visible",
+            "false"
+        );
+
+        mainTitle.setAttribute(
+            "visible",
+            "false"
+        );
+
+        mainData.setAttribute(
+            "visible",
+            "false"
+        );
+
+        header.setAttribute(
+            "visible",
+            "false"
+        );
+
+
+        student.setAttribute(
+            "visible",
+            "true"
+        );
+
+        studentTitle.setAttribute(
+            "visible",
+            "true"
+        );
+
+        studentData.setAttribute(
+            "visible",
+            "true"
+        );
+
+
+        course.setAttribute(
+            "visible",
+            "true"
+        );
+
+        courseTitle.setAttribute(
+            "visible",
+            "true"
+        );
+
+        courseData.setAttribute(
+            "visible",
+            "true"
+        );
+
+
+        student.setAttribute(
+            "color",
+            "#065f46"
+        );
+
+        course.setAttribute(
+            "color",
+            "#155e75"
+        );
+
+
+        animateSplit(
+            student,
+            course
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   SPLIT ANIMATION
+===================================================== */
+
+function animateSplit(student,course){
+
+    student.setAttribute(
+        "animation__appear",
+        "property:scale;from:0.4 0.4 0.4;to:1 1 1;dur:500;easing:easeOutElastic"
+    );
+
+    course.setAttribute(
+        "animation__appear",
+        "property:scale;from:0.4 0.4 0.4;to:1 1 1;dur:500;easing:easeOutElastic"
+    );
+
+}
+
+
+/* =====================================================
+   NODE HIGHLIGHT
+===================================================== */
+
+function highlightNode(level){
+
+    const nodes = [
+        "nodeUNF",
+        "node1NF",
+        "node2NF",
+        "node3NF"
+    ];
+
+
+    nodes.forEach(id=>{
+
+        document
+            .getElementById(id)
+            .setAttribute(
+                "color",
+                "#ec4899"
+            );
+
+    });
+
+
+    const active =
+        document.getElementById(
+            "node" + level
+        );
+
+
+    if(active){
+
+        active.setAttribute(
+            "color",
+            "#facc15"
+        );
+
+        active.setAttribute(
+            "animation__highlight",
+            "property:scale;to:1.35 1.35 1.35;dur:300;dir:alternate;loop:3"
+        );
+
+        setTimeout(()=>{
+
+            active.removeAttribute(
+                "animation__highlight"
+            );
+
+        },1800);
+
+    }
+
+}
+
+
+/* =====================================================
+   FULL DEMO
+===================================================== */
+
+async function runDemo(){
+
+    if(demoRunning) return;
+
+    demoRunning = true;
+
+
+    const sequence = [
+        "UNF",
+        "1NF",
+        "2NF",
+        "3NF"
+    ];
+
+
+    for(let level of sequence){
+
+        normal(level);
+
+        await wait(2500);
+
+    }
+
+
+    setInfo(
+        "🎉 Normalization Complete",
+        "The database has progressed from UNF to 3NF.<br><br>" +
+        "The main goals are to reduce redundancy, prevent update anomalies, and improve data organization."
+    );
+
+
+    document
+        .getElementById("result")
+        .setAttribute(
+            "value",
+            "✓ NORMALIZATION COMPLETE: UNF → 1NF → 2NF → 3NF"
+        );
+
+
+    demoRunning = false;
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab(){
+
+    demoRunning = false;
+
+    currentLevel = "UNF";
+
+
+    document
+        .getElementById("progressBar")
+        .style.width = "0%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "Current Stage: UNF";
+
+
+    updateTables("UNF");
+
+
+    highlightNode("UNF");
+
+
+    setInfo(
+        "Welcome!",
+        "Select a normal form to see how the database structure changes."
+    );
+
+
+    document
+        .getElementById("result")
+        .setAttribute(
+            "value",
+            "Choose a normal form to begin."
+        );
+
+}
+
+
+/* =====================================================
+   STRIP HTML
+===================================================== */
+
+function stripHTML(text){
+
+    const temp =
+        document.createElement("div");
+
+    temp.innerHTML = text;
+
+    return temp.textContent ||
+           temp.innerText ||
+           "";
+
+}
+
+
+/* =====================================================
+   WAIT
+===================================================== */
+
+function wait(ms){
+
+    return new Promise(
+        resolve =>
+        setTimeout(resolve,ms)
+    );
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+function goHome(){
+
+    window.location.href =
+        "dbms.html";
+
+}
+
+
+function goBack(){
+
+    window.history.back();
+
+}
+
+
+function goNext(){
+
+    /*
+       Change this filename when
+       you send your complete project.
+    */
+
+    window.location.href =
+        "sql.html";
+
+}
+
+</script>
+
+</body>
+
+</html>

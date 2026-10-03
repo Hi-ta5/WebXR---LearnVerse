@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Database Indexing VR Lab</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    overflow:hidden;
+    background:#020617;
+}
+
+/* =========================
+   MAIN PANEL
+========================= */
+
+.panel{
+    position:absolute;
+    z-index:20;
+    top:18px;
+    left:18px;
+
+    width:340px;
+    padding:20px;
+
+    background:rgba(2,6,23,.95);
+    color:white;
+
+    border:1px solid #38bdf8;
+    border-radius:18px;
+
+    box-shadow:
+        0 0 30px rgba(56,189,248,.25),
+        inset 0 0 20px rgba(56,189,248,.04);
+
+    backdrop-filter:blur(12px);
+}
+
+.panel h2{
+    margin:0 0 5px;
+    color:#60a5fa;
+}
+
+.subtitle{
+    color:#94a3b8;
+    font-size:13px;
+    margin-bottom:14px;
+    line-height:1.4;
+}
+
+#info{
+    min-height:80px;
+
+    padding:12px;
+
+    background:#0f172a;
+
+    border-radius:10px;
+
+    border-left:3px solid #38bdf8;
+
+    font-size:13px;
+
+    line-height:1.5;
+}
+
+label{
+    display:block;
+    margin-top:12px;
+    margin-bottom:5px;
+
+    color:#cbd5e1;
+    font-size:13px;
+}
+
+select{
+    width:100%;
+    padding:10px;
+
+    border-radius:8px;
+
+    border:1px solid #475569;
+
+    background:#0f172a;
+
+    color:white;
+
+    outline:none;
+}
+
+button{
+    width:100%;
+
+    padding:11px;
+
+    margin-top:7px;
+
+    border:0;
+    border-radius:9px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.15);
+}
+
+.normalBtn{
+    background:#475569;
+    color:white;
+}
+
+.indexBtn{
+    background:#0284c7;
+    color:white;
+}
+
+.conceptBtn{
+    background:#7c3aed;
+    color:white;
+}
+
+.stopBtn{
+    background:#dc2626;
+    color:white;
+}
+
+.resetBtn{
+    background:#334155;
+    color:white;
+}
+
+/* =========================
+   STATS
+========================= */
+
+.stats{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:7px;
+
+    margin-top:12px;
+}
+
+.stat{
+    padding:10px;
+
+    background:#0f172a;
+
+    border-radius:9px;
+
+    text-align:center;
+}
+
+.stat span{
+    display:block;
+
+    font-size:10px;
+
+    color:#94a3b8;
+}
+
+.stat strong{
+    display:block;
+
+    margin-top:3px;
+
+    font-size:17px;
+
+    color:#38bdf8;
+}
+
+/* =========================
+   PROGRESS
+========================= */
+
+.progressBox{
+    margin-top:10px;
+
+    height:7px;
+
+    background:#1e293b;
+
+    border-radius:10px;
+
+    overflow:hidden;
+}
+
+#progress{
+    width:0%;
+
+    height:100%;
+
+    background:#38bdf8;
+
+    transition:.3s;
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+.navigation{
+    position:absolute;
+
+    z-index:20;
+
+    right:18px;
+    top:18px;
+
+    display:flex;
+
+    gap:7px;
+}
+
+.navigation button{
+    width:auto;
+
+    padding:9px 14px;
+
+    margin:0;
+
+    background:#0f172a;
+
+    border:1px solid #334155;
+
+    color:white;
+}
+
+/* =========================
+   LEGEND
+========================= */
+
+.legend{
+    position:absolute;
+
+    z-index:20;
+
+    right:18px;
+    bottom:18px;
+
+    padding:13px 16px;
+
+    background:rgba(2,6,23,.92);
+
+    color:white;
+
+    border:1px solid #334155;
+
+    border-radius:12px;
+
+    font-size:12px;
+}
+
+.legend div{
+    margin:5px 0;
+}
+
+.dot{
+    display:inline-block;
+
+    width:10px;
+    height:10px;
+
+    border-radius:50%;
+
+    margin-right:6px;
+}
+
+.blue{
+    background:#38bdf8;
+}
+
+.yellow{
+    background:#facc15;
+}
+
+.green{
+    background:#22c55e;
+}
+
+.red{
+    background:#ef4444;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:700px){
+
+    .panel{
+        width:280px;
+        max-height:88vh;
+        overflow:auto;
+    }
+
+    .navigation,
+    .legend{
+        display:none;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- =====================================================
+     UI PANEL
+===================================================== -->
+
+<div class="panel">
+
+<h2>⚡ Database Indexing</h2>
+
+<div class="subtitle">
+Explore how a database index reduces the amount of searching required to find a record.
+</div>
+
+
+<div id="info">
+
+<b>Welcome to the Indexing Lab!</b>
+
+<br><br>
+
+Choose a record and compare:
+
+<br>
+🔎 Normal Search
+<br>
+⚡ Indexed Search
+
+</div>
+
+
+<label>Select Search Target</label>
+
+<select id="targetSelect">
+
+<option value="10">Record 10</option>
+<option value="25">Record 25</option>
+<option value="35">Record 35</option>
+<option value="50">Record 50</option>
+<option value="60">Record 60</option>
+<option value="75">Record 75</option>
+
+</select>
+
+
+<button
+class="normalBtn"
+onclick="searchNormal()">
+
+🔎 Run Normal Search
+
+</button>
+
+
+<button
+class="indexBtn"
+onclick="searchIndex()">
+
+⚡ Run Indexed Search
+
+</button>
+
+
+<button
+class="conceptBtn"
+onclick="showConcept()">
+
+📚 What is an Index?
+
+</button>
+
+
+<button
+class="stopBtn"
+onclick="stopSearch()">
+
+⛔ Stop Search
+
+</button>
+
+
+<button
+class="resetBtn"
+onclick="resetLab()">
+
+↻ Reset Lab
+
+</button>
+
+
+<div class="stats">
+
+<div class="stat">
+
+<span>Records / Nodes Checked</span>
+
+<strong id="counter">
+0
+</strong>
+
+</div>
+
+
+<div class="stat">
+
+<span>Search Type</span>
+
+<strong id="searchType">
+---
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="progressBox">
+
+<div id="progress"></div>
+
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
+
+<div class="navigation">
+
+<button onclick="goHome()">
+🏠 Home
+</button>
+
+<button onclick="goBack()">
+← Back
+</button>
+
+<button onclick="goNext()">
+Next →
+</button>
+
+</div>
+
+
+
+<!-- =====================================================
+     LEGEND
+===================================================== -->
+
+<div class="legend">
+
+<div>
+<span class="dot blue"></span>
+Database Record
+</div>
+
+<div>
+<span class="dot yellow"></span>
+Index Node
+</div>
+
+<div>
+<span class="dot green"></span>
+Found
+</div>
+
+<div>
+<span class="dot red"></span>
+Checking
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
+     A-FRAME SCENE
+===================================================== -->
+
+<a-scene
+background="color:#020617"
+renderer="antialias:true"
+cursor="rayOrigin:mouse"
+raycaster="objects:.clickable">
+
+
+<!-- CAMERA -->
+
+<a-camera position="0 3.2 14">
+
+<a-cursor
+color="#38bdf8"
+fuse="false">
+</a-cursor>
+
+</a-camera>
+
+
+
+<!-- LIGHTING -->
+
+<a-light
+type="ambient"
+intensity="1.5">
+</a-light>
+
+
+<a-light
+type="point"
+position="0 8 3"
+intensity="2.5"
+color="#60a5fa">
+</a-light>
+
+
+<a-light
+type="point"
+position="-7 4 -5"
+intensity="1.5"
+color="#2563eb">
+</a-light>
+
+
+<a-light
+type="point"
+position="8 5 -7"
+intensity="1.4"
+color="#7c3aed">
+</a-light>
+
+
+
+<!-- FLOOR -->
+
+<a-plane
+rotation="-90 0 0"
+width="40"
+height="40"
+color="#0f172a">
+</a-plane>
+
+
+<!-- FLOOR GRID -->
+
+<a-plane
+rotation="-90 0 0"
+position="0 .02 -5"
+width="30"
+height="30"
+
+material="
+color:#111827;
+transparent:true;
+opacity:.8;
+wireframe:true">
+
+</a-plane>
+
+
+<a-sky color="#020617"></a-sky>
+
+
+
+<!-- =====================================================
+     TITLE
+===================================================== -->
+
+<a-text
+value="DATABASE INDEXING"
+position="-3.8 7.4 -9"
+color="#60a5fa"
+scale="2 2 2">
+</a-text>
+
+
+<a-text
+value="Find data faster using an index"
+position="-3.1 6.8 -9"
+color="#94a3b8"
+scale=".8 .8 .8">
+</a-text>
+
+
+
+<!-- =====================================================
+     DATABASE
+===================================================== -->
+
+<a-text
+value="DATABASE RECORDS"
+position="-7.2 5.5 -8"
+color="#e2e8f0"
+scale="1.3 1.3 1.3">
+</a-text>
+
+
+<!-- DATABASE CONTAINER -->
+
+<a-box
+position="-2.5 3.4 -8"
+width="9"
+height="2.6"
+depth=".35"
+color="#172033"
+material="transparent:true;opacity:.35">
+</a-box>
+
+
+
+<!-- RECORD 10 -->
+
+<a-box
+id="record10"
+class="clickable record"
+position="-6 4 -8"
+width="1"
+height="1"
+depth="1"
+color="#334155"
+onclick="recordClicked(10,'record10')">
+
+<a-text
+value="10"
+align="center"
+position="0 0 .51"
+color="white"
+width="4">
+</a-text>
+
+</a-box>
+
+
+
+<!-- RECORD 25 -->
+
+<a-box
+id="record25"
+class="clickable record"
+position="-4.5 4 -8"
+width="1"
+height="1"
+depth="1"
+color="#334155"
+onclick="recordClicked(25,'record25')">
+
+<a-text
+value="25"
+align="center"
+position="0 0 .51"
+color="white"
+width="4">
+</a-text>
+
+</a-box>
+
+
+
+<!-- RECORD 35 -->
+
+<a-box
+id="record35"
+class="clickable record"
+position="-3 4 -8"
+width="1"
+height="1"
+depth="1"
+color="#334155"
+onclick="recordClicked(35,'record35')">
+
+<a-text
+value="35"
+align="center"
+position="0 0 .51"
+color="white"
+width="4">
+</a-text>
+
+</a-box>
+
+
+
+<!-- RECORD 50 -->
+
+<a-box
+id="record50"
+class="clickable record"
+position="-1.5 4 -8"
+width="1"
+height="1"
+depth="1"
+color="#334155"
+onclick="recordClicked(50,'record50')">
+
+<a-text
+value="50"
+align="center"
+position="0 0 .51"
+color="white"
+width="4">
+</a-text>
+
+</a-box>
+
+
+
+<!-- RECORD 60 -->
+
+<a-box
+id="record60"
+class="clickable record"
+position="0 4 -8"
+width="1"
+height="1"
+depth="1"
+color="#334155"
+onclick="recordClicked(60,'record60')">
+
+<a-text
+value="60"
+align="center"
+position="0 0 .51"
+color="white"
+width="4">
+</a-text>
+
+</a-box>
+
+
+
+<!-- RECORD 75 -->
+
+<a-box
+id="record75"
+class="clickable record"
+position="1.5 4 -8"
+width="1"
+height="1"
+depth="1"
+color="#334155"
+onclick="recordClicked(75,'record75')">
+
+<a-text
+value="75"
+align="center"
+position="0 0 .51"
+color="white"
+width="4">
+</a-text>
+
+</a-box>
+
+
+
+<!-- =====================================================
+     INDEX SECTION
+===================================================== -->
+
+<a-text
+value="INDEX TREE"
+position="3.1 5.7 -8"
+color="#60a5fa"
+scale="1.3 1.3 1.3">
+</a-text>
+
+
+<!-- ROOT -->
+
+<a-sphere
+id="index50"
+class="clickable indexNode"
+position="5 4.5 -8"
+radius=".65"
+color="#facc15"
+onclick="indexClicked(50,'index50')">
+
+<a-text
+value="50"
+align="center"
+position="0 0 .61"
+color="black"
+width="4">
+</a-text>
+
+</a-sphere>
+
+
+
+<!-- LEFT NODE -->
+
+<a-sphere
+id="index25"
+class="clickable indexNode"
+position="4 2.8 -8"
+radius=".55"
+color="#38bdf8"
+onclick="indexClicked(25,'index25')">
+
+<a-text
+value="25"
+align="center"
+position="0 0 .51"
+color="black"
+width="4">
+</a-text>
+
+</a-sphere>
+
+
+
+<!-- RIGHT NODE -->
+
+<a-sphere
+id="index75"
+class="clickable indexNode"
+position="6 2.8 -8"
+radius=".55"
+color="#38bdf8"
+onclick="indexClicked(75,'index75')">
+
+<a-text
+value="75"
+align="center"
+position="0 0 .51"
+color="black"
+width="4">
+</a-text>
+
+</a-sphere>
+
+
+
+<!-- TREE CONNECTIONS -->
+
+<a-cylinder
+id="lineLeft"
+position="4.5 3.65 -8"
+radius=".04"
+height="1.8"
+rotation="0 0 34"
+color="#38bdf8">
+</a-cylinder>
+
+
+<a-cylinder
+id="lineRight"
+position="5.5 3.65 -8"
+radius=".04"
+height="1.8"
+rotation="0 0 -34"
+color="#38bdf8">
+</a-cylinder>
+
+
+
+<!-- =====================================================
+     PATH DISPLAY
+===================================================== -->
+
+<a-text
+id="status"
+value="READY — Choose a search method"
+position="-4.5 1.8 -8"
+color="#60a5fa"
+scale="1.15 1.15 1.15">
+</a-text>
+
+
+<a-text
+id="pathText"
+value=""
+position="-4.5 1.25 -8"
+color="#94a3b8"
+scale=".7 .7 .7">
+</a-text>
+
+
+
+<!-- =====================================================
+     EXPLANATION BOARD
+===================================================== -->
+
+<a-plane
+position="0 6 -10"
+width="9"
+height="1.2"
+color="#0f172a"
+material="transparent:true;opacity:.8">
+</a-plane>
+
+
+<a-text
+value="NORMAL SEARCH → Scan records one by one
+INDEXED SEARCH → Follow the index path to narrow the search"
+align="center"
+position="0 6 -9.9"
+color="#cbd5e1"
+width="9">
+</a-text>
+
+
+
+<!-- SEARCH ENERGY BEAM -->
+
+<a-cylinder
+id="searchBeam"
+position="-6 4 -7.3"
+radius=".06"
+height=".1"
+color="#ef4444"
+visible="false">
+</a-cylinder>
+
+
+</a-scene>
+
+
+
+<script>
+
+/* =====================================================
+   DATA
+===================================================== */
+
+const records = [10,25,35,50,60,75];
+
+let searching = false;
+let searchToken = 0;
+
+
+/* =====================================================
+   INFO
+===================================================== */
+
+function setInfo(title,text){
+
+    document.getElementById("info").innerHTML =
+        "<b>"+title+"</b><br><br>"+text;
+
+}
+
+
+/* =====================================================
+   WAIT
+===================================================== */
+
+function wait(ms,token){
+
+    return new Promise(resolve=>{
+
+        setTimeout(()=>{
+
+            resolve(token === searchToken);
+
+        },ms);
+
+    });
+
+}
+
+
+/* =====================================================
+   RECORD CLICK
+===================================================== */
+
+function recordClicked(value,id){
+
+    if(searching) return;
+
+    setInfo(
+        "📦 Database Record "+value,
+
+        "This is a record stored in the database.<br><br>"+
+
+        "Record value: <b>"+value+"</b><br><br>"+
+
+        "A normal search may need to examine multiple records before finding this record."
+    );
+
+    pulse(id);
+
+}
+
+
+/* =====================================================
+   INDEX CLICK
+===================================================== */
+
+function indexClicked(value,id){
+
+    if(searching) return;
+
+    setInfo(
+        "🌳 Index Node "+value,
+
+        "This is part of the database index.<br><br>"+
+
+        "The index helps the database decide which direction or area should be searched instead of scanning every record."
+    );
+
+    pulse(id);
+
+}
+
+
+/* =====================================================
+   PULSE
+===================================================== */
+
+function pulse(id){
+
+    const el =
+        document.getElementById(id);
+
+    if(!el) return;
+
+    el.setAttribute(
+        "animation__pulse",
+        "property:scale;to:1.35 1.35 1.35;dur:300;dir:alternate;loop:3"
+    );
+
+    setTimeout(()=>{
+
+        el.removeAttribute(
+            "animation__pulse"
+        );
+
+    },2000);
+
+}
+
+
+/* =====================================================
+   RESET COLORS
+===================================================== */
+
+function resetColors(){
+
+    records.forEach(value=>{
+
+        const el =
+            document.getElementById("record"+value);
+
+        if(el){
+
+            el.setAttribute(
+                "color",
+                "#334155"
+            );
+
+            el.setAttribute(
+                "scale",
+                "1 1 1"
+            );
+
+        }
+
+    });
+
+
+    document
+        .getElementById("index50")
+        .setAttribute(
+            "color",
+            "#facc15"
+        );
+
+
+    document
+        .getElementById("index25")
+        .setAttribute(
+            "color",
+            "#38bdf8"
+        );
+
+
+    document
+        .getElementById("index75")
+        .setAttribute(
+            "color",
+            "#38bdf8"
+        );
+
+
+    document
+        .getElementById("lineLeft")
+        .setAttribute(
+            "color",
+            "#38bdf8"
+        );
+
+
+    document
+        .getElementById("lineRight")
+        .setAttribute(
+            "color",
+            "#38bdf8"
+        );
+
+}
+
+
+/* =====================================================
+   NORMAL SEARCH
+===================================================== */
+
+async function searchNormal(){
+
+    if(searching) return;
+
+    searching = true;
+
+    searchToken++;
+
+    const token =
+        searchToken;
+
+    resetColors();
+
+    const target =
+        Number(
+            document
+            .getElementById("targetSelect")
+            .value
+        );
+
+
+    document
+        .getElementById("searchType")
+        .innerText =
+        "NORMAL";
+
+
+    document
+        .getElementById("counter")
+        .innerText =
+        "0";
+
+
+    document
+        .getElementById("progress")
+        .style.width =
+        "0%";
+
+
+    setInfo(
+        "🔎 Normal Search",
+
+        "The database scans the records one by one until the requested record is found."
+    );
+
+
+    let checked = 0;
+
+
+    for(let value of records){
+
+        if(token !== searchToken){
+
+            searching = false;
+            return;
+
+        }
+
+
+        checked++;
+
+
+        document
+            .getElementById("counter")
+            .innerText =
+            checked;
+
+
+        const percent =
+            (checked / records.length) * 100;
+
+
+        document
+            .getElementById("progress")
+            .style.width =
+            percent+"%";
+
+
+        const record =
+            document.getElementById(
+                "record"+value
+            );
+
+
+        record.setAttribute(
+            "color",
+            "#ef4444"
+        );
+
+
+        document
+            .getElementById("status")
+            .setAttribute(
+                "value",
+                "🔎 Checking Record "+value
+            );
+
+
+        document
+            .getElementById("pathText")
+            .setAttribute(
+                "value",
+                "Database → Record "+value
+            );
+
+
+        await wait(750,token);
+
+
+        if(token !== searchToken){
+
+            searching = false;
+            return;
+
+        }
+
+
+        if(value === target){
+
+            record.setAttribute(
+                "color",
+                "#22c55e"
+            );
+
+
+            pulse(
+                "record"+target
+            );
+
+
+            document
+                .getElementById("status")
+                .setAttribute(
+                    "value",
+                    "✓ RECORD "+target+" FOUND!"
+                );
+
+
+            setInfo(
+                "✅ Record Found",
+
+                "Normal search checked <b>"+
+                checked+
+                "</b> record(s) before finding record <b>"+
+                target+
+                "</b>."
+            );
+
+
+            searching = false;
+
+            return;
+
+        }
+
+    }
+
+
+    searching = false;
+
+}
+
+
+/* =====================================================
+   INDEXED SEARCH
+===================================================== */
+
+async function searchIndex(){
+
+    if(searching) return;
+
+    searching = true;
+
+    searchToken++;
+
+    const token =
+        searchToken;
+
+    resetColors();
+
+
+    const target =
+        Number(
+            document
+            .getElementById("targetSelect")
+            .value
+        );
+
+
+    document
+        .getElementById("searchType")
+        .innerText =
+        "INDEXED";
+
+
+    document
+        .getElementById("counter")
+        .innerText =
+        "0";
+
+
+    document
+        .getElementById("progress")
+        .style.width =
+        "0%";
+
+
+    setInfo(
+        "⚡ Indexed Search",
+
+        "The database first checks the index and then follows the appropriate branch to narrow the search."
+    );
+
+
+    /* STEP 1 */
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "Step 1 → Checking Index Root"
+        );
+
+
+    document
+        .getElementById("pathText")
+        .setAttribute(
+            "value",
+            "Database → Index Root (50)"
+        );
+
+
+    document
+        .getElementById("index50")
+        .setAttribute(
+            "color",
+            "#22c55e"
+        );
+
+
+    pulse("index50");
+
+
+    document
+        .getElementById("counter")
+        .innerText =
+        "1";
+
+
+    document
+        .getElementById("progress")
+        .style.width =
+        "35%";
+
+
+    await wait(900,token);
+
+
+    if(token !== searchToken){
+
+        searching = false;
+        return;
+
+    }
+
+
+    /* STEP 2 */
+
+    let node;
+
+
+    if(target < 50){
+
+        node =
+            document.getElementById(
+                "index25"
+            );
+
+
+        node.setAttribute(
+            "color",
+            "#22c55e"
+        );
+
+
+        document
+            .getElementById("lineLeft")
+            .setAttribute(
+                "color",
+                "#22c55e"
+            );
+
+
+        document
+            .getElementById("pathText")
+            .setAttribute(
+                "value",
+                "50 → LEFT BRANCH → 25"
+            );
+
+
+    }
+
+    else if(target > 50){
+
+        node =
+            document.getElementById(
+                "index75"
+            );
+
+
+        node.setAttribute(
+            "color",
+            "#22c55e"
+        );
+
+
+        document
+            .getElementById("lineRight")
+            .setAttribute(
+                "color",
+                "#22c55e"
+            );
+
+
+        document
+            .getElementById("pathText")
+            .setAttribute(
+                "value",
+                "50 → RIGHT BRANCH → 75"
+            );
+
+    }
+
+    else{
+
+        node =
+            document.getElementById(
+                "index50"
+            );
+
+
+        document
+            .getElementById("pathText")
+            .setAttribute(
+                "value",
+                "Index 50 → Direct Match"
+            );
+
+    }
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "Step 2 → Following Index Path"
+        );
+
+
+    if(target === 50){
+
+        document
+            .getElementById("counter")
+            .innerText =
+            "1";
+
+    }else{
+
+        document
+            .getElementById("counter")
+            .innerText =
+            "2";
+
+    }
+
+
+    document
+        .getElementById("progress")
+        .style.width =
+        "70%";
+
+
+    pulse(
+        node.id
+    );
+
+
+    await wait(900,token);
+
+
+    if(token !== searchToken){
+
+        searching = false;
+        return;
+
+    }
+
+
+    /* STEP 3 */
+
+    const record =
+        document.getElementById(
+            "record"+target
+        );
+
+
+    if(record){
+
+        record.setAttribute(
+            "color",
+            "#22c55e"
+        );
+
+
+        pulse(
+            "record"+target
+        );
+
+
+        document
+            .getElementById("progress")
+            .style.width =
+            "100%";
+
+
+        document
+            .getElementById("status")
+            .setAttribute(
+                "value",
+                "✓ INDEX → RECORD "+target+" FOUND!"
+            );
+
+
+        document
+            .getElementById("pathText")
+            .setAttribute(
+                "value",
+                "Index → Direct Location → Record "+target
+            );
+
+
+        setInfo(
+            "⚡ Indexed Search Complete",
+
+            "The index narrowed the search path instead of scanning every record.<br><br>"+
+
+            "Index nodes checked: <b>"+
+
+            (target === 50 ? "1" : "2")+
+
+            "</b><br><br>"+
+
+            "Target record: <b>"+target+"</b>"
+        );
+
+    }
+
+
+    searching = false;
+
+}
+
+
+/* =====================================================
+   STOP SEARCH
+===================================================== */
+
+function stopSearch(){
+
+    if(!searching){
+
+        setInfo(
+            "ℹ️ Search",
+
+            "There is no active search to stop."
+        );
+
+        return;
+
+    }
+
+
+    searchToken++;
+
+    searching = false;
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "⛔ SEARCH STOPPED"
+        );
+
+
+    document
+        .getElementById("pathText")
+        .setAttribute(
+            "value",
+            "Search cancelled by user"
+        );
+
+
+    setInfo(
+        "⛔ Search Stopped",
+
+        "The current search animation was cancelled. Press Reset Lab to start again."
+    );
+
+}
+
+
+/* =====================================================
+   CONCEPT
+===================================================== */
+
+function showConcept(){
+
+    if(searching) return;
+
+
+    setInfo(
+        "📚 What is Database Indexing?",
+
+        "A database index is a special data structure that helps the database locate records faster.<br><br>"+
+
+        "Think of it like the index of a textbook. Instead of reading every page, you use the index to locate the required page.<br><br>"+
+
+        "<b>Without Index:</b> Scan many records.<br>"+
+
+        "<b>With Index:</b> Follow an organized search path.<br><br>"+
+
+        "<b>Goal:</b> Faster data retrieval."
+    );
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "INDEX = FASTER DATA RETRIEVAL"
+        );
+
+
+    document
+        .getElementById("pathText")
+        .setAttribute(
+            "value",
+            "Index → Narrow search → Locate record"
+        );
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab(){
+
+    searchToken++;
+
+    searching = false;
+
+
+    resetColors();
+
+
+    document
+        .getElementById("counter")
+        .innerText =
+        "0";
+
+
+    document
+        .getElementById("searchType")
+        .innerText =
+        "---";
+
+
+    document
+        .getElementById("progress")
+        .style.width =
+        "0%";
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "READY — Choose a search method"
+        );
+
+
+    document
+        .getElementById("pathText")
+        .setAttribute(
+            "value",
+            ""
+        );
+
+
+    setInfo(
+        "Welcome to the Indexing Lab!",
+
+        "Select a record and compare normal search with indexed search."
+    );
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+function goHome(){
+
+    window.location.href =
+        "dbms.html";
+
+}
+
+
+function goBack(){
+
+    window.history.back();
+
+}
+
+
+function goNext(){
+
+    window.location.href =
+        "transactions.html";
+
+}
+
+</script>
+
+</body>
+
+</html>
