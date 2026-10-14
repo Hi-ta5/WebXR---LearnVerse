@@ -1,0 +1,89 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cryptographic Hash Functions</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#1a1038"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#251850"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="3.7 2.35 -2.7" rotation="0 -28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="msg" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="New text" align="center" position="0 0 .07" width="1.50" wrap-count="10" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="flip" data-v="" position="3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Flip char" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="-1.2 0 -3.6">
+<a-box  position="-2.3 3.1 0" width="2.4" height="1.1" depth="0.2" color="#3b3b78"></a-box>
+<a-text id="inp" value="" align="center" anchor="center" baseline="center" position="-2.3 3.1 0.12" width="2.21" wrap-count="17" color="#fff"></a-text>
+<a-text value="INPUT DATA" align="center" anchor="center" baseline="center" position="-2.3 3.85 0" width="1.40" wrap-count="10" color="#cfe3ff"></a-text>
+<a-cone position="-.95 3.1 0" rotation="0 0 -90" radius=".22" height=".5" color="#ffd36b"></a-cone><a-box  position="0.5 3.1 0" width="1.9" height="1.7" depth="0.8" color="#6b3fb0"></a-box>
+<a-torus id="gear" position=".5 3.1 .45" radius=".5" radius-tubular=".09" color="#ffd36b" animation="property:rotation;from:0 0 0;to:0 0 360;dur:1200;easing:linear;startEvents:spin"></a-torus><a-text value="HASH MACHINE" align="center" anchor="center" baseline="center" position="0.5 4.1 0" width="1.68" wrap-count="12" color="#ffd36b"></a-text>
+<a-text value="Original" align="center" anchor="center" baseline="center" position="-2.3 1.95 0" width="1.04" wrap-count="8" color="#cfe3ff"></a-text>
+<a-text value="New" align="center" anchor="center" baseline="center" position="-2.3 1.25 0" width="1.04" wrap-count="8" color="#cfe3ff"></a-text>
+<a-text id="ban" value="" align="center" anchor="center" baseline="center" position="0.5 0.8 0" width="4.76" wrap-count="28" color="#fff"></a-text>
+<a-box id="h00"  position="-1.3 1.95 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c00" value=" " align="center" anchor="center" baseline="center" position="-1.3 1.95 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h01"  position="-0.75 1.95 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c01" value=" " align="center" anchor="center" baseline="center" position="-0.75 1.95 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h02"  position="-0.19999999999999996 1.95 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c02" value=" " align="center" anchor="center" baseline="center" position="-0.19999999999999996 1.95 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h03"  position="0.3500000000000001 1.95 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c03" value=" " align="center" anchor="center" baseline="center" position="0.3500000000000001 1.95 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h04"  position="0.9000000000000001 1.95 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c04" value=" " align="center" anchor="center" baseline="center" position="0.9000000000000001 1.95 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h05"  position="1.45 1.95 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c05" value=" " align="center" anchor="center" baseline="center" position="1.45 1.95 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h06"  position="2.0 1.95 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c06" value=" " align="center" anchor="center" baseline="center" position="2.0 1.95 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h07"  position="2.5500000000000007 1.95 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c07" value=" " align="center" anchor="center" baseline="center" position="2.5500000000000007 1.95 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h10"  position="-1.3 1.25 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c10" value=" " align="center" anchor="center" baseline="center" position="-1.3 1.25 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h11"  position="-0.75 1.25 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c11" value=" " align="center" anchor="center" baseline="center" position="-0.75 1.25 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h12"  position="-0.19999999999999996 1.25 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c12" value=" " align="center" anchor="center" baseline="center" position="-0.19999999999999996 1.25 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h13"  position="0.3500000000000001 1.25 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c13" value=" " align="center" anchor="center" baseline="center" position="0.3500000000000001 1.25 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h14"  position="0.9000000000000001 1.25 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c14" value=" " align="center" anchor="center" baseline="center" position="0.9000000000000001 1.25 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h15"  position="1.45 1.25 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c15" value=" " align="center" anchor="center" baseline="center" position="1.45 1.25 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h16"  position="2.0 1.25 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c16" value=" " align="center" anchor="center" baseline="center" position="2.0 1.25 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+<a-box id="h17"  position="2.5500000000000007 1.25 0" width="0.5" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="c17" value=" " align="center" anchor="center" baseline="center" position="2.5500000000000007 1.25 0.07" width="0.40" wrap-count="1" color="#fff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const MS=['Alice pays Bob 10','Bob pays Carol 25','Blockchain'];let mi=0,cur,A;
+const alt=t=>t.slice(0,-1)+String.fromCharCode(t.charCodeAt(t.length-1)+1);
+function row(r,h,ref){for(let k=0;k<8;k++){T('#c'+r+k,h?h[k]:' ');$('#h'+r+k).setAttribute('color',!h?'#334':ref?(ref[k]!=h[k]?'#c4423b':'#2e9e6b'):'#2a6db0')}}
+const ban=(t,c)=>{T('#ban',t);$('#ban').setAttribute('color',c||'#fff')};
+const spin=()=>$('#gear').emit('spin');
+const diff=B=>pc((parseInt(A,16)^parseInt(B,16))>>>0);
+const INTRO=['HASH = A FINGERPRINT FOR DATA','A hash function turns any data into a short code, like a fingerprint.','a fingerprint: same finger, same print.','Press Next step.'];
+function rst0(){cur=MS[mi];A='';T('#inp',cur);row(0,'');row(1,'');ban('')}
+const X={msg:()=>{mi=(mi+1)%3;ACT.rst()},flip:()=>{if(!A)return;const t=alt(cur),B=hx(t);T('#inp',t);spin();row(1,B,A);ban(diff(B)+' of 32 bits changed','#ff8a80');T('#inf','Changed the last letter. The new fingerprint is completely different (red tiles).')}};
+const STEPS=[
+{t:'Pick some data',a:'putting a finger on a scanner.',h:'Click New text to change it.',f:()=>'We will hash: "'+cur+'". Any data can go in, small or big.'},
+{t:'Make the fingerprint',a:'a fingerprint cannot rebuild the finger.',h:'Press Next step.',f:()=>{A=hx(cur);spin();row(0,A);return 'The machine outputs a short code: '+A+'. You cannot work backwards from it to the data.'}},
+{t:'Do it again',a:'same finger, same print.',h:'Press Next step.',f:()=>{row(1,hx(cur),A);ban('SAME fingerprint','#9bffb0');return 'Same data always gives the same fingerprint (all green). That is how anyone can double-check data.'}},
+{t:'Change one letter',a:'a different finger gives a different print.',h:'Click Flip char.',f:()=>{const t=alt(cur),B=hx(t);T('#inp',t);spin();row(1,B,A);ban(diff(B)+' of 32 bits changed','#ff8a80');return 'One letter changed, but the fingerprint is totally different (red tiles). Tampering is easy to spot.'}},
+{t:'Always same size',a:'a word and a whole book each get one print.',h:'Press Reset to replay.',f:()=>{T('#inp','(same text x30)');spin();row(1,hx(cur.repeat(30)),A);ban('Still 8 digits','#fff');return 'Even huge data gives a fingerprint of the same length (8 digits here; SHA-256 uses 64).'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

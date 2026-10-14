@@ -1,0 +1,64 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Transactions and the Network</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0a2814"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#123a20"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="3.7 2.35 -2.7" rotation="0 -28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="sc" data-v="" position="2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Next txs" align="center" position="0 0 .07" width="1.50" wrap-count="10" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="-1.2 0 -3.6">
+<a-entity line="start:0 3.0 0;end:0.0 4.1 0;color:#4a8a5a"></a-entity>
+<a-entity line="start:0 3.0 0;end:-1.91 3.55 0;color:#4a8a5a"></a-entity>
+<a-entity line="start:0 3.0 0;end:-1.91 2.45 0;color:#4a8a5a"></a-entity>
+<a-entity line="start:0 3.0 0;end:-0.0 1.9 0;color:#4a8a5a"></a-entity>
+<a-entity line="start:0 3.0 0;end:1.91 2.45 0;color:#4a8a5a"></a-entity>
+<a-entity line="start:0 3.0 0;end:1.91 3.55 0;color:#4a8a5a"></a-entity>
+<a-sphere id="n0" position="0.0 4.1 0" radius=".36" color="#3b82c4"></a-sphere><a-text value="PC1" align="center" anchor="center" baseline="center" position="0.0 4.1 0.4" width="0.48" wrap-count="3" color="#fff"></a-text>
+<a-sphere id="n1" position="-1.91 3.55 0" radius=".36" color="#3b82c4"></a-sphere><a-text value="PC2" align="center" anchor="center" baseline="center" position="-1.91 3.55 0.4" width="0.48" wrap-count="3" color="#fff"></a-text>
+<a-sphere id="n2" position="-1.91 2.45 0" radius=".36" color="#3b82c4"></a-sphere><a-text value="PC3" align="center" anchor="center" baseline="center" position="-1.91 2.45 0.4" width="0.48" wrap-count="3" color="#fff"></a-text>
+<a-sphere id="n3" position="-0.0 1.9 0" radius=".36" color="#3b82c4"></a-sphere><a-text value="PC4" align="center" anchor="center" baseline="center" position="-0.0 1.9 0.4" width="0.48" wrap-count="3" color="#fff"></a-text>
+<a-sphere id="n4" position="1.91 2.45 0" radius=".36" color="#3b82c4"></a-sphere><a-text value="PC5" align="center" anchor="center" baseline="center" position="1.91 2.45 0.4" width="0.48" wrap-count="3" color="#fff"></a-text>
+<a-sphere id="n5" position="1.91 3.55 0" radius=".36" color="#3b82c4"></a-sphere><a-text value="PC6" align="center" anchor="center" baseline="center" position="1.91 3.55 0.4" width="0.48" wrap-count="3" color="#fff"></a-text>
+<a-box id="bay"  position="0 3.0 0" width="1.6" height="0.9" depth="0.2" color="#3a4a5a"></a-box>
+<a-text id="baytx" value="WAITING
+ROOM" align="center" anchor="center" baseline="center" position="0 3.0 0.12" width="1.20" wrap-count="8" color="#fff"></a-text>
+<a-sphere id="pk" position="0 3 .1" radius=".2" color="#ffd36b" visible="false"></a-sphere><a-box  position="0 1.15 0" width="5.0" height="0.55" depth="0.1" color="#0e2238"></a-box>
+<a-text id="brd" value="" align="center" anchor="center" baseline="center" position="0 1.15 0.07" width="4.80" wrap-count="32" color="#fff"></a-text>
+<a-text value="Yellow = got it    Green = approved    Red = rejected" align="center" anchor="center" baseline="center" position="0 0.7 0" width="6.72" wrap-count="56" color="#cfe3ff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const P=[[0.0, 4.1], [-1.91, 3.55], [-1.91, 2.45], [-0.0, 1.9], [1.91, 2.45], [1.91, 3.55]];
+const SC=[['Alice pays Bob 30'],['Bob pays Carol 50'],['Alice pays Bob 40','Alice pays Carol 40']];let sc=0,bal,res,nb;
+const brd=()=>T('#brd','Balances:  '+Object.keys(bal).map(k=>k+' '+bal[k]).join('   '));
+const nodes=c=>{for(let k=0;k<6;k++)$('#n'+k).setAttribute('color',c)};
+const INTRO=['A PAYMENT ON THE NETWORK','A payment is shared with every computer. Each one checks it before it is accepted.','a village where everyone checks the shared ledger.','Press Next step.'];
+function rst0(){bal={Alice:50,Bob:20,Carol:0};res=null;brd();nodes('#3b82c4');$('#pk').setAttribute('visible',false);$('#bay').setAttribute('color','#3a4a5a');T('#baytx','WAITING\nROOM')}
+const X={sc:()=>{sc=(sc+1)%3;ACT.rst();T('#inf','New case: '+SC[sc].join(' and ')+'. Press Next step.')}};
+const STEPS=[
+{t:'Write the payment',a:'filling in a cheque and signing it.',h:'Click Next txs for other cases.',f:()=>{$('#pk').setAttribute('position',P[0][0]+' '+P[0][1]+' .1');$('#pk').setAttribute('visible',true);return 'PC1 writes: '+SC[sc].join(' and ')+'. It is signed with the sender\'s secret key.'}},
+{t:'Tell everyone',w:3800,a:'shouting news across a village.',h:'Follow the gold dot.',f:()=>{busy=1;for(let k=0;k<6;k++)tm.push(setTimeout(()=>{$('#n'+k).setAttribute('color','#d4a017');$('#pk').setAttribute('position',P[k][0]+' '+P[k][1]+' .1');if(k==5)busy=0},k*350));return 'The payment is passed from computer to computer until all six have it (yellow). No boss is needed.'}},
+{t:'Everyone checks',a:'checking the ledger so nobody spends a coin twice.',h:'Try the other cases.',f:()=>{let b={...bal};res=SC[sc].map(x=>{const m=x.match(/(\w+) pays (\w+) (\d+)/),a=+m[3],ok=b[m[1]]>=a;if(ok){b[m[1]]-=a;b[m[2]]=(b[m[2]]||0)+a}return{x,ok}});nb=b;const all=res.every(r=>r.ok),any=res.some(r=>r.ok);nodes(all?'#2e9e6b':any?'#d9822b':'#c4423b');return res.map(r=>r.x+': '+(r.ok?'OK':'REJECTED, not enough coins')).join('. ')+'.'}},
+{t:'Put it in a block',a:'writing it into the ledger.',h:'Press Next step.',f:()=>{const ok=res.filter(r=>r.ok);$('#bay').setAttribute('color',ok.length?'#2e9e6b':'#c4423b');T('#baytx',ok.length?'BLOCK 1\n'+hx(ok.map(r=>r.x).join()):'EMPTY\nREJECTED');return ok.length?'Approved payments go into a new block (the box in the middle). Rejected ones are left out.':'Nothing was approved, so the block stays empty.'}},
+{t:'Update balances',a:'everyone updates their copy of the ledger.',h:'Click Next txs, then Run all.',f:()=>{bal=nb;brd();return 'Balances change only for approved payments. Rejected payments changed nothing.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

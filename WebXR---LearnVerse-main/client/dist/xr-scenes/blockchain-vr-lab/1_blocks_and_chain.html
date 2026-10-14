@@ -1,0 +1,55 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Blocks and the Blockchain</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#062a3a"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#0b3d54"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="0 1.35 -3.3"><a-plane width="9.0" height="1.7" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="3.26 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="3.52 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="3.78 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="4.04 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="4.30 .7 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="center" position="-4.35 0.7 0" width="5.78" wrap-count="34" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-4.35 0.4 0" width="4.20" wrap-count="30" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="0.2 0.4 0" width="4.20" wrap-count="30" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="0.2 -0.35 0" width="4.20" wrap-count="30" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="0 0 -3.7">
+<a-box id="b0" class="hit" data-a="tam" data-v="0" position="-2.9 3.0 0" width="2.6" height="1.6" depth="0.35" color="#2e9e6b"></a-box>
+<a-text id="t0" value="" align="center" anchor="center" baseline="center" position="-2.9 3.0 0.2" width="2.47" wrap-count="19" color="#fff"></a-text>
+<a-text id="s0" value="" align="center" anchor="center" baseline="center" position="-2.9 4.0 0" width="1.70" wrap-count="10" color="#fff"></a-text>
+<a-cone id="r0" position="-1.45 3.0 0" rotation="0 0 90" radius=".22" height=".5" color="#2e9e6b"></a-cone><a-box id="b1" class="hit" data-a="tam" data-v="1" position="0 3.0 0" width="2.6" height="1.6" depth="0.35" color="#2e9e6b"></a-box>
+<a-text id="t1" value="" align="center" anchor="center" baseline="center" position="0 3.0 0.2" width="2.47" wrap-count="19" color="#fff"></a-text>
+<a-text id="s1" value="" align="center" anchor="center" baseline="center" position="0 4.0 0" width="1.70" wrap-count="10" color="#fff"></a-text>
+<a-cone id="r1" position="1.45 3.0 0" rotation="0 0 90" radius=".22" height=".5" color="#2e9e6b"></a-cone><a-box id="b2" class="hit" data-a="tam" data-v="2" position="2.9 3.0 0" width="2.6" height="1.6" depth="0.35" color="#2e9e6b"></a-box>
+<a-text id="t2" value="" align="center" anchor="center" baseline="center" position="2.9 3.0 0.2" width="2.47" wrap-count="19" color="#fff"></a-text>
+<a-text id="s2" value="" align="center" anchor="center" baseline="center" position="2.9 4.0 0" width="1.70" wrap-count="10" color="#fff"></a-text>
+<a-text value="Green = nothing changed.   Red = something was changed." align="center" anchor="center" baseline="center" position="0 4.45 0" width="7.28" wrap-count="52" color="#cfe3ff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const D0=['Alice pays Bob 5','Bob pays Carol 2','Carol pays Dan 1'];let tam,vis;
+const comp=t=>{let p='000000';return D0.map((d,i)=>{const x=t[i]?d+'9':d,h=hx((i+1)+p+x).slice(0,6),o={d:x,p,h};p=h;return o})};
+const SEAL=comp([0,0,0]);
+function draw(){comp(tam).forEach((b,i)=>{const bad=b.h!=SEAL[i].h,v=i<vis,c=bad?'#c4423b':'#2e9e6b';$('#b'+i).setAttribute('color',c);T('#t'+i,'BLOCK '+(i+1)+'\n'+b.d+'\nlinks to: '+b.p+'\nmy hash: '+b.h);T('#s'+i,bad?'BROKEN':'OK');$('#s'+i).setAttribute('color',bad?'#ff8a80':'#9bffb0');['b','t','s'].forEach(p=>$('#'+p+i).setAttribute('visible',v));if(i){const r=$('#r'+(i-1));r.setAttribute('color',c);r.setAttribute('visible',v)}})}
+const INTRO=['BLOCKS AND THE BLOCKCHAIN','A blockchain is a notebook where every page is locked to the page before it.','a notebook where each page quotes a stamp from the previous page.','Press Next step to begin.'];
+function rst0(){tam=[0,0,0];vis=0;draw()}
+const X={tam:i=>{i=+i;if(i>=vis)return;tam[i]^=1;draw();T('#inf',tam[i]?'Block '+(i+1)+' was edited. Its hash changed, so the blocks after it no longer match. Click again to undo.':'Block '+(i+1)+' is restored. Everything matches again.')}};
+const STEPS=[
+{t:'First block',a:'a page with a unique stamp.',h:'Press Next step.',f:()=>{vis=1;draw();return 'Block 1 holds some data. It also has a hash, a short code that identifies this block.'}},
+{t:'Chain the blocks',a:'each page quotes the stamp before it.',h:'Press Next step.',f:()=>{vis=3;draw();return 'Each new block remembers the hash of the block before it ("links to"). That link is the chain.'}},
+{t:'All is well',a:'every seal is unbroken.',h:'Press Next step.',f:()=>'Green means nothing was changed. Every hash still matches the one it was sealed with.'},
+{t:'Try to cheat',a:'changing one page ruins all the pages after it.',h:'Click any block yourself.',f:()=>{tam[1]=1;draw();return 'Someone edits Block 2. Its hash changes, so Block 3 no longer matches. Red means broken.'}},
+{t:'Why it is safe',a:'forging a whole notebook by hand.',h:'Click a block to edit it.',f:()=>{tam=[0,0,0];draw();return 'To hide an edit, a cheater must redo every later block. On a real blockchain that is almost impossible.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

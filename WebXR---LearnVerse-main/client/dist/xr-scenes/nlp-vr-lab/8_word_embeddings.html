@@ -1,0 +1,58 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>8. Word Embeddings and Semantic Vectors</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn" vr-mode-ui="enabled:true">
+<a-sky color="#0b1d33"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#12304f"></a-circle>
+<a-light type="ambient" intensity="1"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0.8"></a-entity>
+<a-entity laser-controls="hand:right" raycaster="objects:.btn;far:20"></a-entity></a-entity>
+<a-entity id="w" position="0 0 -3.5">
+<a-text value="8. Word Embeddings and Semantic Vectors" align="center" position="0 4 0" width="9" wrap-count="38" color="#ffd36b"></a-text>
+<a-sphere id="pk" radius=".2" color="#ffd36b" position="-3.6 3.65 0"></a-sphere>
+<a-plane position="0 1.15 -.02" width="8.7" height="1.05" color="#0e2238"></a-plane>
+<a-text id="out" value="" position="-4.2 1.15 0" width="8.4" wrap-count="52" anchor="left" align="left" baseline="center" color="#ffffff"></a-text>
+<a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="cp" visible="false" height=".36" depth=".08" color="#555"><a-text align="center" position="0 0 .06" color="#fff" value=" "></a-text></a-box><a-box class="btn" data-a="run" position="-3.15 0.32 0" width="1.9" height=".44" depth=".1" color="#d9822b"><a-text value="Run all" align="center" baseline="center" position="0 0 .06" width="2.4" wrap-count="14" color="#fff"></a-text></a-box><a-box class="btn" data-a="step" position="-1.05 0.32 0" width="1.9" height=".44" depth=".1" color="#d9822b"><a-text value="Step" align="center" baseline="center" position="0 0 .06" width="2.4" wrap-count="14" color="#fff"></a-text></a-box><a-box class="btn" data-a="rst" position="1.05 0.32 0" width="1.9" height=".44" depth=".1" color="#d9822b"><a-text value="Reset" align="center" baseline="center" position="0 0 .06" width="2.4" wrap-count="14" color="#fff"></a-text></a-box><a-box class="btn" data-a="nxt" position="3.15 0.32 0" width="1.9" height=".44" depth=".1" color="#d9822b"><a-text value="Next text" align="center" baseline="center" position="0 0 .06" width="2.4" wrap-count="14" color="#fff"></a-text></a-box>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s);
+const C={a:'#3b82c4',g:'#2e9e6b',o:'#d9822b',p:'#8a5cc4',r:'#c4423b',y:'#b8921a',k:'#667'};
+const STOP=new Set('a an the is are was were be been to of in on at for and or but it its this that i me my we you he she they them with as by from do does did will can so'.split(' '));
+const tok=t=>t.match(/[A-Za-z']+|\d+|[^\sA-Za-z\d]/g)||[];
+const words=t=>tok(t).filter(w=>/^[A-Za-z']+$/.test(w));
+const ch=(a,c)=>a.map(x=>[x,c]);
+const stem=w=>w.length>4?w.replace(/(ing|edly|ed|ies|es|s|ly)$/,m=>m=='ies'?'y':'').replace(/(.)\1$/,'$1'):w;
+const LM={children:'child',running:'run',playing:'play',buying:'buy',went:'go',better:'good',studies:'study',mice:'mouse',was:'be',loves:'love',movies:'movie',eating:'eat',tastier:'tasty'};
+const lem=w=>LM[w]||(w.length>3&&w.endsWith('s')&&!w.endsWith('ss')?w.slice(0,-1):w);
+const cos=(a,b)=>{let d=0,x=0,y=0;a.forEach((v,i)=>{d+=v*b[i];x+=v*v;y+=b[i]*b[i]});return x&&y?d/Math.sqrt(x*y):0};
+
+const SMP=['king - man + woman','prince - man + woman','cat'];
+const EM={king:[.9,.8,.1,0],queen:[.9,-.8,.1,0],prince:[.5,.8,.1,0],princess:[.5,-.8,.1,0],man:[.1,.9,.2,0],woman:[.1,-.9,.2,0],cat:[0,0,.9,0],dog:[0,.1,.9,0],apple:[0,0,0,.9],banana:[0,0,.05,.9]};
+const nn=(v,ex)=>Object.keys(EM).filter(w=>!ex.includes(w)).map(w=>[w,cos(v,EM[w])]).sort((a,b)=>b[1]-a[1]);
+const S=[
+{n:'Words',f:c=>{c.t=c.text.split(' ').filter(x=>EM[x]);return{o:'Words found in the vocabulary. Each will become a dense vector of numbers.',c:ch(c.t,C.a)}}},
+{n:'Embedding\nlookup',f:c=>({o:'Toy 4-D vectors [royalty, male, animal, food]:\n'+c.t.map(w=>w+' = ['+EM[w].join(', ')+']').join('\n'),c:ch(c.t,C.o)})},
+{n:'Cosine\nsimilarity',f:c=>{c.n=nn(EM[c.t[0]],[c.t[0]]);return{o:'Cosine similarity of "'+c.t[0]+'" with other words (1 = same direction):\n'+c.n.slice(0,3).map(x=>x[0]+' '+x[1].toFixed(2)).join(',  '),c:c.n.slice(0,6).map(x=>[x[0]+' '+x[1].toFixed(2),x[1]>.5?C.g:C.k])}}},
+{n:'Vector\nmath',f:c=>{const a=c.t.length==3;c.v=a?EM[c.t[0]].map((x,i)=>x-EM[c.t[1]][i]+EM[c.t[2]][i]):EM[c.t[0]];return{o:a?c.t[0]+' - '+c.t[1]+' + '+c.t[2]+' = ['+c.v.map(x=>x.toFixed(1)).join(', ')+']\nSubtract one meaning direction, add another.':'Single word: use its own vector ['+c.v.join(', ')+']',c:ch(c.t,C.p)}}},
+{n:'Result',f:c=>{const r=nn(c.v,c.t);return{o:'Closest word to the result vector: '+r[0][0]+' ('+r[0][1].toFixed(2)+'). Runner-up: '+r[1][0]+'.\nMeaning is captured as distance and direction.',c:r.slice(0,4).map(x=>[x[0]+' '+x[1].toFixed(2),C.r])}}}];
+const px=i=>-3.6+i*(S.length>1?7.2/(S.length-1):0);
+const ST=S.map((s,i)=>{const e=document.createElement('a-box'),t=document.createElement('a-text');
+ e.setAttribute('position',px(i)+' 3 0');e.setAttribute('width',1.55);e.setAttribute('height',.8);e.setAttribute('depth',.2);e.setAttribute('color','#2a6db0');
+ t.setAttribute('value',s.n);t.setAttribute('align','center');t.setAttribute('position','0 0 .11');t.setAttribute('width',1.7);t.setAttribute('wrap-count',12);t.setAttribute('color','#fff');
+ e.appendChild(t);$('#w').appendChild(e);return e});
+const CP=[...document.querySelectorAll('.cp')];
+function chips(a){let x=-4.1,r=0;CP.forEach(b=>b.setAttribute('visible',false));
+ for(let i=0;i<a.length&&i<CP.length;i++){const[t,c]=a[i],s=String(t),w=s.length*.14+.3;
+  if(x+w>4.1){x=-4.1;r++}if(r>1)break;
+  const b=CP[i];b.setAttribute('visible',true);b.setAttribute('width',w);b.setAttribute('color',c);b.setAttribute('position',(x+w/2)+' '+(2.30-r*.40)+' 0');
+  b.firstElementChild.setAttribute('text',{value:s,width:s.length*.14+.14,wrapCount:s.length+1,align:'center',color:'#fff'});x+=w+.12}}
+let ctx,k=-1,si=0,tm=[];
+function rst(){tm.forEach(clearTimeout);tm=[];k=-1;ctx={text:SMP[si]};ST.forEach(s=>s.setAttribute('color','#2a6db0'));
+ $('#pk').setAttribute('animation','property:position;to:'+px(0)+' 3.65 0;dur:300');
+ $('#out').setAttribute('value','Sample text '+(si+1)+' of '+SMP.length+':\n'+SMP[si]+'\n\nPress Step (one stage at a time) or Run all.');chips([])}
+function step(){if(k>=S.length-1)return;const kk=++k;
+ ST.forEach((s,i)=>s.setAttribute('color',i<kk?'#2e9e6b':i==kk?'#f90':'#2a6db0'));
+ $('#pk').setAttribute('animation','property:position;to:'+px(kk)+' 3.65 0;dur:600;easing:easeInOutQuad');
+ const r=S[kk].f(ctx);tm.push(setTimeout(()=>{$('#out').setAttribute('value',(kk+1)+'. '+S[kk].n.replace('\n',' ')+'\n'+r.o);chips(r.c||[])},600))}
+const act={run:()=>{rst();S.forEach((_,i)=>tm.push(setTimeout(step,i*2800+300)))},step,rst,nxt:()=>{si=(si+1)%SMP.length;rst()}};
+document.querySelectorAll('.btn').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.a=='step')tm.forEach(clearTimeout);act[b.dataset.a]()}));
+rst();
+</script></body></html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relational Algebra and Calculus</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0b1d33"></a-sky><a-circle rotation="-90 0 0" radius="7" color="#12304f"></a-circle>
+<a-light type="ambient" intensity=".9"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity position="0 0 0"><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+<a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-1.45 0 -4">
+<a-text value="Relational Algebra and Calculus" align="center" position="1.45 3.9 0" width="7.5" color="#ffd36b"></a-text>
+<a-plane position="4.5 2.2 -.02" width="3.4" height="3.7" color="#10263f"></a-plane>
+<a-text id="i" value="Look at the scene and click any item or button (mouse, or controller trigger in VR)." position="2.95 2.2 0" width="3.1" wrap-count="31" anchor="left" align="left" baseline="center" color="#fff"></a-text>
+<a-text  value="R(id, name, dept_id)
+1 | Asha | 10
+2 | Ravi | 20
+3 | Meera | 10" align="left" anchor="left" position="-2.9 3.35 0" width="2.4" wrap-count="26" color="#fff"></a-text>
+<a-text  value="S(dept_id, dname)
+10 | CSE
+20 | IT" align="left" anchor="left" position="-0.2 3.35 0" width="2" wrap-count="22" color="#fff"></a-text>
+<a-plane position="-.35 2.0 -.02" width="5.3999999999999995" height="1.5" color="#0e2238"></a-plane><a-text id="res" value="Choose an operator below." align="left" anchor="left" position="-2.9 2.0 0" width="5.1" wrap-count="56" color="#fff"></a-text>
+<a-box class="btn" data-x="s" data-t="SELECTION (sigma): picks ROWS meeting a condition.
+sigma dept_id=10 (R)
+SQL: SELECT * FROM R WHERE dept_id=10" position="-2.0 0.95 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Select" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="p" data-t="PROJECTION (pi): picks COLUMNS, removes duplicates.
+pi name (R)
+SQL: SELECT DISTINCT name FROM R" position="-0.35 0.95 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Project" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="j" data-t="JOIN: combines tuples of R and S that match on dept_id.
+R JOIN S
+SQL: SELECT * FROM R JOIN S USING(dept_id)" position="1.2999999999999998 0.95 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Join" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="x" data-t="CARTESIAN PRODUCT: every row of R with every row of S: 3 x 2 = 6 rows. JOIN = product + selection." position="-2.0 0.35 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Product" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="u" data-t="SET OPERATIONS: union, intersection, difference. Need union-compatible relations (same attributes and domains)." position="-0.35 0.35 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Set ops" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="c" data-t="RELATIONAL CALCULUS (declarative)
+Tuple (TRC): { t | t in R AND t.dept_id=10 }
+Domain (DRC): { &lt;i,n,d&gt; | &lt;i,n,d&gt; in R AND d=10 }
+Algebra = HOW, calculus = WHAT." position="1.2999999999999998 0.35 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Calculus" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const D={s:'sigma dept_id=10 (R)\nid | name | dept_id\n1 | Asha | 10\n3 | Meera | 10',p:'pi name (R)\nname\nAsha\nRavi\nMeera',
+j:'R JOIN S\nid | name | dept_id | dname\n1 | Asha | 10 | CSE\n2 | Ravi | 20 | IT\n3 | Meera | 10 | CSE',
+x:'R x S (6 rows)\n1 Asha 10 | 10 CSE\n1 Asha 10 | 20 IT\n2 Ravi 20 | 10 CSE\n2 Ravi 20 | 20 IT\n3 Meera 10 | 10 CSE\n3 Meera 10 | 20 IT',
+u:'A={Asha,Ravi}  B={Ravi,Meera}\nA union B = {Asha,Ravi,Meera}\nA intersect B = {Ravi}\nA - B = {Asha}',
+c:'TRC / DRC give the same answer as sigma:\nAsha, Meera (dept_id=10)'};
+function X(k){T('#res',D[k])}
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{
+ if(b.classList.contains('btn')){document.querySelectorAll('.btn').forEach(x=>x.setAttribute('color','#2a6db0'));b.setAttribute('color','#f90')}
+ T('#i',b.dataset.t);if(window.X)X(b.dataset.x||'')}));
+</script></body></html>

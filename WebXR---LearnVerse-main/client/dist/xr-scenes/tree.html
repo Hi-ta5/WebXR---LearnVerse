@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WebXR Tree Visualization</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+
+    body{
+      margin:0;
+      overflow:hidden;
+      font-family:Arial;
+    }
+
+    .ui{
+      position:absolute;
+      top:20px;
+      left:20px;
+      width:320px;
+      background:rgba(0,0,0,0.85);
+      color:white;
+      padding:15px;
+      border-radius:12px;
+      z-index:999;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .ui h2{
+      margin-top:0;
+      color:#00ffff;
+    }
+
+    select, input{
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      border:none;
+      border-radius:8px;
+      box-sizing:border-box;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    option {
+      background: #111827;
+      color: white;
+    }
+
+    button{
+      width:100%;
+      margin-top:10px;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      background:#00ffff;
+      color:black;
+      font-weight:bold;
+      cursor:pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover{
+      background: #00cccc;
+    }
+
+    #info{
+      margin-top:10px;
+      color:#22c55e;
+      font-weight:bold;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="ui">
+
+  <h2>TREE VR LAB</h2>
+
+  <select id="treeType">
+
+    <option value="binary">Binary Tree</option>
+
+    <option value="bst">Binary Search Tree</option>
+
+    <option value="avl">AVL Tree</option>
+
+    <option value="heap">Heap Tree</option>
+
+  </select>
+
+  <input
+    type="number"
+    id="valueInput"
+    placeholder="Enter Node Value">
+
+  <button onclick="insertNode()">Insert Node</button>
+
+  <button onclick="traverseTree()">Traverse Tree</button>
+
+  <button onclick="highlightRoot()">Highlight Root</button>
+
+  <div id="info">Root Node: None</div>
+
+</div>
+
+<a-scene background="color:#020617" vr-mode-ui="enabled:true">
+
+  <!-- Assets -->
+  <a-assets>
+
+    <a-asset-item
+      id="robotModel"
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+    </a-asset-item>
+
+  </a-assets>
+
+  <!-- Camera -->
+  <a-camera position="0 6 18"></a-camera>
+
+  <!-- Lights -->
+  <a-light type="ambient" intensity="1"></a-light>
+
+  <a-light
+    type="point"
+    intensity="2"
+    position="0 15 5">
+  </a-light>
+
+  <!-- Ground -->
+  <a-plane
+    rotation="-90 0 0"
+    width="80"
+    height="80"
+    color="#111827">
+  </a-plane>
+
+  <!-- Sky -->
+  <a-sky color="#020617"></a-sky>
+
+  <!-- Header -->
+  <a-text
+    value="WEBXR TREE VISUALIZATION"
+    position="-8 12 -18"
+    scale="4 4 4"
+    color="#00ffff">
+  </a-text>
+
+  <!-- Decorative Robots -->
+
+  <a-gltf-model
+    src="#robotModel"
+    position="-14 0 -14"
+    scale="1 1 1"
+    animation="
+      property: rotation;
+      to: 0 360 0;
+      loop: true;
+      dur: 20000">
+  </a-gltf-model>
+
+  <a-gltf-model
+    src="#robotModel"
+    position="14 0 -14"
+    scale="1 1 1"
+    animation="
+      property: rotation;
+      to: 0 -360 0;
+      loop: true;
+      dur: 20000">
+  </a-gltf-model>
+
+  <!-- Tree Container -->
+  <a-entity id="treeContainer"></a-entity>
+
+</a-scene>
+
+<script>
+
+let treeNodes = [50, 30, 70, 20, 40, 60, 80];
+
+const container =
+  document.querySelector('#treeContainer');
+
+function getNodePosition(index){
+
+  const levels = [
+    [{x:0, y:8}],
+    [{x:-6, y:5}, {x:6, y:5}],
+    [
+      {x:-9, y:2},
+      {x:-3, y:2},
+      {x:3, y:2},
+      {x:9, y:2}
+    ]
+  ];
+
+  if(index === 0) return levels[0][0];
+
+  if(index === 1) return levels[1][0];
+  if(index === 2) return levels[1][1];
+
+  return levels[2][index - 3];
+}
+
+function renderTree(highlight = -1){
+
+  container.innerHTML = '';
+
+  const type =
+    document.getElementById('treeType').value;
+
+  treeNodes.forEach((value, index) => {
+
+    const pos = getNodePosition(index);
+
+    let color = '#3b82f6';
+
+    if(highlight === index){
+      color = '#22c55e';
+    }
+
+    // AVL TREE COLOR
+    if(type === 'avl'){
+      color = '#a855f7';
+    }
+
+    // HEAP TREE COLOR
+    if(type === 'heap'){
+      color = '#f59e0b';
+    }
+
+    // NODE
+    const node =
+      document.createElement('a-sphere');
+
+    node.setAttribute(
+      'position',
+      `${pos.x} ${pos.y} -12`
+    );
+
+    node.setAttribute('radius', '1');
+
+    node.setAttribute('color', color);
+
+    // Glow
+    node.setAttribute(
+      'material',
+      'emissive: #00ffff; emissiveIntensity: 0.4'
+    );
+
+    // Floating animation
+    node.setAttribute(
+      'animation',
+      `
+      property: position;
+      dir: alternate;
+      dur: 1500;
+      loop: true;
+      to: ${pos.x} ${pos.y + 0.3} -12
+      `
+    );
+
+    // TEXT
+    const text =
+      document.createElement('a-text');
+
+    text.setAttribute('value', value);
+
+    text.setAttribute('align', 'center');
+
+    text.setAttribute('color', 'white');
+
+    text.setAttribute('position', '0 1.4 0');
+
+    text.setAttribute('scale', '4 4 4');
+
+    node.appendChild(text);
+
+    container.appendChild(node);
+
+    // CONNECTION LINES
+    if(index > 0){
+
+      const parentIndex =
+        Math.floor((index - 1) / 2);
+
+      const parentPos =
+        getNodePosition(parentIndex);
+
+      const line =
+        document.createElement('a-cylinder');
+
+      const midX =
+        (pos.x + parentPos.x) / 2;
+
+      const midY =
+        (pos.y + parentPos.y) / 2;
+
+      line.setAttribute(
+        'position',
+        `${midX} ${midY} -12`
+      );
+
+      line.setAttribute('radius', '0.08');
+
+      const distance =
+        Math.sqrt(
+          Math.pow(pos.x - parentPos.x,2) +
+          Math.pow(pos.y - parentPos.y,2)
+        );
+
+      line.setAttribute('height', distance);
+
+      const angle =
+        Math.atan2(
+          pos.y - parentPos.y,
+          pos.x - parentPos.x
+        ) * (180 / Math.PI);
+
+      line.setAttribute(
+        'rotation',
+        `0 0 ${90 - angle}`
+      );
+
+      line.setAttribute('color', '#00ffff');
+
+      container.appendChild(line);
+    }
+  });
+}
+
+function insertNode(){
+
+  const value =
+    parseInt(
+      document.getElementById('valueInput').value
+    );
+
+  if(!isNaN(value)){
+
+    treeNodes.push(value);
+
+    renderTree();
+  }
+}
+
+async function traverseTree(){
+
+  for(let i = 0; i < treeNodes.length; i++){
+
+    renderTree(i);
+
+    await new Promise(resolve =>
+      setTimeout(resolve, 700)
+    );
+  }
+
+  renderTree();
+}
+
+function highlightRoot(){
+
+  renderTree(0);
+
+  document.getElementById('info').innerHTML =
+    'Root Node: ' + treeNodes[0];
+}
+
+renderTree();
+
+document
+  .getElementById('treeType')
+  .addEventListener('change', renderTree);
+
+</script>
+
+</body>
+</html>

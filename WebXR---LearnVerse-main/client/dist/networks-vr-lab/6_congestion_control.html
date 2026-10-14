@@ -1,0 +1,110 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Congestion Control</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#2a0f14"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#3d1a20"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-3.7 2.35 -2.7" rotation="0 28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="burst" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#8a2a2a"><a-text value="Burst!" align="center" position="0 0 .07" width="1.20" wrap-count="8" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rep" data-v="" position="3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Replay" align="center" position="0 0 .07" width="1.20" wrap-count="8" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="1.2 0 -3.6">
+<a-box id="fq0" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-box id="fq1" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-box id="fq2" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-box id="fq3" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-box id="fq4" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-box id="fq5" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-box id="fq6" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-box id="fq7" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-box id="fq8" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-box id="fq9" width=".22" height=".22" depth=".22" color="#3b82c4" visible="false"></a-box><a-entity id="g1" visible="false"><a-box  position="-2.5 3.6 0" width="1.2" height="0.7" depth="0.15" color="#3b82c4"></a-box>
+<a-text value="SENDER" align="center" anchor="center" baseline="center" position="-2.5 3.6 0.12" width="0.91" wrap-count="7" color="#fff"></a-text>
+<a-cylinder position="-.1 2.8 0" radius=".75" height="1.7" open-ended="true" color="#9ab" opacity=".35" side="double"></a-cylinder><a-box id="cb0" visible="false" position="-0.1 2.08 0" width="0.9" height="0.24" depth="0.5" color="#3b82c4"></a-box>
+<a-box id="cb1" visible="false" position="-0.1 2.35 0" width="0.9" height="0.24" depth="0.5" color="#3b82c4"></a-box>
+<a-box id="cb2" visible="false" position="-0.1 2.62 0" width="0.9" height="0.24" depth="0.5" color="#3b82c4"></a-box>
+<a-box id="cb3" visible="false" position="-0.1 2.89 0" width="0.9" height="0.24" depth="0.5" color="#3b82c4"></a-box>
+<a-box id="cb4" visible="false" position="-0.1 3.16 0" width="0.9" height="0.24" depth="0.5" color="#3b82c4"></a-box>
+<a-box id="cb5" visible="false" position="-0.1 3.43 0" width="0.9" height="0.24" depth="0.5" color="#3b82c4"></a-box>
+<a-box  position="1.4 1.95 0" width="3.0" height="0.2" depth="0.15" color="#667"></a-box>
+<a-box  position="3.1 1.95 0" width="0.9" height="0.7" depth="0.15" color="#2e9e6b"></a-box>
+<a-text value="NETWORK" align="center" anchor="center" baseline="center" position="3.1 1.95 0.12" width="0.88" wrap-count="8" color="#fff"></a-text>
+<a-entity id="tk" visible="false"><a-box  position="-0.1 4.35 0" width="1.5" height="0.5" depth="0.2" color="#b8921a"></a-box>
+<a-text value="TOKEN MAKER" align="center" anchor="center" baseline="center" position="-0.1 4.35 0.12" width="1.21" wrap-count="11" color="#fff"></a-text>
+</a-entity><a-text id="mt" value="" align="center" anchor="center" baseline="center" position="0 4.85 0" width="5.78" wrap-count="34" color="#ffd36b"></a-text>
+<a-text id="cnt" value="" align="center" anchor="center" baseline="center" position="0 1.35 0" width="5.60" wrap-count="40" color="#fff"></a-text>
+</a-entity><a-entity id="g2" visible="false"><a-box  position="-2.7 3.0 0" width="1.1" height="1.0" depth="0.15" color="#3b82c4"></a-box>
+<a-text value="SENDER" align="center" anchor="center" baseline="center" position="-2.7 3.0 0.12" width="0.91" wrap-count="7" color="#fff"></a-text>
+<a-box  position="0.2 3.0 0" width="1.4" height="1.4" depth="0.15" color="#d9822b"></a-box>
+<a-text value="ROUTER" align="center" anchor="center" baseline="center" position="0.2 3.0 0.12" width="0.91" wrap-count="7" color="#fff"></a-text>
+<a-box  position="3.1 3.0 0" width="1.0" height="1.0" depth="0.15" color="#2e9e6b"></a-box>
+<a-text value="RECEIVER" align="center" anchor="center" baseline="center" position="3.1 3.0 0.12" width="0.88" wrap-count="8" color="#fff"></a-text>
+<a-box  position="1.45 3.0 0" width="0.35" height="1.8" depth="0.15" color="#334"></a-box>
+<a-box id="qf"  position="1.45 2.1 0" width="0.3" height="0.02" depth="0.1" color="#3b82c4"></a-box>
+<a-box  position="1.45 3.225 0" width="0.55" height="0.04" depth="0.15" color="#ff3d3d"></a-box>
+<a-text value="QUEUE" align="center" anchor="center" baseline="center" position="1.45 4.15 0" width="0.60" wrap-count="5" color="#cfe3ff"></a-text>
+<a-text id="ckm" value="" align="center" anchor="center" baseline="center" position="0 4.7 0" width="5.78" wrap-count="34" color="#ffd36b"></a-text>
+<a-text id="ckt" value="" align="center" anchor="center" baseline="center" position="0 1.5 0" width="6.16" wrap-count="44" color="#fff"></a-text>
+</a-entity><a-entity id="g3" visible="false"><a-box id="ab0" visible="false" position="-2.7 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab1" visible="false" position="-2.3400000000000003 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab2" visible="false" position="-1.9800000000000002 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab3" visible="false" position="-1.62 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab4" visible="false" position="-1.2600000000000002 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab5" visible="false" position="-0.9000000000000004 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab6" visible="false" position="-0.54 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab7" visible="false" position="-0.18000000000000016 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab8" visible="false" position="0.17999999999999972 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab9" visible="false" position="0.5399999999999996 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab10" visible="false" position="0.8999999999999995 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab11" visible="false" position="1.2599999999999998 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab12" visible="false" position="1.62 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab13" visible="false" position="1.9799999999999995 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab14" visible="false" position="2.34 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box id="ab15" visible="false" position="2.6999999999999993 1.8 0" width="0.3" height="0.2" depth="0.2" color="#d9822b"></a-box>
+<a-box  position="0 1.78 0" width="6.0" height="0.04" depth="0.15" color="#aaa"></a-box>
+<a-text id="ph" value="" align="center" anchor="center" baseline="center" position="0 4.75 0" width="6.12" wrap-count="36" color="#ffd36b"></a-text>
+<a-text value="window size" align="left" anchor="left" baseline="center" position="-2.9 4.4 0" width="1.56" wrap-count="12" color="#cfe3ff"></a-text>
+<a-text value="time (round trips)" align="center" anchor="center" baseline="center" position="0 1.45 0" width="2.60" wrap-count="20" color="#cfe3ff"></a-text>
+</a-entity></a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const PAT=[3,2,0,0,1,0,0,2,0,0,1,0];let iv=0,t=0,ex=0,fi=0,lb,tb,ck,aw;
+const at=(ms,f)=>tm.push(setTimeout(f,ms));
+const stop=()=>{clearInterval(iv);iv=0};
+const grp=(a,b,c)=>{$('#g1').setAttribute('visible',a);$('#g2').setAttribute('visible',b);$('#g3').setAttribute('visible',c)};
+function fl(a,b,c,t0,dur){const k=fi++%10;at(t0,()=>{const e=$('#fq'+k);e.setAttribute('color',c);e.setAttribute('position',a[0]+' '+a[1]+' .2');e.setAttribute('visible',true);e.setAttribute('animation__f',{property:'position',to:b[0]+' '+b[1]+' .2',dur:dur,easing:'linear'});at(dur+40,()=>e.setAttribute('visible',false))})}
+function lvl(n,c){for(let i=0;i<6;i++){const e=$('#cb'+i);e.setAttribute('visible',i<n);e.setAttribute('color',c)}}
+function qbar(q){const h=Math.max(.02,1.8*q/8),e=$('#qf');e.setAttribute('height',h);e.setAttribute('position','1.45 '+(2.1+h/2)+' 0')}
+function lbTick(){const arr=PAT[t%12]+ex;ex=0;const acc=Math.min(arr,6-lb.l),drop=arr-acc;lb.l+=acc;lb.d+=drop;const out=lb.l>0?1:0;lb.l-=out;lb.o+=out;
+ for(let i=0;i<acc;i++)fl([-2.5,3.6],[-.1,3.7],'#3b82c4',i*140,420);for(let i=0;i<drop;i++)fl([-.1,3.8],[1.1,2.4],'#c4423b',i*140,500);if(out)fl([-.1,1.95],[3.0,1.95],'#3b82c4',500,500);
+ lvl(lb.l,'#3b82c4');T('#cnt','arrived '+arr+'   in bucket '+lb.l+'   sent out '+lb.o+'   DROPPED '+lb.d)}
+function tbTick(){tb.k=Math.min(6,tb.k+1);const arr=PAT[t%12]+ex+tb.w;ex=0;const send=Math.min(arr,tb.k);tb.k-=send;let w=arr-send,drop=0;if(w>6){drop=w-6;w=6}tb.w=w;tb.s+=send;tb.d+=drop;
+ for(let i=0;i<send;i++)fl([-2.5,3.6],[3.0,1.95],'#3b82c4',i*160,900);for(let i=0;i<drop;i++)fl([-2.5,3.4],[-1.5,2.2],'#c4423b',i*140,500);fl([-.1,4.2],[-.1,3.7],'#ffd36b',0,400);
+ lvl(tb.k,'#ffd36b');T('#cnt','tokens '+tb.k+'   sent '+tb.s+'   waiting '+tb.w+'   dropped '+tb.d)}
+function ckTick(ctrl){const r=ck.r;ck.q+=r;let drop=0;if(ck.q>8){drop=ck.q-8;ck.q=8}ck.d+=drop;const sv=Math.min(2,ck.q);ck.q-=sv;
+ for(let i=0;i<r;i++)fl([-2.7,3.0],[.2,3.0],'#3b82c4',i*110,450);if(drop)fl([.2,3.6],[.9,2.4],'#c4423b',300,500);for(let i=0;i<sv;i++)fl([.2,3.0],[3.1,3.0],'#3b82c4',500+i*150,500);
+ let ch=0;if(ctrl){if(ck.q>=5){fl([.2,3.75],[-2.7,3.75],'#ff3d3d',600,600);ck.r=Math.max(1,Math.floor(ck.r/2));ch=1}else ck.r=Math.min(5,ck.r+1)}
+ qbar(ck.q);T('#ckt','sending '+r+'/tick   queue '+ck.q+'/8   dropped '+ck.d+(ch?'   CHOKE sent!':''))}
+const SEQ=[1,2,4,8,9,10,11,12,6,7,8,9,10,11,12,6];
+function awTick(){if(aw.i>=16){if(++aw.w>3){aw.i=0;aw.w=0;for(let i=0;i<16;i++)$('#ab'+i).setAttribute('visible',false)}return}const i=aw.i++,v=SEQ[i],e=$('#ab'+i),ph=i<4?0:(i==8||i==15)?2:1;e.setAttribute('visible',true);e.setAttribute('height',.22*v);e.setAttribute('position',(-2.7+i*.36)+' '+(1.8+.11*v)+' 0');e.setAttribute('color',['#d9822b','#2e9e6b','#c4423b'][ph]);T('#ph',['SLOW START: window doubles each round','CONGESTION AVOIDANCE: +1 each round','PACKET LOSS: window cut in half'][ph]+'  (window = '+v+')')}
+function run(f){stop();t=0;iv=setInterval(()=>{f();t++},900)}
+const INTRO=['CONGESTION CONTROL','When too much data enters a network, queues overflow and packets are lost. Congestion control keeps traffic flowing.','a traffic jam and the tools that prevent it.','Press Next step.'];
+function rst0(){stop();grp(false,false,false);for(let k=0;k<10;k++)$('#fq'+k).setAttribute('visible',false);ex=0}
+const X={burst:()=>{ex+=4;T('#inf','Burst! 4 extra packets arrive on the next tick.')},rep:()=>{if(si>=0){busy=0;go(si)}}};
+const STEPS=[
+{t:'The problem: a jam',a:'a traffic jam at a toll booth.',h:'Watch the red dropped packets.',f:()=>{grp(false,true,false);ck={r:4,q:0,d:0};T('#ckm','NO CONTROL');qbar(0);run(()=>ckTick(false));return 'The sender sends 4 packets per tick but the router passes only 2. The queue fills and packets are DROPPED.'}},
+{t:'Leaky bucket',a:'a bucket with a small hole.',h:'Click Burst! to add packets.',f:()=>{grp(true,false,false);$('#tk').setAttribute('visible',false);lb={l:0,o:0,d:0};T('#mt','LEAKY BUCKET');lvl(0,'#3b82c4');run(lbTick);return 'Leaky bucket: bursts pour in but packets leave at one steady rate. If the bucket is full, extra packets spill and are dropped.'}},
+{t:'Token bucket',a:'a bag of tickets you can spend when you like.',h:'Click Burst! and watch tokens.',f:()=>{grp(true,false,false);$('#tk').setAttribute('visible',true);tb={k:3,s:0,w:0,d:0};T('#mt','TOKEN BUCKET');lvl(3,'#ffd36b');run(tbTick);return 'Token bucket: one token arrives each tick. A packet needs a token to leave, so saved tokens allow short bursts.'}},
+{t:'Choke packets',a:'a traffic officer waving cars to slow down.',h:'Compare with step 1.',f:()=>{grp(false,true,false);ck={r:4,q:0,d:0};T('#ckm','WITH CHOKE PACKETS');qbar(0);run(()=>ckTick(true));return 'When the queue is long the router sends a red choke packet back. The sender halves its rate, so no more drops.'}},
+{t:'TCP window (AIMD)',a:'filling a pool but stopping before it overflows.',h:'Wait for the sawtooth.',f:()=>{grp(false,false,true);aw={i:0,w:0};for(let i=0;i<16;i++)$('#ab'+i).setAttribute('visible',false);run(awTick);return 'TCP grows its window fast (slow start), then adds 1 per round trip, and halves it on loss. The result is a sawtooth.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

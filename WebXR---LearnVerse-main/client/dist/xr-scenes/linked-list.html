@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>WebXR Linked List Visualization</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial;
+    }
+
+    .ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+      background: rgba(0,0,0,0.85);
+      padding: 15px;
+      border-radius: 12px;
+      color: white;
+      width: 260px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .ui h2 {
+      margin-top: 0;
+      color: #00ffff;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      background: #00ffff;
+      color: black;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #00cccc;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: none;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    option {
+      background: #111827;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="ui">
+
+  <h2>Linked List Lab</h2>
+
+  <select id="listType">
+    <option value="singly">Singly Linked List</option>
+    <option value="doubly">Doubly Linked List</option>
+    <option value="circular">Circular Linked List</option>
+  </select>
+
+  <input type="number" id="valueInput" placeholder="Enter Value">
+
+  <button onclick="insertNode()">Insert Node</button>
+  <button onclick="deleteNode()">Delete Node</button>
+  <button onclick="traverseList()">Traverse</button>
+  <button onclick="reverseTraverse()">Reverse Traverse</button>
+
+</div>
+
+<a-scene background="color: #050816" vr-mode-ui="enabled: true">
+
+  <!-- Assets -->
+  <a-assets>
+
+    <a-asset-item
+      id="robotModel"
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+    </a-asset-item>
+
+  </a-assets>
+
+  <!-- Camera -->
+  <a-camera position="0 2 12"></a-camera>
+
+  <!-- Lights -->
+  <a-light type="ambient" intensity="1"></a-light>
+  <a-light type="point" intensity="2" position="0 8 5"></a-light>
+
+  <!-- Ground -->
+  <a-plane
+    rotation="-90 0 0"
+    width="40"
+    height="40"
+    color="#111827">
+  </a-plane>
+
+  <!-- Sky -->
+  <a-sky color="#020617"></a-sky>
+
+  <!-- Header -->
+  <a-text
+    value="WEBXR LINKED LIST LAB"
+    position="-5 5 -10"
+    scale="3 3 3"
+    color="#00ffff">
+  </a-text>
+
+  <!-- Decorative Robots -->
+  <a-gltf-model
+    src="#robotModel"
+    position="-8 0 -7"
+    scale="0.7 0.7 0.7"
+    animation="property: rotation; to: 0 360 0; loop: true; dur: 20000">
+  </a-gltf-model>
+
+  <a-gltf-model
+    src="#robotModel"
+    position="8 0 -7"
+    scale="0.7 0.7 0.7"
+    animation="property: rotation; to: 0 -360 0; loop: true; dur: 20000">
+  </a-gltf-model>
+
+  <!-- Linked List Container -->
+  <a-entity id="listContainer"></a-entity>
+
+</a-scene>
+
+<script>
+
+let linkedList = [10, 20, 30, 40];
+
+const container = document.querySelector('#listContainer');
+
+function renderList(highlight = -1) {
+
+  container.innerHTML = '';
+
+  const type = document.getElementById('listType').value;
+
+  linkedList.forEach((value, index) => {
+
+    let color = '#3b82f6';
+
+    if(index === highlight) {
+      color = '#22c55e';
+    }
+
+    // NODE
+    const node = document.createElement('a-sphere');
+
+    node.setAttribute('position', `${index * 3 - 4} 2 -6`);
+    node.setAttribute('radius', '0.7');
+    node.setAttribute('color', color);
+
+    node.setAttribute(
+      'animation',
+      `property: position;
+       dir: alternate;
+       dur: 1500;
+       loop: true;
+       to: ${index * 3 - 4} 2.3 -6`
+    );
+
+    node.setAttribute(
+      'material',
+      'emissive: #00ffff; emissiveIntensity: 0.5'
+    );
+
+    // VALUE TEXT
+    const text = document.createElement('a-text');
+
+    text.setAttribute('value', value);
+    text.setAttribute('align', 'center');
+    text.setAttribute('color', 'white');
+    text.setAttribute('position', '0 1 0');
+    text.setAttribute('scale', '3 3 3');
+
+    node.appendChild(text);
+
+    container.appendChild(node);
+
+    // CONNECTIONS
+    if(index < linkedList.length - 1) {
+
+      // FORWARD ARROW
+      const line = document.createElement('a-cylinder');
+
+      line.setAttribute(
+        'position',
+        `${index * 3 - 2.5} 2 -6`
+      );
+
+      line.setAttribute('radius', '0.06');
+      line.setAttribute('height', '2');
+      line.setAttribute('rotation', '0 0 90');
+      line.setAttribute('color', '#00ffff');
+
+      container.appendChild(line);
+
+      // FORWARD ARROW HEAD
+      const cone = document.createElement('a-cone');
+
+      cone.setAttribute(
+        'position',
+        `${index * 3 - 1.45} 2 -6`
+      );
+
+      cone.setAttribute('radius-bottom', '0.15');
+      cone.setAttribute('height', '0.4');
+      cone.setAttribute('rotation', '0 0 -90');
+      cone.setAttribute('color', '#00ffff');
+
+      container.appendChild(cone);
+
+      // DOUBLY LINKED LIST BACKWARD ARROW
+      if(type === 'doubly') {
+
+        // backward line
+        const backLine = document.createElement('a-cylinder');
+
+        backLine.setAttribute(
+          'position',
+          `${index * 3 - 2.5} 1.2 -6`
+        );
+
+        backLine.setAttribute('radius', '0.06');
+        backLine.setAttribute('height', '2');
+        backLine.setAttribute('rotation', '0 0 90');
+        backLine.setAttribute('color', '#a855f7');
+
+        container.appendChild(backLine);
+
+        // backward arrow head
+        const backCone = document.createElement('a-cone');
+
+        backCone.setAttribute(
+          'position',
+          `${index * 3 - 3.55} 1.2 -6`
+        );
+
+        backCone.setAttribute('radius-bottom', '0.15');
+        backCone.setAttribute('height', '0.4');
+        backCone.setAttribute('rotation', '0 0 90');
+        backCone.setAttribute('color', '#a855f7');
+
+        container.appendChild(backCone);
+      }
+    }
+  });
+
+  // CIRCULAR LINKED LIST CONNECTION
+  if(type === 'circular' && linkedList.length > 1) {
+
+    // Curve line back to first node
+    const curve = document.createElement('a-torus');
+
+    curve.setAttribute('position', '1 2 -6');
+    curve.setAttribute('radius', '6');
+    curve.setAttribute('radius-tubular', '0.05');
+    curve.setAttribute('rotation', '90 0 0');
+    curve.setAttribute('arc', '220');
+    curve.setAttribute('color', '#00ffff');
+
+    curve.setAttribute(
+      'animation',
+      'property: rotation; to: 90 360 0; loop: true; dur: 10000'
+    );
+
+    container.appendChild(curve);
+
+    // Circular arrow head
+    const circleCone = document.createElement('a-cone');
+
+    circleCone.setAttribute(
+      'position',
+      '-4 3.5 -6'
+    );
+
+    circleCone.setAttribute('radius-bottom', '0.18');
+    circleCone.setAttribute('height', '0.5');
+    circleCone.setAttribute('rotation', '0 0 180');
+    circleCone.setAttribute('color', '#00ffff');
+
+    container.appendChild(circleCone);
+  }
+}
+function insertNode() {
+
+  const value = parseInt(
+    document.getElementById('valueInput').value
+  );
+
+  if(!isNaN(value)) {
+
+    linkedList.push(value);
+
+    renderList();
+  }
+}
+
+function deleteNode() {
+
+  linkedList.pop();
+
+  renderList();
+}
+
+async function traverseList() {
+
+  for(let i = 0; i < linkedList.length; i++) {
+
+    renderList(i);
+
+    await new Promise(resolve => setTimeout(resolve, 700));
+  }
+
+  renderList();
+}
+
+async function reverseTraverse() {
+
+  for(let i = linkedList.length - 1; i >= 0; i--) {
+
+    renderList(i);
+
+    await new Promise(resolve => setTimeout(resolve, 700));
+  }
+
+  renderList();
+}
+
+renderList();
+
+document
+  .getElementById('listType')
+  .addEventListener('change', renderList);
+
+  </script>
+
+</body>
+</html>

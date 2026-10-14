@@ -1,0 +1,99 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OSI Model: 7 Layers</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0b1830"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#12294d"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="3.7 2.35 -2.7" rotation="0 -28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d5" position="-0.20 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d6" position="0.06 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d7" position="0.32 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="-1.2 0 -3.6">
+<a-box id="s1" class="hit" data-a="lay" data-v="1" position="-2.15 1.95 0" width="2.0" height="0.38" depth="0.2" color="#8a5cc4"></a-box>
+<a-text value="1 Physical" align="center" anchor="center" baseline="center" position="-2.15 1.95 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="s2" class="hit" data-a="lay" data-v="2" position="-2.15 2.37 0" width="2.0" height="0.38" depth="0.2" color="#5b5bd6"></a-box>
+<a-text value="2 Data Link" align="center" anchor="center" baseline="center" position="-2.15 2.37 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="s3" class="hit" data-a="lay" data-v="3" position="-2.15 2.79 0" width="2.0" height="0.38" depth="0.2" color="#3b82c4"></a-box>
+<a-text value="3 Network" align="center" anchor="center" baseline="center" position="-2.15 2.79 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="s4" class="hit" data-a="lay" data-v="4" position="-2.15 3.21 0" width="2.0" height="0.38" depth="0.2" color="#2e9e6b"></a-box>
+<a-text value="4 Transport" align="center" anchor="center" baseline="center" position="-2.15 3.21 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="s5" class="hit" data-a="lay" data-v="5" position="-2.15 3.63 0" width="2.0" height="0.38" depth="0.2" color="#b8921a"></a-box>
+<a-text value="5 Session" align="center" anchor="center" baseline="center" position="-2.15 3.63 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="s6" class="hit" data-a="lay" data-v="6" position="-2.15 4.05 0" width="2.0" height="0.38" depth="0.2" color="#d9822b"></a-box>
+<a-text value="6 Presentation" align="center" anchor="center" baseline="center" position="-2.15 4.05 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="s7" class="hit" data-a="lay" data-v="7" position="-2.15 4.47 0" width="2.0" height="0.38" depth="0.2" color="#c4423b"></a-box>
+<a-text value="7 Application" align="center" anchor="center" baseline="center" position="-2.15 4.47 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-text value="ALICE&#x27;S PC" align="center" anchor="center" baseline="center" position="-2.15 4.5 0" width="1.92" wrap-count="12" color="#ffd36b"></a-text>
+<a-box id="r1" class="hit" data-a="lay" data-v="1" position="2.15 1.95 0" width="2.0" height="0.38" depth="0.2" color="#8a5cc4"></a-box>
+<a-text value="1 Physical" align="center" anchor="center" baseline="center" position="2.15 1.95 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="r2" class="hit" data-a="lay" data-v="2" position="2.15 2.37 0" width="2.0" height="0.38" depth="0.2" color="#5b5bd6"></a-box>
+<a-text value="2 Data Link" align="center" anchor="center" baseline="center" position="2.15 2.37 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="r3" class="hit" data-a="lay" data-v="3" position="2.15 2.79 0" width="2.0" height="0.38" depth="0.2" color="#3b82c4"></a-box>
+<a-text value="3 Network" align="center" anchor="center" baseline="center" position="2.15 2.79 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="r4" class="hit" data-a="lay" data-v="4" position="2.15 3.21 0" width="2.0" height="0.38" depth="0.2" color="#2e9e6b"></a-box>
+<a-text value="4 Transport" align="center" anchor="center" baseline="center" position="2.15 3.21 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="r5" class="hit" data-a="lay" data-v="5" position="2.15 3.63 0" width="2.0" height="0.38" depth="0.2" color="#b8921a"></a-box>
+<a-text value="5 Session" align="center" anchor="center" baseline="center" position="2.15 3.63 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="r6" class="hit" data-a="lay" data-v="6" position="2.15 4.05 0" width="2.0" height="0.38" depth="0.2" color="#d9822b"></a-box>
+<a-text value="6 Presentation" align="center" anchor="center" baseline="center" position="2.15 4.05 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-box id="r7" class="hit" data-a="lay" data-v="7" position="2.15 4.47 0" width="2.0" height="0.38" depth="0.2" color="#c4423b"></a-box>
+<a-text value="7 Application" align="center" anchor="center" baseline="center" position="2.15 4.47 0.12" width="1.82" wrap-count="14" color="#fff"></a-text>
+<a-text value="BOB&#x27;S PC" align="center" anchor="center" baseline="center" position="2.15 4.5 0" width="1.92" wrap-count="12" color="#ffd36b"></a-text>
+<a-box  position="0 1.5 0" width="4.4" height="0.1" depth="0.15" color="#556"></a-box>
+<a-text value="CABLE" align="center" anchor="center" baseline="center" position="0 1.28 0" width="0.84" wrap-count="6" color="#cfe3ff"></a-text>
+<a-entity id="pkt" position="-.55 4.3 .3" visible="false"><a-box id="h2"  position="0 0 0" width="0.18" height="0.34" depth="0.1" color="#5b5bd6"></a-box>
+<a-box id="h3"  position="0 0 0" width="0.18" height="0.34" depth="0.1" color="#3b82c4"></a-box>
+<a-box id="h4"  position="0 0 0" width="0.18" height="0.34" depth="0.1" color="#2e9e6b"></a-box>
+<a-box id="dt"  position="0 0 0" width="0.38" height="0.34" depth="0.1" color="#ffd36b"></a-box>
+<a-box id="t2"  position="0 0 0" width="0.12" height="0.34" depth="0.1" color="#5b5bd6"></a-box>
+<a-text id="pl" value="DATA" align="center" anchor="center" baseline="center" position="0 0.34 0" width="1.04" wrap-count="8" color="#fff"></a-text>
+</a-entity><a-text id="pk" value="" align="center" anchor="center" baseline="center" position="0 0.95 0" width="6.16" wrap-count="44" color="#fff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const Y=i=>1.95+(i-1)*.42;
+const LC=['','#8a5cc4','#5b5bd6','#3b82c4','#2e9e6b','#b8921a','#d9822b','#c4423b'];
+const INFO=['',
+'LAYER 1 Physical: sends raw bits as electrical, light or radio signals. Devices: cables, hubs. Unit: bits.',
+'LAYER 2 Data Link: moves frames between neighbours using MAC addresses, checks errors. Device: switch.',
+'LAYER 3 Network: finds a path across networks using IP addresses. Device: router. Unit: packet.',
+'LAYER 4 Transport: delivers data between apps using ports. TCP is reliable, UDP is fast. Unit: segment.',
+'LAYER 5 Session: opens, keeps and closes the conversation between two computers.',
+'LAYER 6 Presentation: translates data formats, compresses and encrypts them (for example TLS).',
+'LAYER 7 Application: the programs you use, such as web, email and DNS. Unit: data.'];
+const SZ={h2:.18,h3:.18,h4:.18,dt:.38,t2:.12},ALL=['h2','h3','h4','dt','t2'];
+function lay(ids,label){let tw=ids.reduce((a,k)=>a+SZ[k],0),x=-tw/2;ALL.forEach(k=>{const e=$('#'+k);if(ids.includes(k)){e.setAttribute('visible',true);e.setAttribute('position',(x+SZ[k]/2)+' 0 0');x+=SZ[k]}else e.setAttribute('visible',false)});T('#pl',label)}
+const mv=(x,y,ms)=>$('#pkt').setAttribute('animation__m',{property:'position',to:x+' '+y+' .3',dur:ms,easing:'easeInOutQuad'});
+const hi=(s,i)=>{for(let k=1;k<=7;k++)$('#'+s+k).setAttribute('scale',k==i?'1.12 1.3 1':'1 1 1')};
+const hold=ms=>{busy=1;tm.push(setTimeout(()=>busy=0,ms))};
+const at=(ms,f)=>tm.push(setTimeout(f,ms));
+const INTRO=['OSI MODEL: 7 LAYERS','Data goes DOWN 7 layers on the sender, across the cable, then UP 7 layers on the receiver.','sending a letter inside nested envelopes.','Press Next step. Click any layer to learn what it does.'];
+function rst0(){$('#pkt').removeAttribute('animation__m');$('#pkt').setAttribute('position','-.55 '+Y(7)+' .3');$('#pkt').setAttribute('visible',false);hi('s',0);hi('r',0);T('#pk','')}
+const X={lay:i=>{i=+i;hi('s',i);hi('r',i);T('#inf',INFO[i])}};
+const STEPS=[
+{t:'Alice sends a message',a:'writing a letter.',h:'Click any layer to learn about it.',f:()=>{const p=$('#pkt');p.setAttribute('position','-.55 '+Y(7)+' .3');p.setAttribute('visible',true);lay(['dt'],'DATA');hi('s',7);T('#pk','Data = "Hello Bob!"');return 'Alice types "Hello Bob!" in an app. At layer 7 it is just plain data.'}},
+{t:'Layers 6 and 5',a:'checking the letter and booking a phone call.',h:'Watch the packet go down.',f:()=>{hold(1000);mv(-.55,Y(5),900);hi('s',5);T('#pk','Data = encrypted "Hello Bob!" + session opened');return 'Layer 6 formats and encrypts the data. Layer 5 opens a session with Bob. It is still just data.'}},
+{t:'Layer 4: add TCP',a:'putting the letter in an envelope with a flat number.',h:'Match the colored bar to the layer.',f:()=>{hold(1000);mv(-.55,Y(4),800);lay(['h4','dt'],'SEGMENT');hi('s',4);T('#pk','Segment = [ TCP header | Data ]   (port 51000 to port 80)');return 'Layer 4 adds a TCP header (a green bar) with port numbers. Data plus header is a SEGMENT.'}},
+{t:'Layer 3: add IP',a:'writing the street address on a bigger envelope.',h:'Press Next step.',f:()=>{hold(1000);mv(-.55,Y(3),800);lay(['h3','h4','dt'],'PACKET');hi('s',3);T('#pk','Packet = [ IP | TCP | Data ]   (192.168.1.5 to 10.0.0.8)');return 'Layer 3 adds an IP header (blue bar) with the sender and receiver addresses. Now it is a PACKET.'}},
+{t:'Layer 2: add frame',a:'putting the parcel in a delivery van.',h:'Press Next step.',f:()=>{hold(1000);mv(-.55,Y(2),800);lay(ALL,'FRAME');hi('s',2);T('#pk','Frame = [ ETH | IP | TCP | Data | FCS ]   (MAC addresses + error check)');return 'Layer 2 adds a header and trailer with MAC addresses and an error check. Now it is a FRAME.'}},
+{t:'Layer 1: bits on wire',w:4000,a:'the van driving along the road.',h:'Watch the packet cross the cable.',f:()=>{hold(3000);lay(ALL,'BITS');hi('s',1);T('#pk','Bits = 0110 1001 ...   (signals on the cable)');mv(-.55,1.62,600);at(650,()=>mv(.55,1.62,1500));at(2200,()=>{mv(.55,Y(1),600);hi('s',0);hi('r',1)});return 'Layer 1 turns the frame into bits: electric pulses, light or radio. They race along the cable to Bob.'}},
+{t:'Bob unwraps it',w:4600,a:'opening the envelopes one by one.',h:'Click layers to review.',f:()=>{hold(3300);mv(.55,Y(2),500);hi('r',2);lay(ALL,'FRAME');at(700,()=>{lay(['h3','h4','dt'],'PACKET');mv(.55,Y(3),500);hi('r',3);T('#pk','Packet = [ IP | TCP | Data ]')});at(1400,()=>{lay(['h4','dt'],'SEGMENT');mv(.55,Y(4),500);hi('r',4);T('#pk','Segment = [ TCP | Data ]')});at(2100,()=>{lay(['dt'],'DATA');mv(.55,Y(7),800);hi('r',7);T('#pk','Data = "Hello Bob!"')});return 'Now it goes UP. Each layer reads its own header, removes it and passes the rest up.'}},
+{t:'Bob reads it',a:'every envelope opened, the letter is read.',h:'Press Reset and replay.',f:()=>{hi('r',7);T('#pk','Bob sees: "Hello Bob!"');return 'Each layer talks only to the SAME layer on the other computer. The headers are the notes they pass.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Critical Section and Mutex</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#1a1038"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#251850"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="3.7 2.35 -2.7" rotation="0 -28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d5" position="-0.20 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="lk" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Lock On/Off" align="center" position="0 0 .07" width="1.60" wrap-count="13" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run2" data-v="" position="3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Run both" align="center" position="0 0 .07" width="1.50" wrap-count="10" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="-1.2 0 -3.6">
+<a-box  position="0 4.0 0" width="2.4" height="0.08" depth="0.15" color="#aaa"></a-box>
+<a-box  position="-0.85 2.0 0" width="0.7" height="0.08" depth="0.15" color="#aaa"></a-box>
+<a-box  position="0.85 2.0 0" width="0.7" height="0.08" depth="0.15" color="#aaa"></a-box>
+<a-box  position="-1.2 3.0 0" width="0.08" height="2.0" depth="0.15" color="#aaa"></a-box>
+<a-box  position="1.2 3.0 0" width="0.08" height="2.0" depth="0.15" color="#aaa"></a-box>
+<a-text value="CRITICAL SECTION" align="center" anchor="center" baseline="center" position="0 4.3 0" width="2.38" wrap-count="17" color="#ffd36b"></a-text>
+<a-text id="bd" value="COUNTER
+= 5" align="center" anchor="center" baseline="center" position="0 3.0 0" width="1.76" wrap-count="8" color="#fff"></a-text>
+<a-sphere id="ta" position="-1.5 1.4 .2" radius=".3" color="#3b82c4"><a-text value="A" align="center" position="0 0 .32" width=".5" wrap-count="1" color="#fff"></a-text><a-text id="ra" value="" align="center" position="0 .6 0" width="1.5" wrap-count="10" color="#fff"></a-text></a-sphere><a-sphere id="tb" position="1.5 1.4 .2" radius=".3" color="#d9822b"><a-text value="B" align="center" position="0 0 .32" width=".5" wrap-count="1" color="#fff"></a-text><a-text id="rb" value="" align="center" position="0 .6 0" width="1.5" wrap-count="10" color="#fff"></a-text></a-sphere><a-entity id="key" position="0 1.2 .2" visible="false"><a-box  position="0 0 0" width="0.7" height="0.28" depth="0.1" color="#ffd36b"></a-box>
+<a-text value="LOCK" align="center" anchor="center" baseline="center" position="0 0 0.07" width="0.50" wrap-count="5" color="#222"></a-text>
+</a-entity><a-text id="lm" value="MUTEX LOCK: OFF" align="center" anchor="center" baseline="center" position="0 0.9 0" width="3.00" wrap-count="20" color="#cfe3ff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+const at=(ms,f)=>tm.push(setTimeout(f,ms)),hold=ms=>{busy=1;at(ms,()=>busy=0)};
+const vs=(a,v)=>a.forEach(i=>$('#'+i).setAttribute('visible',v));
+
+let val=5,lk=0;
+const mvt=(id,x,y,ms)=>$('#'+id).setAttribute('animation__m',{property:'position',to:x+' '+y+' .2',dur:ms,easing:'easeInOutQuad'});
+const bd=(v,c)=>{val=v;T('#bd','COUNTER\n= '+v);$('#bd').setAttribute('color',c||'#fff')};
+const reg=(k,v)=>T('#r'+k,v);
+function runBoth(lock){busy=1;bd(5);reg('a','');reg('b','');const K=$('#key');
+ if(!lock){K.setAttribute('visible',false);mvt('ta',-.5,2.9,800);mvt('tb',.5,2.9,800);at(900,()=>{reg('a','read 5');reg('b','read 5');T('#inf','Both threads READ the counter: 5.')});at(1900,()=>{reg('a','add: 6');reg('b','add: 6');T('#inf','Both ADD 1 in their own copy: 6.')});at(2900,()=>{bd(6,'#ffd36b');T('#inf','Thread A writes 6.')});at(3700,()=>{bd(6,'#ff6b6b');T('#inf','B writes 6 too. Final 6 but it should be 7: LOST UPDATE!')});at(4600,()=>{mvt('ta',-1.5,1.4,700);mvt('tb',1.5,1.4,700);reg('a','');reg('b','')});at(5400,()=>busy=0)}
+ else{K.setAttribute('visible',true);K.setAttribute('position','0 1.2 .2');reg('b','waiting');mvt('key',-1.5,1.9,500);at(500,()=>{mvt('ta',0,3.0,900);T('#inf','A takes the lock key and enters alone. B waits outside.')});at(1500,()=>reg('a','read 5'));at(2300,()=>reg('a','add: 6'));at(3100,()=>{bd(6,'#ffd36b');T('#inf','A writes 6, leaves, and hands the key to B.')});at(3700,()=>{mvt('ta',-1.5,1.4,700);reg('a','');mvt('key',1.5,1.9,600)});at(4500,()=>{mvt('tb',0,3.0,900);reg('b','')});at(5500,()=>reg('b','read 6'));at(6300,()=>reg('b','add: 7'));at(7100,()=>{bd(7,'#9bffb0');T('#inf','B writes 7. Counter = 7: correct! The lock made them take turns.')});at(7700,()=>{mvt('tb',1.5,1.4,700);reg('b','');K.setAttribute('visible',false)});at(8400,()=>busy=0)}}
+const INTRO=['CRITICAL SECTION AND MUTEX','When two threads change the same data at once, results can go wrong. A lock makes them take turns.','two cashiers updating one bank balance.','Press Next step.'];
+function rst0(){['ta','tb','key'].forEach(i=>$('#'+i).removeAttribute('animation__m'));$('#ta').setAttribute('position','-1.5 1.4 .2');$('#tb').setAttribute('position','1.5 1.4 .2');$('#key').setAttribute('visible',false);reg('a','');reg('b','');bd(5);T('#lm','MUTEX LOCK: '+(lk?'ON':'OFF'))}
+const X={lk:()=>{lk=1-lk;T('#lm','MUTEX LOCK: '+(lk?'ON':'OFF'));T('#inf','Lock '+(lk?'ON':'OFF')+'. Press Run both.')},run2:()=>{if(busy)return;runBoth(lk)}};
+const STEPS=[
+{t:'The shared counter',a:'two cashiers updating one account.',h:'Press Next step.',f:()=>'Threads A and B each want to do counter = counter + 1. The counter starts at 5, so the answer should be 7.'},
+{t:'Run without a lock',w:6000,a:'two people editing one document at once.',h:'Watch both read 5.',f:()=>{runBoth(false);return 'No lock: both threads enter the critical section at the same time.'}},
+{t:'Why it went wrong',a:'both copy the same balance, then both save.',h:'Press Next step.',f:()=>'Both read 5 before either wrote. Each wrote 6, so one update was lost. This is a RACE CONDITION.'},
+{t:'Add a mutex lock',a:'a bathroom with one key.',h:'Press Next step.',f:()=>{$('#key').setAttribute('visible',true);$('#key').setAttribute('position','0 1.2 .2');T('#lm','MUTEX LOCK: ON');return 'A mutex is a key. Only the thread holding the key may enter the critical section. Others wait.'}},
+{t:'Run with the lock',w:9000,a:'one person in the bathroom at a time.',h:'Watch B wait its turn.',f:()=>{runBoth(true);return 'With the lock: A takes the key and enters. B waits outside until A is done.'}},
+{t:'Semaphores and more',a:'a parking lot with a limited number of spaces.',h:'Click Run both to repeat.',f:()=>'A semaphore counts keys: wait() takes one, signal() returns one. Locks prevent races, but careless use can cause deadlock.'}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

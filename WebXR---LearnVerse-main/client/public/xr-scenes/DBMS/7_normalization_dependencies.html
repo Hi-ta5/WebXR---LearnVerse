@@ -1,0 +1,42 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dependencies and Normal Forms</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0b1d33"></a-sky><a-circle rotation="-90 0 0" radius="7" color="#12304f"></a-circle>
+<a-light type="ambient" intensity=".9"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity position="0 0 0"><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+<a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-1.45 0 -4">
+<a-text value="Dependencies and Normal Forms" align="center" position="1.45 3.9 0" width="7.5" color="#ffd36b"></a-text>
+<a-plane position="4.5 2.2 -.02" width="3.4" height="3.7" color="#10263f"></a-plane>
+<a-text id="i" value="Look at the scene and click any item or button (mouse, or controller trigger in VR)." position="2.95 2.2 0" width="3.1" wrap-count="31" anchor="left" align="left" baseline="center" color="#fff"></a-text>
+<a-plane position="-.35 2.45 -.02" width="5.3999999999999995" height="2.0" color="#0e2238"></a-plane><a-text id="tb" value="Click a form, from UNF to 3NF/BCNF." align="left" anchor="left" position="-2.9 2.45 0" width="5.1" wrap-count="56" color="#fff"></a-text>
+<a-box class="btn" data-x="0" data-t="UNNORMALIZED
+A cell holds several values (repeating group). FDs: sid -&gt; sname, dept; dept -&gt; hod; (sid,cid) -&gt; grade. Fix: make every cell atomic." position="-2.0 1.0 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="UNF" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="1" data-t="FIRST NORMAL FORM
+All values atomic; key = (sid,cid). Problem: sname, dept, hod depend on only PART of the key (partial dependency) -&gt; update/insert/delete anomalies." position="-0.35 1.0 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="1NF" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="2" data-t="SECOND NORMAL FORM
+1NF + no partial dependency: split so each non-key attribute depends on the whole key. Remaining problem: sid -&gt; dept -&gt; hod (transitive)." position="1.2999999999999998 1.0 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="2NF" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="3" data-t="THIRD NORMAL FORM
+No transitive dependency: for X -&gt; A, X is a superkey or A is a prime attribute.
+BCNF is stricter: every determinant must be a superkey." position="-2.0 0.4 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="3NF / BCNF" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="a" data-t="ARMSTRONG&#x27;S AXIOMS (sound and complete)
+1 Reflexivity: Y in X =&gt; X -&gt; Y
+2 Augmentation: X -&gt; Y =&gt; XZ -&gt; YZ
+3 Transitivity: X -&gt; Y, Y -&gt; Z =&gt; X -&gt; Z
+Example: sid -&gt; dept, dept -&gt; hod =&gt; sid -&gt; hod" position="-0.35 0.4 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Armstrong" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="l" data-t="LOSSLESS + DEPENDENCY PRESERVING
+Split R into R1, R2 is lossless if R1 intersect R2 is a key of R1 or R2. Here sid is the key of STUDENT, so the join gives back the original rows (no spurious tuples). Every FD must still be checkable in one table." position="1.2999999999999998 0.4 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Lossless" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const D={0:'UNF: STUDENT(sid, sname, dept, hod, courses)\n1 | Asha | CSE | Rao | C1:A, C2:B  <- not atomic\n2 | Ravi | IT | Das | C1:A',
+1:'1NF: ENROLL(sid, cid, sname, dept, hod, grade)\n1 | C1 | Asha | CSE | Rao | A\n1 | C2 | Asha | CSE | Rao | B   <- repeated\n2 | C1 | Ravi | IT | Das | A',
+2:'2NF:\nSTUDENT(sid, sname, dept, hod)\nENROLL(sid, cid, grade)\n(dept -> hod still repeats per student)',
+3:'3NF / BCNF:\nSTUDENT(sid, sname, dept)\nDEPT(dept, hod)\nENROLL(sid, cid, grade)',
+a:'FDs: sid -> dept, dept -> hod\nBy transitivity: sid -> hod\nClosure sid+ = {sid, sname, dept, hod}\nsid is a key of STUDENT',
+l:'STUDENT JOIN ENROLL on sid\n= original rows, nothing extra\nLossless and dependency preserving'};
+function X(k){T('#tb',D[k])}
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{
+ if(b.classList.contains('btn')){document.querySelectorAll('.btn').forEach(x=>x.setAttribute('color','#2a6db0'));b.setAttribute('color','#f90')}
+ T('#i',b.dataset.t);if(window.X)X(b.dataset.x||'')}));
+</script></body></html>

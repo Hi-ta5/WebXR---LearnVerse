@@ -1,0 +1,74 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Process States</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0b1830"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#12294d"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="3.7 2.35 -2.7" rotation="0 -28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d5" position="-0.20 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d6" position="0.06 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d7" position="0.32 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d8" position="0.58 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="-1.2 0 -3.6">
+<a-box class="hit" data-a="tr" data-v="0" position="-1.72 3.57 0" rotation="0 0 -34.5" width="0.02" height=".1" depth=".08" color="#cfe3ff"></a-box><a-cone class="hit" data-a="tr" data-v="0" position="-1.71 3.56 0" rotation="0 0 -124.5" radius=".15" height=".3" color="#cfe3ff"></a-cone><a-text value="admit" align="center" anchor="center" baseline="center" position="-1.5054050120987261 3.8785018005836713 0" width="1.20" wrap-count="10" color="#ffd36b"></a-text>
+<a-box class="hit" data-a="tr" data-v="1" position="0.25 3.04 0" rotation="0 0 0.0" width="0.74" height=".1" depth=".08" color="#cfe3ff"></a-box><a-cone class="hit" data-a="tr" data-v="1" position="0.62 3.04 0" rotation="0 0 -90.0" radius=".15" height=".3" color="#cfe3ff"></a-cone><a-text value="dispatch" align="center" anchor="center" baseline="center" position="0.25 3.42 0" width="1.20" wrap-count="10" color="#ffd36b"></a-text>
+<a-box class="hit" data-a="tr" data-v="2" position="0.25 2.76 0" rotation="0 0 180.0" width="0.74" height=".1" depth=".08" color="#cfe3ff"></a-box><a-cone class="hit" data-a="tr" data-v="2" position="-0.12 2.76 0" rotation="0 0 90.0" radius=".15" height=".3" color="#cfe3ff"></a-cone><a-text value="timeout" align="center" anchor="center" baseline="center" position="0.25 2.38 0" width="1.20" wrap-count="10" color="#ffd36b"></a-text>
+<a-box class="hit" data-a="tr" data-v="3" position="0.95 2.15 0" rotation="0 0 -135.0" width="0.26" height=".1" depth=".08" color="#cfe3ff"></a-box><a-cone class="hit" data-a="tr" data-v="3" position="0.86 2.06 0" rotation="0 0 -225.0" radius=".15" height=".3" color="#cfe3ff"></a-cone><a-text value="I/O wait" align="center" anchor="center" baseline="center" position="1.2176955262170046 1.8823044737829953 0" width="1.20" wrap-count="10" color="#ffd36b"></a-text>
+<a-box class="hit" data-a="tr" data-v="4" position="-0.50 2.16 0" rotation="0 0 132.7" width="0.25" height=".1" depth=".08" color="#cfe3ff"></a-box><a-cone class="hit" data-a="tr" data-v="4" position="-0.59 2.25 0" rotation="0 0 42.7" radius=".15" height=".3" color="#cfe3ff"></a-cone><a-text value="I/O done" align="center" anchor="center" baseline="center" position="-0.7820977912062937 1.8972943465788057 0" width="1.20" wrap-count="10" color="#ffd36b"></a-text>
+<a-box class="hit" data-a="tr" data-v="5" position="1.95 3.55 0" rotation="0 0 -135.0" width="0.02" height=".1" depth=".08" color="#cfe3ff"></a-box><a-cone class="hit" data-a="tr" data-v="5" position="1.94 3.54 0" rotation="0 0 -225.0" radius=".15" height=".3" color="#cfe3ff"></a-cone><a-text value="exit" align="center" anchor="center" baseline="center" position="1.6823044737829953 3.8176955262170047 0" width="1.20" wrap-count="10" color="#ffd36b"></a-text>
+<a-box id="st0"  position="-2.6 4.0 0" width="1.6" height="1.0" depth="0.2" color="#5b5bd6"></a-box>
+<a-text value="NEW" align="center" anchor="center" baseline="center" position="-2.6 4.25 0.12" width="1.30" wrap-count="10" color="#fff"></a-text>
+<a-box id="st1"  position="-1.0 2.9 0" width="1.6" height="1.0" depth="0.2" color="#3b82c4"></a-box>
+<a-text value="READY" align="center" anchor="center" baseline="center" position="-1.0 3.15 0.12" width="1.30" wrap-count="10" color="#fff"></a-text>
+<a-box id="st2"  position="1.5 2.9 0" width="1.6" height="1.0" depth="0.2" color="#2e9e6b"></a-box>
+<a-text value="RUNNING" align="center" anchor="center" baseline="center" position="1.5 3.15 0.12" width="1.30" wrap-count="10" color="#fff"></a-text>
+<a-box id="st3"  position="0.2 1.6 0" width="1.6" height="1.0" depth="0.2" color="#d9822b"></a-box>
+<a-text value="WAITING" align="center" anchor="center" baseline="center" position="0.2 1.85 0.12" width="1.30" wrap-count="10" color="#fff"></a-text>
+<a-box id="st4"  position="2.6 4.0 0" width="1.6" height="1.0" depth="0.2" color="#8a2a2a"></a-box>
+<a-text value="TERMINATED" align="center" anchor="center" baseline="center" position="2.6 4.25 0.12" width="1.30" wrap-count="10" color="#fff"></a-text>
+<a-box  position="-1.5 2.15 0" width="0.6" height="0.35" depth="0.1" color="#667"></a-box>
+<a-text value="P2" align="center" anchor="center" baseline="center" position="-1.5 2.15 0.07" width="0.26" wrap-count="2" color="#fff"></a-text>
+<a-box  position="-0.7 2.15 0" width="0.6" height="0.35" depth="0.1" color="#667"></a-box>
+<a-text value="P3" align="center" anchor="center" baseline="center" position="-0.7 2.15 0.07" width="0.26" wrap-count="2" color="#fff"></a-text>
+<a-entity id="tok" position="-2.6 3.78 .25"><a-box  position="0 0 0" width="0.5" height="0.38" depth="0.1" color="#ffd36b"></a-box>
+<a-text value="P1" align="center" anchor="center" baseline="center" position="0 0 0.07" width="0.30" wrap-count="2" color="#222"></a-text>
+</a-entity><a-text value="Click an arrow to move P1. Only valid moves work." align="center" anchor="center" baseline="center" position="0 0.95 0" width="6.50" wrap-count="50" color="#cfe3ff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+const at=(ms,f)=>tm.push(setTimeout(f,ms)),hold=ms=>{busy=1;at(ms,()=>busy=0)};
+const vs=(a,v)=>a.forEach(i=>$('#'+i).setAttribute('visible',v));
+
+const ND=[[-2.6,4.0],[-1.0,2.9],[1.5,2.9],[.2,1.6],[2.6,4.0]],ED=[[0,1],[1,2],[2,1],[2,3],[3,1],[2,4]],SN=['NEW','READY','RUNNING','WAITING','TERMINATED'];let cur=0;
+const DESC=['The OS admits the new process to the READY queue. It waits for the CPU.','The scheduler DISPATCHES P1: it gets the CPU and is RUNNING.','Timer interrupt! P1 used its time slice and goes back to READY.','P1 needs I/O (like reading a file), so it WAITS and frees the CPU.','The I/O is finished. P1 goes back to READY, not straight to RUNNING.','P1 has finished. It is TERMINATED and the OS frees its memory.'];
+function place(n,ms){$('#tok').setAttribute('animation__m',{property:'position',to:ND[n][0]+' '+(ND[n][1]-.22)+' .25',dur:ms,easing:'easeInOutQuad'});for(let i=0;i<5;i++)$('#st'+i).setAttribute('scale',i==n?'1.1 1.1 1':'1 1 1')}
+function tr(k){hold(1000);cur=ED[k][1];place(cur,900)}
+const INTRO=['PROCESS STATES','A process is a program in action. During its life it moves between states, like a customer in a bank.','a customer: arrive, queue, get served, wait, leave.','Press Next step. Click an arrow to move P1.'];
+function rst0(){cur=0;$('#tok').removeAttribute('animation__m');$('#tok').setAttribute('position','-2.6 3.78 .25');for(let i=0;i<5;i++)$('#st'+i).setAttribute('scale',i==0?'1.1 1.1 1':'1 1 1')}
+const X={tr:k=>{k=+k;if(busy)return;if(ED[k][0]!=cur){T('#inf','Not allowed: P1 is '+SN[cur]+', but this arrow starts at '+SN[ED[k][0]]+'.');return}tr(k);T('#inf',DESC[k])}};
+const STEPS=[
+{t:'New process',a:'a customer walks into the bank.',h:'Press Next step.',f:()=>'You start a program. The OS creates a process for it in the NEW state.'},
+{t:'Admit',a:'taking a queue ticket.',h:'Press Next step.',f:()=>{tr(0);return DESC[0]}},
+{t:'Dispatch',a:'"next customer, please!"',h:'Press Next step.',f:()=>{tr(1);return DESC[1]}},
+{t:'Timer interrupt',a:'the clerk limits each customer to 5 minutes.',h:'Press Next step.',f:()=>{tr(2);return DESC[2]}},
+{t:'Dispatch again',a:'back to the counter.',h:'Press Next step.',f:()=>{tr(1);return DESC[1]}},
+{t:'Needs I/O',a:'waiting for a form from another office.',h:'Press Next step.',f:()=>{tr(3);return DESC[3]}},
+{t:'I/O complete',a:'the form arrives; rejoin the queue.',h:'Press Next step.',f:()=>{tr(4);return DESC[4]}},
+{t:'Dispatch',a:'the final visit to the counter.',h:'Press Next step.',f:()=>{tr(1);return DESC[1]}},
+{t:'Exit',a:'leaving the bank.',h:'Press Reset, then click arrows.',f:()=>{tr(5);return DESC[5]}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

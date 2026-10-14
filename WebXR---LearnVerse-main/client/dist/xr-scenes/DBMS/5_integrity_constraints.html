@@ -1,0 +1,38 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Integrity Constraints</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0b1d33"></a-sky><a-circle rotation="-90 0 0" radius="7" color="#12304f"></a-circle>
+<a-light type="ambient" intensity=".9"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity position="0 0 0"><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+<a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-1.45 0 -4">
+<a-text value="Integrity Constraints" align="center" position="1.45 3.9 0" width="7.5" color="#ffd36b"></a-text>
+<a-plane position="4.5 2.2 -.02" width="3.4" height="3.7" color="#10263f"></a-plane>
+<a-text id="i" value="Look at the scene and click any item or button (mouse, or controller trigger in VR)." position="2.95 2.2 0" width="3.1" wrap-count="31" anchor="left" align="left" baseline="center" color="#fff"></a-text>
+<a-plane position="-.35 2.65 -.02" width="5.3999999999999995" height="1.6" color="#0e2238"></a-plane><a-text id="tb" value="" align="left" anchor="left" position="-2.9 2.65 0" width="5.1" wrap-count="56" color="#fff"></a-text>
+<a-sphere id="lamp" position="-2.9 1.45 0" radius=".2" color="#555"></a-sphere><a-text id="res" value="Result: -" align="left" anchor="left" position="-2.55 1.45 0" width="2.5" wrap-count="27" color="#fff"></a-text>
+<a-box class="btn" data-x="e" data-t="ENTITY INTEGRITY
+INSERT (NULL,&#x27;Kiran&#x27;,20,10)
+Primary key cannot be NULL: every row must be identifiable." position="-2.0 1.0 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Entity" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="k" data-t="KEY CONSTRAINT
+INSERT (1,&#x27;Kiran&#x27;,20,10)
+id=1 already exists: PRIMARY KEY / UNIQUE must not repeat." position="-0.35 1.0 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Key" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="f" data-t="REFERENTIAL INTEGRITY
+INSERT (4,&#x27;Kiran&#x27;,20,99)
+FK dept_id=99 is not in DEPT. Likewise deleting a referenced DEPT row needs CASCADE / SET NULL / RESTRICT." position="1.2999999999999998 1.0 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Referential" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="d" data-t="DOMAIN CONSTRAINT
+INSERT (4,&#x27;Kiran&#x27;,-5,10)
+age=-5 violates CHECK(age&gt;0) / the data type." position="-1.1749999999999998 0.4 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Domain" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="ok" data-t="VALID INSERT
+INSERT (3,&#x27;Meera&#x27;,19,10)
+All constraints are satisfied." position="0.475 0.4 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Valid row" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const rows=['1 | Asha | 20 | 10','2 | Ravi | 21 | 20'];let done=0;
+function show(){T('#tb','DEPT(dept_id PK, dname)\n10 | CSE\n20 | IT\n\nSTUDENT(id PK, name, age>0, dept_id FK)\n'+rows.join('\n'))}show();
+function X(k){const ok=k=='ok';$('#lamp').setAttribute('color',ok?'#2c2':'#e33');T('#res',ok?'ACCEPTED':'REJECTED');if(ok&&!done){rows.push('3 | Meera | 19 | 10');done=1;show()}}
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{
+ if(b.classList.contains('btn')){document.querySelectorAll('.btn').forEach(x=>x.setAttribute('color','#2a6db0'));b.setAttribute('color','#f90')}
+ T('#i',b.dataset.t);if(window.X)X(b.dataset.x||'')}));
+</script></body></html>

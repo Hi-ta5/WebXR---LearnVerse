@@ -1,0 +1,97 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page Replacement (Virtual Memory)</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#2a1a08"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#3d2810"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="0 1.35 -3.3"><a-plane width="9.0" height="1.7" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="3.52 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="3.78 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="4.04 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="4.30 .7 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="center" position="-4.35 0.7 0" width="5.78" wrap-count="34" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-4.35 0.4 0" width="4.20" wrap-count="30" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="0.2 0.4 0" width="4.20" wrap-count="30" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="0.2 -0.35 0" width="4.20" wrap-count="30" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rep" data-v="" position="2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Replay" align="center" position="0 0 .07" width="1.20" wrap-count="8" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="0 0 -3.7">
+<a-text id="alg" value="" align="center" anchor="center" baseline="center" position="0 4.65 0" width="7.04" wrap-count="44" color="#ffd36b"></a-text>
+<a-box id="rf0"  position="-2.75 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt0" value="" align="center" anchor="center" baseline="center" position="-2.75 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq0"  position="-2.75 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf1"  position="-2.25 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt1" value="" align="center" anchor="center" baseline="center" position="-2.25 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq1"  position="-2.25 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf2"  position="-1.75 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt2" value="" align="center" anchor="center" baseline="center" position="-1.75 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq2"  position="-1.75 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf3"  position="-1.25 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt3" value="" align="center" anchor="center" baseline="center" position="-1.25 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq3"  position="-1.25 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf4"  position="-0.75 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt4" value="" align="center" anchor="center" baseline="center" position="-0.75 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq4"  position="-0.75 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf5"  position="-0.25 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt5" value="" align="center" anchor="center" baseline="center" position="-0.25 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq5"  position="-0.25 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf6"  position="0.25 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt6" value="" align="center" anchor="center" baseline="center" position="0.25 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq6"  position="0.25 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf7"  position="0.75 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt7" value="" align="center" anchor="center" baseline="center" position="0.75 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq7"  position="0.75 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf8"  position="1.25 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt8" value="" align="center" anchor="center" baseline="center" position="1.25 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq8"  position="1.25 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf9"  position="1.75 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt9" value="" align="center" anchor="center" baseline="center" position="1.75 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq9"  position="1.75 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf10"  position="2.25 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt10" value="" align="center" anchor="center" baseline="center" position="2.25 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq10"  position="2.25 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="rf11"  position="2.75 4.2 0" width="0.44" height="0.5" depth="0.1" color="#2a6db0"></a-box>
+<a-text id="rt11" value="" align="center" anchor="center" baseline="center" position="2.75 4.2 0.07" width="0.30" wrap-count="1" color="#fff"></a-text>
+<a-box id="tq11"  position="2.75 2.5 0" width="0.38" height="0.22" depth="0.05" color="#445"></a-box>
+<a-box id="fr0"  position="-1.6 3.3 0" width="1.3" height="1.0" depth="0.2" color="#334"></a-box>
+<a-text id="ft0" value="-" align="center" anchor="center" baseline="center" position="-1.6 3.3 0.12" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-text value="FRAME 1" align="center" anchor="center" baseline="center" position="-1.6 3.9 0" width="0.96" wrap-count="8" color="#cfe3ff"></a-text>
+<a-box id="fr1"  position="0.0 3.3 0" width="1.3" height="1.0" depth="0.2" color="#334"></a-box>
+<a-text id="ft1" value="-" align="center" anchor="center" baseline="center" position="0.0 3.3 0.12" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-text value="FRAME 2" align="center" anchor="center" baseline="center" position="0.0 3.9 0" width="0.96" wrap-count="8" color="#cfe3ff"></a-text>
+<a-box id="fr2"  position="1.6 3.3 0" width="1.3" height="1.0" depth="0.2" color="#334"></a-box>
+<a-text id="ft2" value="-" align="center" anchor="center" baseline="center" position="1.6 3.3 0.12" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-text value="FRAME 3" align="center" anchor="center" baseline="center" position="1.6 3.9 0" width="0.96" wrap-count="8" color="#cfe3ff"></a-text>
+<a-text id="fc" value="faults: 0" align="center" anchor="center" baseline="center" position="-3.3 3.3 0" width="1.70" wrap-count="10" color="#fff"></a-text>
+<a-text id="sts" value="" align="center" anchor="center" baseline="center" position="3.2 3.3 0" width="2.10" wrap-count="14" color="#fff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+const at=(ms,f)=>tm.push(setTimeout(f,ms)),hold=ms=>{busy=1;at(ms,()=>busy=0)};
+const vs=(a,v)=>a.forEach(i=>$('#'+i).setAttribute('visible',v));
+
+const REF=[7,0,1,2,0,3,0,4,2,3,0,3],NM={fifo:'FIFO: remove the OLDEST page',lru:'LRU: remove the page unused for the LONGEST time'};
+function simR(a){const fr=[],ord=[],last={},out=[];let f=0;REF.forEach((p,t)=>{const hit=fr.includes(p);let ev=null;if(!hit){f++;if(fr.length<3){fr.push(p);ord.push(p)}else{let v;if(a=='fifo')v=ord.shift();else v=fr.reduce((x,y)=>last[x]<last[y]?x:y);ev=v;fr[fr.indexOf(v)]=p;if(a=='fifo')ord.push(p)}}last[p]=t;out.push({fr:fr.slice(),hit,ev,f})});return out}
+function clr(){for(let i=0;i<12;i++){T('#rt'+i,String(REF[i]));$('#rf'+i).setAttribute('color','#2a6db0');$('#tq'+i).setAttribute('color','#445')}for(let k=0;k<3;k++){T('#ft'+k,'-');$('#fr'+k).setAttribute('color','#334')}T('#fc','faults: 0');T('#sts','')}
+function paint(r,t){for(let i=0;i<12;i++)$('#rf'+i).setAttribute('color',i==t?'#f90':i<t?'#2e5a8a':'#2a6db0');const p=REF[t],idx=r.fr.indexOf(p);for(let k=0;k<3;k++){T('#ft'+k,r.fr[k]==null?'-':String(r.fr[k]));$('#fr'+k).setAttribute('color',k==idx?(r.hit?'#2e9e6b':'#d4a017'):'#334')}
+ $('#tq'+t).setAttribute('color',r.hit?'#2e9e6b':'#c4423b');T('#fc','faults: '+r.f);T('#sts',r.hit?'HIT\npage '+p+' is there':'PAGE FAULT\n'+(r.ev!=null?'evict '+r.ev+', load '+p:'load '+p));$('#sts').setAttribute('color',r.hit?'#9bffb0':'#ff8a80')}
+function play(a,msg){clr();T('#alg',NM[a]);busy=1;const R=simR(a);R.forEach((r,t)=>at(t*800,()=>paint(r,t)));at(12*800,()=>{busy=0;T('#inf',msg(R[11].f))})}
+const INTRO=['PAGE REPLACEMENT','Memory is small. When a needed page is missing, the OS must remove another page to make room.','a small desk and a big library.','Press Next step.'];
+function rst0(){clr();T('#alg','3 FRAMES, 12 PAGE REQUESTS')}
+const X={rep:()=>{if(si>=0&&!busy)go(si)}};
+const STEPS=[
+{t:'Small memory',a:'a small desk and a big library.',h:'Press Next step.',f:()=>{clr();return 'Memory has only 3 frames but the program asks for 12 pages in a row. A page that is missing is a PAGE FAULT.'}},
+{t:'FIFO',w:9800,a:'throwing out the book that arrived first.',h:'Watch HIT and PAGE FAULT.',f:()=>{play('fifo',n=>'FIFO finished with '+n+' page faults. It may evict a page that is still being used.');return 'FIFO: when memory is full, remove the page that has been there the longest.'}},
+{t:'LRU',w:9800,a:'putting away the book you have not touched for longest.',h:'Compare the fault count.',f:()=>{play('lru',n=>'LRU finished with '+n+' page faults. Recently used pages tend to be needed again.');return 'LRU: remove the page that has not been used for the longest time.'}},
+{t:'Compare',a:'oldest book or least recently used book?',h:'Click Replay to watch again.',f:()=>{return 'FIFO: '+simR('fifo')[11].f+' faults. LRU: '+simR('lru')[11].f+' faults. Fewer faults means a faster program. LRU is usually better.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

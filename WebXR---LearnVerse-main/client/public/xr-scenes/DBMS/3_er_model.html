@@ -1,0 +1,52 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Entity-Relationship Model</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0b1d33"></a-sky><a-circle rotation="-90 0 0" radius="7" color="#12304f"></a-circle>
+<a-light type="ambient" intensity=".9"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity position="0 0 0"><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+<a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-1.45 0 -4">
+<a-text value="Entity-Relationship Model" align="center" position="1.45 3.9 0" width="7.5" color="#ffd36b"></a-text>
+<a-plane position="4.5 2.2 -.02" width="3.4" height="3.7" color="#10263f"></a-plane>
+<a-text id="i" value="Look at the scene and click any item or button (mouse, or controller trigger in VR)." position="2.95 2.2 0" width="3.1" wrap-count="31" anchor="left" align="left" baseline="center" color="#fff"></a-text>
+<a-box class="hit" data-t="ENTITY: Student
+A real-world object with independent existence (rectangle). Entity set = all students. Becomes a table." data-x=" " position="-2.6 2.2 0" width="1.4" height="0.7" depth=".15" color="#2a6db0"><a-text value="Student" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-box class="hit" data-t="ENTITY: Course
+Another entity set. Becomes a table." data-x=" " position="1.4 2.2 0" width="1.4" height="0.7" depth=".15" color="#2a6db0"><a-text value="Course" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-box class="hit" data-t="RELATIONSHIP: Enrolls
+Association between entities (diamond).
+Cardinality M:N - a student takes many courses and a course has many students. Becomes its own table holding both keys." position="-.6 2.2 0" rotation="0 0 45" width=".75" height=".75" depth=".15" color="#d9822b"></a-box><a-text  value="Enrolls" align="center" anchor="center" position="-0.6 2.2 0" width="1" wrap-count="11" color="#cfe3ff"></a-text>
+<a-text  value="M" align="center" anchor="center" position="-1.45 2.45 0" width="0.5" wrap-count="5" color="#cfe3ff"></a-text>
+<a-text  value="N" align="center" anchor="center" position="0.25 2.45 0" width="0.5" wrap-count="5" color="#cfe3ff"></a-text>
+<a-entity  line="start:-1.9 2.2 0;end:-0.95 2.2 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:-0.25 2.2 0;end:0.7 2.2 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:-3.3 3.3 0;end:-2.8 2.55 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:-1.9 3.3 0;end:-2.4 2.55 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:-2.6 1.05 0;end:-2.6 1.85 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:0.8 3.3 0;end:1.2 2.55 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:2 3.3 0;end:1.6 2.55 0;color:#cfe3ff"></a-entity>
+<a-circle class="hit" data-t="KEY ATTRIBUTE: roll_no
+Uniquely identifies each student (underlined in ER). Becomes the primary key." data-x="" position="-3.3 3.3 0" radius="0.5" scale="1.2 0.6 1" color="#caa21c"></a-circle><a-text value="roll_no (key)" align="center" position="-3.3 3.3 .02" width="1.6" color="#fff"></a-text>
+<a-circle class="hit" data-t="SIMPLE ATTRIBUTE: name
+Property of an entity (ellipse), single atomic value." data-x="" position="-1.9 3.3 0" radius="0.5" scale="1.2 0.6 1" color="#2e9e6b"></a-circle><a-text value="name" align="center" position="-1.9 3.3 .02" width="1.6" color="#fff"></a-text>
+<a-circle class="hit" data-t="MULTIVALUED ATTRIBUTE: phone
+A student can have many numbers (double ellipse). Becomes its own table (roll_no, phone)." data-x="" position="-2.6 1.05 0" radius="0.5" scale="1.2 0.6 1" color="#8a5cc4"></a-circle><a-text value="phone {many}" align="center" position="-2.6 1.05 .02" width="1.6" color="#fff"></a-text>
+<a-circle class="hit" data-t="KEY ATTRIBUTE: course_id
+Primary key of Course." data-x="" position="0.8 3.3 0" radius="0.5" scale="1.2 0.6 1" color="#caa21c"></a-circle><a-text value="course_id (key)" align="center" position="0.8 3.3 .02" width="1.6" color="#fff"></a-text>
+<a-circle class="hit" data-t="SIMPLE ATTRIBUTE: title
+Describes the course." data-x="" position="2 3.3 0" radius="0.5" scale="1.2 0.6 1" color="#2e9e6b"></a-circle><a-text value="title" align="center" position="2 3.3 .02" width="1.6" color="#fff"></a-text>
+<a-box class="btn" data-x="m" data-t="ER TO RELATIONAL MAPPING
+Student(roll_no PK, name)
+Student_Phone(roll_no FK, phone)
+Course(course_id PK, title)
+Enrolls(roll_no FK, course_id FK)
+
+M:N relationship = new table; multivalued attribute = new table." position="-0.35 0.75 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="ER to tables" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+function X(){}
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{
+ if(b.classList.contains('btn')){document.querySelectorAll('.btn').forEach(x=>x.setAttribute('color','#2a6db0'));b.setAttribute('color','#f90')}
+ T('#i',b.dataset.t);if(window.X)X(b.dataset.x||'')}));
+</script></body></html>

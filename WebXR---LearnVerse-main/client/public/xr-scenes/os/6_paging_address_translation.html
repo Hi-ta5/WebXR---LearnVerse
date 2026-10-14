@@ -1,0 +1,94 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Paging and Address Translation</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#071f2e"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#0d3248"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-3.7 2.35 -2.7" rotation="0 28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d5" position="-0.20 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="nx" data-v="" position="2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Next address" align="center" position="0 0 .07" width="1.60" wrap-count="14" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="1.2 0 -3.6">
+<a-text value="PROGRAM" align="center" anchor="center" baseline="center" position="-2.4 4.55 0" width="1.12" wrap-count="8" color="#cfe3ff"></a-text>
+<a-text value="PAGE TABLE" align="center" anchor="center" baseline="center" position="-0.6 4.55 0" width="1.40" wrap-count="10" color="#cfe3ff"></a-text>
+<a-text value="MEMORY" align="center" anchor="center" baseline="center" position="2.1 4.55 0" width="1.12" wrap-count="8" color="#cfe3ff"></a-text>
+<a-entity id="gp" visible="false"><a-box id="pg0"  position="-2.4 4.0 0" width="1.1" height="0.6" depth="0.15" color="#3b82c4"></a-box>
+<a-text value="Page 0" align="center" anchor="center" baseline="center" position="-2.4 4.0 0.1" width="0.91" wrap-count="7" color="#fff"></a-text>
+<a-box id="pg1"  position="-2.4 3.25 0" width="1.1" height="0.6" depth="0.15" color="#2e9e6b"></a-box>
+<a-text value="Page 1" align="center" anchor="center" baseline="center" position="-2.4 3.25 0.1" width="0.91" wrap-count="7" color="#fff"></a-text>
+<a-box id="pg2"  position="-2.4 2.5 0" width="1.1" height="0.6" depth="0.15" color="#d9822b"></a-box>
+<a-text value="Page 2" align="center" anchor="center" baseline="center" position="-2.4 2.5 0.1" width="0.91" wrap-count="7" color="#fff"></a-text>
+<a-box id="pg3"  position="-2.4 1.75 0" width="1.1" height="0.6" depth="0.15" color="#8a5cc4"></a-box>
+<a-text value="Page 3" align="center" anchor="center" baseline="center" position="-2.4 1.75 0.1" width="0.91" wrap-count="7" color="#fff"></a-text>
+<a-box id="fr0"  position="1.55 4.0 0" width="1.0" height="0.6" depth="0.15" color="#445"></a-box>
+<a-text value="F0" align="center" anchor="center" baseline="center" position="1.55 4.0 0.1" width="0.39" wrap-count="3" color="#fff"></a-text>
+<a-box id="fr1"  position="1.55 3.25 0" width="1.0" height="0.6" depth="0.15" color="#445"></a-box>
+<a-text value="F1" align="center" anchor="center" baseline="center" position="1.55 3.25 0.1" width="0.39" wrap-count="3" color="#fff"></a-text>
+<a-box id="fr2"  position="1.55 2.5 0" width="1.0" height="0.6" depth="0.15" color="#445"></a-box>
+<a-text value="F2" align="center" anchor="center" baseline="center" position="1.55 2.5 0.1" width="0.39" wrap-count="3" color="#fff"></a-text>
+<a-box id="fr3"  position="1.55 1.75 0" width="1.0" height="0.6" depth="0.15" color="#445"></a-box>
+<a-text value="F3" align="center" anchor="center" baseline="center" position="1.55 1.75 0.1" width="0.39" wrap-count="3" color="#fff"></a-text>
+<a-box id="fr4"  position="2.7 4.0 0" width="1.0" height="0.6" depth="0.15" color="#445"></a-box>
+<a-text value="F4" align="center" anchor="center" baseline="center" position="2.7 4.0 0.1" width="0.39" wrap-count="3" color="#fff"></a-text>
+<a-box id="fr5"  position="2.7 3.25 0" width="1.0" height="0.6" depth="0.15" color="#445"></a-box>
+<a-text value="F5" align="center" anchor="center" baseline="center" position="2.7 3.25 0.1" width="0.39" wrap-count="3" color="#fff"></a-text>
+<a-box id="fr6"  position="2.7 2.5 0" width="1.0" height="0.6" depth="0.15" color="#445"></a-box>
+<a-text value="F6" align="center" anchor="center" baseline="center" position="2.7 2.5 0.1" width="0.39" wrap-count="3" color="#fff"></a-text>
+<a-box id="fr7"  position="2.7 1.75 0" width="1.0" height="0.6" depth="0.15" color="#445"></a-box>
+<a-text value="F7" align="center" anchor="center" baseline="center" position="2.7 1.75 0.1" width="0.39" wrap-count="3" color="#fff"></a-text>
+</a-entity><a-entity id="gt" visible="false"><a-box id="tr0"  position="-0.6 4.0 0" width="1.8" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="trt0" value="" align="center" anchor="center" baseline="center" position="-0.6 4.0 0.08" width="1.40" wrap-count="10" color="#fff"></a-text>
+<a-box id="ln0"  position="0 0 0" width="1" height="0.04" depth="0.02" color="#cfe3ff"></a-box>
+<a-box id="tr1"  position="-0.6 3.25 0" width="1.8" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="trt1" value="" align="center" anchor="center" baseline="center" position="-0.6 3.25 0.08" width="1.40" wrap-count="10" color="#fff"></a-text>
+<a-box id="ln1"  position="0 0 0" width="1" height="0.04" depth="0.02" color="#cfe3ff"></a-box>
+<a-box id="tr2"  position="-0.6 2.5 0" width="1.8" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="trt2" value="" align="center" anchor="center" baseline="center" position="-0.6 2.5 0.08" width="1.40" wrap-count="10" color="#fff"></a-text>
+<a-box id="ln2"  position="0 0 0" width="1" height="0.04" depth="0.02" color="#cfe3ff"></a-box>
+<a-box id="tr3"  position="-0.6 1.75 0" width="1.8" height="0.6" depth="0.1" color="#334"></a-box>
+<a-text id="trt3" value="" align="center" anchor="center" baseline="center" position="-0.6 1.75 0.08" width="1.40" wrap-count="10" color="#fff"></a-text>
+<a-box id="ln3"  position="0 0 0" width="1" height="0.04" depth="0.02" color="#cfe3ff"></a-box>
+</a-entity><a-sphere id="pk" radius=".17" color="#ffd36b" position="-2.4 4 .2" visible="false"></a-sphere><a-text id="ad" value="" align="center" anchor="center" baseline="center" position="0 1.15 0" width="6.60" wrap-count="44" color="#fff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+const at=(ms,f)=>tm.push(setTimeout(f,ms)),hold=ms=>{busy=1;at(ms,()=>busy=0)};
+const vs=(a,v)=>a.forEach(i=>$('#'+i).setAttribute('visible',v));
+
+const MAP=[5,2,7,0],PCL=['#3b82c4','#2e9e6b','#d9822b','#8a5cc4'],AD=[[2,5],[0,3],[1,6],[3,1]];let ai=0;
+const FP=f=>[1.55+(f>>2)*1.15,4.0-.75*(f%4)],PP=i=>[-2.4,4.0-.75*i],TP=i=>[-.6,4.0-.75*i];
+const sc=(id,o)=>$('#'+id).setAttribute('scale',o?'1.15 1.15 1':'1 1 1');
+function link(id,a,b){const e=$('#'+id),L=Math.hypot(b[0]-a[0],b[1]-a[1]);e.setAttribute('width',L);e.setAttribute('position',(a[0]+b[0])/2+' '+(a[1]+b[1])/2+' -.02');e.setAttribute('rotation','0 0 '+Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI)}
+const mvp=(a,ms)=>$('#pk').setAttribute('animation__m',{property:'position',to:a[0]+' '+a[1]+' .2',dur:ms,easing:'easeInOutQuad'});
+function clr(){for(let i=0;i<4;i++){sc('pg'+i,0);sc('tr'+i,0)}for(let f=0;f<8;f++)sc('fr'+f,0);T('#ad','');$('#pk').setAttribute('visible',false)}
+function s3(){clr();const[p,o]=AD[ai];T('#ad','Logical address = '+(p*8+o)+'  (page '+p+', offset '+o+')');sc('pg'+p,1);const k=$('#pk');k.removeAttribute('animation__m');k.setAttribute('visible',true);k.setAttribute('position',PP(p)[0]+' '+PP(p)[1]+' .2');return 'The CPU uses logical addresses: '+(p*8+o)+' = page '+p+', offset '+o+' ('+(p*8+o)+' / 8 = '+p+' remainder '+o+').'}
+function s4(){const[p]=AD[ai];sc('tr'+p,1);mvp(TP(p),800);return 'The MMU looks in row '+p+' of the page table: page '+p+' is stored in frame '+MAP[p]+'.'}
+function s5(){const[p,o]=AD[ai],f=MAP[p];sc('fr'+f,1);mvp(FP(f),900);T('#ad','Logical address = '+(p*8+o)+'  (page '+p+', offset '+o+')\nPhysical address = '+f+' x 8 + '+o+' = '+(f*8+o));return 'Physical address = frame x page size + offset = '+f+' x 8 + '+o+' = '+(f*8+o)+'. The data is read from there.'}
+const INTRO=['PAGING','Paging cuts a program into equal pieces (pages) and memory into equal slots (frames), so pages can go anywhere.','a book split into pages, a shelf split into slots.','Press Next step.'];
+function rst0(){vs(['gp','gt'],false);clr();for(let f=0;f<8;f++)$('#fr'+f).setAttribute('color','#445')}
+const X={nx:()=>{if(si<2||busy)return;ai=(ai+1)%4;hold(3000);T('#inf',s3());at(1000,()=>T('#inf',s4()));at(2000,()=>T('#inf',s5()))}};
+const STEPS=[
+{t:'Pages and frames',a:'a book split into pages, a shelf split into slots.',h:'Press Next step.',f:()=>{vs(['gp'],true);return 'The program is cut into equal PAGES. Memory is cut into equal FRAMES of the same size (8 words here).'}},
+{t:'The page table',a:'a library index card.',h:'Press Next step.',f:()=>{vs(['gt'],true);for(let i=0;i<4;i++){T('#trt'+i,'P'+i+' > F'+MAP[i]);$('#tr'+i).setAttribute('color',PCL[i]);$('#fr'+MAP[i]).setAttribute('color',PCL[i]);link('ln'+i,[TP(i)[0]+.9,TP(i)[1]],[FP(MAP[i])[0]-.5,FP(MAP[i])[1]])}return 'The OS keeps a PAGE TABLE: which frame holds each page. Pages can sit anywhere, not in order. Same color = same page.'}},
+{t:'CPU makes an address',a:'house number 21 on a street.',h:'Press Next step.',f:()=>s3()},
+{t:'Look up the table',w:3000,a:'finding a name in an index.',h:'Press Next step.',f:()=>{hold(900);return s4()}},
+{t:'Physical address',w:3200,a:'walking to the shelf slot.',h:'Click Next address.',f:()=>{hold(1000);return s5()}},
+{t:'Why paging?',a:'a book can be stored in slots anywhere.',h:'Click Next address to try more.',f:()=>{return 'Pages need not be next to each other, so there is no external fragmentation. Only the last page may waste a little space.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

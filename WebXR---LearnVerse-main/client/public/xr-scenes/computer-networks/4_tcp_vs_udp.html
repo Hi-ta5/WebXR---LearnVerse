@@ -1,0 +1,70 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TCP vs UDP</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#071f2e"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#0d3248"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="0 1.35 -3.3"><a-plane width="9.0" height="1.7" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="2.74 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="3.00 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="3.26 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="3.52 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="3.78 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d5" position="4.04 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d6" position="4.30 .7 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="center" position="-4.35 0.7 0" width="5.78" wrap-count="34" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-4.35 0.4 0" width="4.20" wrap-count="30" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="0.2 0.4 0" width="4.20" wrap-count="30" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="0.2 -0.35 0" width="4.20" wrap-count="30" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rep" data-v="" position="2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Replay" align="center" position="0 0 .07" width="1.20" wrap-count="8" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="0 0 -3.7">
+<a-box  position="-3.65 3.35 0" width="1.5" height="2.4" depth="0.4" color="#3b82c4"></a-box>
+<a-text value="CLIENT" align="center" anchor="center" baseline="center" position="-3.65 4.1 0.25" width="0.90" wrap-count="6" color="#fff"></a-text>
+<a-box  position="3.65 3.35 0" width="1.5" height="2.4" depth="0.4" color="#2e9e6b"></a-box>
+<a-text value="SERVER" align="center" anchor="center" baseline="center" position="3.65 4.35 0.25" width="0.90" wrap-count="6" color="#fff"></a-text>
+<a-box  position="0 3.9 0" width="5.8" height="0.62" depth="0.05" color="#1f4e79"></a-box>
+<a-box  position="0 2.8 0" width="5.8" height="0.62" depth="0.05" color="#7a3d1f"></a-box>
+<a-text value="TCP: careful and reliable" align="center" anchor="center" baseline="center" position="-1.4 4.4 0" width="3.00" wrap-count="20" color="#9cc9ff"></a-text>
+<a-text id="st" value="CLOSED" align="center" anchor="center" baseline="center" position="1.5 4.4 0" width="2.80" wrap-count="20" color="#fff"></a-text>
+<a-text value="UDP: fast, no promises" align="center" anchor="center" baseline="center" position="-1.4 3.35 0" width="3.00" wrap-count="20" color="#ffcf9c"></a-text>
+<a-text value="no connection needed" align="center" anchor="center" baseline="center" position="1.5 3.35 0" width="2.80" wrap-count="20" color="#ffcf9c"></a-text>
+<a-text id="rxT" value="" align="center" anchor="center" baseline="center" position="3.65 3.9 0.25" width="1.44" wrap-count="12" color="#fff"></a-text>
+<a-text id="rxU" value="" align="center" anchor="center" baseline="center" position="3.65 2.8 0.25" width="1.44" wrap-count="12" color="#fff"></a-text>
+<a-box id="p0" width=".95" height=".34" depth=".1" color="#d9822b" visible="false"><a-text value="" align="center" position="0 0 .07" width=".88" wrap-count="8" color="#fff"></a-text></a-box><a-box id="p1" width=".95" height=".34" depth=".1" color="#d9822b" visible="false"><a-text value="" align="center" position="0 0 .07" width=".88" wrap-count="8" color="#fff"></a-text></a-box><a-box id="p2" width=".95" height=".34" depth=".1" color="#d9822b" visible="false"><a-text value="" align="center" position="0 0 .07" width=".88" wrap-count="8" color="#fff"></a-text></a-box><a-box id="p3" width=".95" height=".34" depth=".1" color="#d9822b" visible="false"><a-text value="" align="center" position="0 0 .07" width=".88" wrap-count="8" color="#fff"></a-text></a-box><a-box id="p4" width=".95" height=".34" depth=".1" color="#d9822b" visible="false"><a-text value="" align="center" position="0 0 .07" width=".88" wrap-count="8" color="#fff"></a-text></a-box><a-box id="p5" width=".95" height=".34" depth=".1" color="#d9822b" visible="false"><a-text value="" align="center" position="0 0 .07" width=".88" wrap-count="8" color="#fff"></a-text></a-box><a-box id="p6" width=".95" height=".34" depth=".1" color="#d9822b" visible="false"><a-text value="" align="center" position="0 0 .07" width=".88" wrap-count="8" color="#fff"></a-text></a-box><a-box id="p7" width=".95" height=".34" depth=".1" color="#d9822b" visible="false"><a-text value="" align="center" position="0 0 .07" width=".88" wrap-count="8" color="#fff"></a-text></a-box><a-entity id="pr" visible="false"><a-box id="pp0"  position="3.65 4.2 0" width="1.4" height="0.32" depth="0.1" color="#445"></a-box>
+<a-text value="port 80 HTTP" align="center" anchor="center" baseline="center" position="3.65 4.2 0.08" width="1.32" wrap-count="12" color="#fff"></a-text>
+<a-box id="pp1"  position="3.65 3.8 0" width="1.4" height="0.32" depth="0.1" color="#445"></a-box>
+<a-text value="port 443 HTTPS" align="center" anchor="center" baseline="center" position="3.65 3.8 0.08" width="1.32" wrap-count="12" color="#fff"></a-text>
+<a-box id="pp2"  position="3.65 3.4 0" width="1.4" height="0.32" depth="0.1" color="#445"></a-box>
+<a-text value="port 53 DNS" align="center" anchor="center" baseline="center" position="3.65 3.4 0.08" width="1.32" wrap-count="12" color="#fff"></a-text>
+<a-box id="pp3"  position="3.65 3.0 0" width="1.4" height="0.32" depth="0.1" color="#445"></a-box>
+<a-text value="port 25 SMTP" align="center" anchor="center" baseline="center" position="3.65 3.0 0.08" width="1.32" wrap-count="12" color="#fff"></a-text>
+</a-entity></a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+let pn=0;
+const at=(ms,f)=>tm.push(setTimeout(f,ms)),hold=ms=>{busy=1;at(ms,()=>busy=0)};
+const st=(t,c)=>{T('#st',t);$('#st').setAttribute('color',c||'#fff')};
+function fly(x1,x2,y,lab,col,t0,dur,lost){const k=pn++%8;at(t0,()=>{const p=$('#p'+k);p.setAttribute('color',col);p.firstElementChild.setAttribute('value',lab);p.setAttribute('position',x1+' '+y+' .2');p.setAttribute('visible',true);p.setAttribute('animation__f',{property:'position',to:(lost?0:x2)+' '+y+' .2',dur:lost?dur/2:dur,easing:'linear'});
+ if(lost){at(dur/2,()=>{p.setAttribute('color','#c4423b');p.firstElementChild.setAttribute('value','LOST');at(900,()=>p.setAttribute('visible',false))})}else at(dur+60,()=>p.setAttribute('visible',false))})}
+const F1=-2.45,F2=2.45,TF=4.04,TB=3.76,UF=2.95;
+const INTRO=['TCP vs UDP','Both carry data between two programs. TCP is careful and reliable. UDP is fast but makes no promises.','registered mail (TCP) versus a postcard (UDP).','Press Next step.'];
+function rst0(){for(let k=0;k<8;k++)$('#p'+k).setAttribute('visible',false);st('CLOSED');T('#rxT','');T('#rxU','');$('#pr').setAttribute('visible',false);for(let i=0;i<4;i++)$('#pp'+i).setAttribute('color','#445')}
+const X={rep:()=>{if(si>=0&&!busy){go(si)}}};
+const STEPS=[
+{t:'Two ways to send',a:'a tracked parcel versus a postcard.',h:'Press Next step.',f:()=>'The top lane is TCP, the bottom lane is UDP. Both send data from the client to the server. Watch how differently they behave.'},
+{t:'TCP: 3-way handshake',w:4200,a:'saying hello before talking.',h:'Watch the 3 packets.',f:()=>{hold(3400);st('SYN_SENT','#ffd36b');fly(F1,F2,TF,'SYN','#d9822b',0,1000);fly(F2,F1,TB,'SYN+ACK','#d9822b',1100,1000);at(2100,()=>st('SYN+ACK RECEIVED','#ffd36b'));fly(F1,F2,TF,'ACK','#2e9e6b',2200,1000);at(3300,()=>st('ESTABLISHED','#9bffb0'));return 'TCP first shakes hands: SYN (shall we talk?), SYN+ACK (yes!), ACK (great). Now both sides are ready.'}},
+{t:'TCP: data and ACKs',w:4400,a:'sending parcels and getting a receipt for each.',h:'Watch the green ACKs return.',f:()=>{hold(3000);T('#rxT','');[1,2,3].forEach((n,i)=>{fly(F1,F2,TF,'#'+n,'#3b82c4',i*600,900);at(i*600+900,()=>T('#rxT','got: '+[1,2,3].slice(0,n).join(' ')));fly(F2,F1,TB,'ACK '+n,'#2e9e6b',i*600+900,700)});return 'TCP sends numbered segments. The server replies with an ACK (a receipt) for each one it receives.'}},
+{t:'TCP: lost packet fixed',w:5200,a:'a parcel is lost, so you post it again.',h:'Wait for the timeout.',f:()=>{hold(4100);fly(F1,F2,TF,'#4','#3b82c4',0,900,true);at(1900,()=>st('TIMEOUT: no ACK','#ff8a80'));fly(F1,F2,TF,'#4 again','#d9822b',2300,900);at(3200,()=>{T('#rxT','got: 1 2 3 4');st('ESTABLISHED','#9bffb0')});fly(F2,F1,TB,'ACK 4','#2e9e6b',3200,700);return 'Segment 4 is LOST. No ACK arrives, so the sender times out and sends it again. Nothing is missed.'}},
+{t:'UDP: just send',w:3600,a:'dropping postcards into a post box.',h:'Watch datagram 2 disappear.',f:()=>{hold(2400);T('#rxU','');fly(F1,F2,UF,'DG 1','#b8921a',0,900);at(900,()=>T('#rxU','got: 1'));fly(F1,F2,UF,'DG 2','#b8921a',400,900,true);fly(F1,F2,UF,'DG 3','#b8921a',800,900);at(1700,()=>T('#rxU','got: 1 3'));return 'UDP has no handshake and no ACKs. Datagram 2 is lost and nobody notices or resends it. It is fast but unreliable.'}},
+{t:'Ports: the right app',w:4000,a:'apartment numbers inside a building.',h:'Press Next step.',f:()=>{hold(1500);$('#pr').setAttribute('visible',true);T('#rxT','');T('#rxU','');fly(F1,F2,TF,'to :80','#3b82c4',0,900);at(900,()=>$('#pp0').setAttribute('color','#2e9e6b'));fly(F1,F2,UF,'to :53','#b8921a',300,900);at(1200,()=>$('#pp2').setAttribute('color','#b8921a'));return 'The IP address finds the computer. The PORT number finds the app: web page to port 80, DNS lookup to port 53.'}},
+{t:'When to use which',a:'registered mail versus a postcard or a phone call.',h:'Press Reset and replay.',f:()=>{$('#pr').setAttribute('visible',false);return 'TCP: web pages, email, file downloads (every byte must arrive). UDP: video calls, games, DNS (speed matters more).'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

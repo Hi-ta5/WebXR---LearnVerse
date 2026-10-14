@@ -1,0 +1,61 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Digital Signatures</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#072a2a"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#0c4040"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="0 1.35 -3.3"><a-plane width="9.0" height="1.7" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="3.00 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="3.26 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="3.52 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="3.78 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="4.04 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d5" position="4.30 .7 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="center" position="-4.35 0.7 0" width="5.78" wrap-count="34" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-4.35 0.4 0" width="4.20" wrap-count="30" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="0.2 0.4 0" width="4.20" wrap-count="30" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="0.2 -0.35 0" width="4.20" wrap-count="30" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="hack" data-v="" position="2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#8a2a2a"><a-text value="Hacker" align="center" position="0 0 .07" width="1.20" wrap-count="8" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="0 0 -3.7">
+<a-cylinder position="-3.6 3.0 0" radius=".38" height="1.2" color="#3b82c4"></a-cylinder><a-sphere position="-3.6 3.85 0" radius=".3" color="#f2c9a0"></a-sphere><a-text value="ALICE" align="center" anchor="center" baseline="center" position="-3.6 2.2 0" width="0.96" wrap-count="6" color="#fff"></a-text>
+<a-cylinder position="3.6 3.0 0" radius=".38" height="1.2" color="#2e9e6b"></a-cylinder><a-sphere position="3.6 3.85 0" radius=".3" color="#f2c9a0"></a-sphere><a-text value="BOB" align="center" anchor="center" baseline="center" position="3.6 2.2 0" width="0.96" wrap-count="6" color="#fff"></a-text>
+<a-sphere position="-2.3 3.95 0" radius=".28" color="#d4a017"></a-sphere><a-text value="SECRET KEY
+(only Alice)" align="center" anchor="center" baseline="center" position="-2.3 4.4 0" width="1.44" wrap-count="12" color="#ffd36b"></a-text>
+<a-sphere position="2.3 3.95 0" radius=".28" color="#3b82c4"></a-sphere><a-text value="PUBLIC KEY
+(everyone)" align="center" anchor="center" baseline="center" position="2.3 4.4 0" width="1.44" wrap-count="12" color="#9cc9ff"></a-text>
+<a-sphere id="lamp" position="0 4.0 0" radius=".3" color="#555"></a-sphere><a-text id="lt" value="WAITING" align="center" anchor="center" baseline="center" position="0 3.5 0" width="1.28" wrap-count="8" color="#fff"></a-text>
+<a-entity id="env" position="-1.5 2.95 0" visible="false"><a-box  position="0 0 0" width="2.6" height="1.3" depth="0.1" color="#e8d9a8"></a-box>
+<a-text id="e1" value="" align="center" anchor="center" baseline="center" position="0 0.32 0.07" width="2.47" wrap-count="19" color="#222"></a-text>
+<a-text id="e2" value="" align="center" anchor="center" baseline="center" position="0 0 0.07" width="2.47" wrap-count="19" color="#222"></a-text>
+<a-text id="e3" value="" align="center" anchor="center" baseline="center" position="0 -0.32 0.07" width="2.47" wrap-count="19" color="#222"></a-text>
+</a-entity></a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const MS=['Alice pays Bob 10','Bob pays Carol 25','Carol pays Dan 7'];let mi=0,msg,m,s,tam;
+const N=3233n,E=17n,D=2753n;
+const mp=(b,e,mo)=>{let r=1n;b%=mo;while(e>0n){if(e&1n)r=r*b%mo;b=b*b%mo;e>>=1n}return r};
+const hm=t=>BigInt(parseInt(hx(t),16))%N,bad=t=>t.replace(/\d+$/,x=>+x+80);
+function env(){T('#e1',tam?bad(msg):msg);T('#e2',m!=null?'fingerprint: '+m:'');T('#e3',s!=null?'signature: '+s:'')}
+function lamp(c,t){$('#lamp').setAttribute('color',c);T('#lt',t)}
+function ver(){const v=mp(s,E,N),mm=hm(tam?bad(msg):msg),ok=v==mm;lamp(ok?'#2e9e6b':'#c4423b',ok?'GENUINE':'FAKE');return 'Bob unlocks the seal with the PUBLIC key: '+v+'. Note fingerprint: '+mm+'. '+(ok?'Match: GENUINE.':'FAKE, rejected.')}
+const INTRO=['DIGITAL SIGNATURE','A digital signature proves who sent a message and that nobody changed it.','a wax seal only Alice can make but anyone can check.','Press Next step.'];
+function rst0(){msg=MS[mi];m=null;s=null;tam=0;$('#env').setAttribute('visible',false);$('#env').removeAttribute('animation__mv');$('#env').setAttribute('position','-1.5 2.95 0');env();lamp('#555','WAITING')}
+const X={hack:()=>{if(s==null)return;tam^=1;env();if(si>=4)T('#inf',(tam?'Hacker edits the note. ':'Undone. ')+ver())}};
+const STEPS=[
+{t:'Alice writes a note',a:'writing a cheque.',h:'Press Next step.',f:()=>{$('#env').setAttribute('visible',true);env();return 'Alice wants to send Bob this payment note: "'+msg+'".'}},
+{t:'Make its fingerprint',a:'squeezing the note into one number.',h:'Press Next step.',f:()=>{m=hm(msg);env();return 'The note is turned into a short number, its fingerprint: '+m+'.'}},
+{t:'Seal with SECRET key',a:'pressing a private ring into wax.',h:'Press Next step.',f:()=>{s=mp(m,D,N);env();return 'Alice mixes the fingerprint with her SECRET key. The result is the signature: '+s+'. Only Alice can make it.'}},
+{t:'Send to Bob',w:2800,a:'posting a sealed letter.',h:'Watch the envelope.',f:()=>{busy=1;$('#env').setAttribute('animation__mv','property:position;to:1.5 2.95 0;dur:1400;easing:easeInOutQuad');tm.push(setTimeout(()=>busy=0,1500));return 'The note and signature travel to Bob. Everyone can read them, but nobody can fake the seal.'}},
+{t:'Bob checks the seal',a:'comparing the seal with a known stamp.',h:'Click Hacker to try cheating.',f:()=>ver()},
+{t:'A hacker cheats',a:'changing the cheque after it was signed.',h:'Click Hacker to undo.',f:()=>{tam=1;env();return 'Hacker edits the note. '+ver()}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

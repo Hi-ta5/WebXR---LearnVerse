@@ -1,0 +1,65 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>User Mode and Kernel Mode</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#1a0f1f"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#2a1630"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-3.7 2.35 -2.7" rotation="0 28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d5" position="-0.20 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d6" position="0.06 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="cheat" data-v="" position="2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#8a2a2a"><a-text value="Try cheat" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="1.2 0 -3.6">
+<a-plane position="-1.6 3.0 -.1" width="3.0" height="3.4" color="#3b82c4" opacity="0.18"></a-plane><a-plane position="1.9 3.0 -.1" width="2.8" height="3.4" color="#c4423b" opacity="0.18"></a-plane><a-text value="USER MODE" align="center" anchor="center" baseline="center" position="-1.6 4.45 0" width="1.70" wrap-count="10" color="#9cc9ff"></a-text>
+<a-text value="KERNEL MODE" align="center" anchor="center" baseline="center" position="1.9 4.45 0" width="2.04" wrap-count="12" color="#ff9c9c"></a-text>
+<a-box id="gate"  position="0.2 3.0 0" width="0.25" height="2.6" depth="0.2" color="#d4a017"></a-box>
+<a-text value="SYSTEM CALL GATE" align="center" anchor="center" baseline="center" position="0.2 1.5 0" width="1.92" wrap-count="16" color="#ffd36b"></a-text>
+<a-box  position="-2.2 3.2 0" width="1.2" height="0.8" depth="0.2" color="#3b82c4"></a-box>
+<a-text value="MY APP" align="center" anchor="center" baseline="center" position="-2.2 3.2 0.12" width="0.84" wrap-count="6" color="#fff"></a-text>
+<a-box  position="1.7 3.6 0" width="1.4" height="0.8" depth="0.2" color="#c4423b"></a-box>
+<a-text value="KERNEL" align="center" anchor="center" baseline="center" position="1.7 3.6 0.12" width="0.84" wrap-count="6" color="#fff"></a-text>
+<a-cylinder id="dsk" position="1.9 2.2 0" radius=".5" height=".3" rotation="90 0 0" color="#8a5cc4"></a-cylinder><a-text value="DISK" align="center" anchor="center" baseline="center" position="1.9 2.2 0.2" width="0.70" wrap-count="5" color="#fff"></a-text>
+<a-entity id="rq" position="-1.7 3.2 .25" visible="false"><a-box  position="0 0 0" width="0.95" height="0.36" depth="0.1" color="#ffd36b"></a-box>
+<a-text id="rql" value="read()" align="center" anchor="center" baseline="center" position="0 0 0.07" width="0.88" wrap-count="8" color="#222"></a-text>
+</a-entity><a-text id="den" value="" align="center" anchor="center" baseline="center" position="0.2 3.95 0" width="2.10" wrap-count="14" color="#ff6b6b"></a-text>
+<a-box  position="0 1.1 0" width="4.8" height="0.5" depth="0.05" color="#0e2238"></a-box>
+<a-text id="md" value="" align="center" anchor="center" baseline="center" position="0.3 1.1 0" width="4.80" wrap-count="30" color="#fff"></a-text>
+<a-sphere id="lmp" position="-2.2 1.1 .1" radius=".15" color="#3b82c4"></a-sphere></a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+const at=(ms,f)=>tm.push(setTimeout(f,ms)),hold=ms=>{busy=1;at(ms,()=>busy=0)};
+const vs=(a,v)=>a.forEach(i=>$('#'+i).setAttribute('visible',v));
+
+const md=k=>{T('#md',k?'CPU MODE: KERNEL (bit 0)':'CPU MODE: USER (bit 1)');$('#lmp').setAttribute('color',k?'#c4423b':'#3b82c4')};
+const mv=(x,y,ms)=>$('#rq').setAttribute('animation__m',{property:'position',to:x+' '+y+' .25',dur:ms,easing:'easeInOutQuad'});
+const rqs=(v,l,x)=>{const r=$('#rq');r.removeAttribute('animation__m');r.setAttribute('visible',v);if(l)T('#rql',l);r.setAttribute('position',(x==null?-1.7:x)+' 3.2 .25')};
+const gate=o=>$('#gate').setAttribute('animation__g',{property:'scale',to:'1 '+(o?.1:1)+' 1',dur:400});
+function cheat(){hold(2300);gate(false);rqs(true,'disk!');mv(-.35,3.2,700);at(800,()=>{T('#den','ACCESS DENIED');T('#rql','BLOCKED')});at(1100,()=>mv(-1.7,3.2,700));at(2000,()=>{T('#den','');rqs(false)})}
+const INTRO=['USER MODE AND KERNEL MODE','The CPU runs in two modes. Apps run in a limited mode. Only the OS kernel may touch the hardware.','a bank: customers in the lobby, staff in the vault.','Press Next step.'];
+function rst0(){gate(false);rqs(false);md(0);T('#den','');$('#dsk').setAttribute('color','#8a5cc4')}
+const X={cheat:()=>{if(!busy)cheat()}};
+const STEPS=[
+{t:'App in user mode',a:'a visitor in a bank lobby.',h:'Click Try cheat.',f:()=>{md(0);return 'Your app runs in USER mode. It may not touch the disk or other hardware directly.'}},
+{t:'Direct access blocked',w:3400,a:'a visitor walking into the vault.',h:'Click Try cheat to repeat.',f:()=>{cheat();return 'The app tries to read the disk by itself. The CPU blocks it: user mode has no such right.'}},
+{t:'Make a system call',w:2800,a:'asking the bank clerk for help.',h:'Press Next step.',f:()=>{hold(1000);rqs(true,'read()');mv(-.35,3.2,800);return 'The app asks the kernel politely: read(file). This request is called a SYSTEM CALL.'}},
+{t:'Trap to kernel mode',w:3200,a:'the clerk unlocks the vault door.',h:'Watch the mode lamp change.',f:()=>{hold(1300);gate(true);at(300,()=>md(1));mv(1.1,3.4,1000);return 'A TRAP switches the CPU to KERNEL mode (mode bit 0). The gate opens and privileged work is allowed.'}},
+{t:'Kernel reads the disk',w:3400,a:'the clerk fetches the papers.',h:'Press Next step.',f:()=>{hold(2000);mv(1.8,2.55,700);at(750,()=>{$('#dsk').setAttribute('color','#ffd36b');T('#rql','data')});at(1400,()=>{mv(1.5,3.3,700);$('#dsk').setAttribute('color','#8a5cc4')});return 'The kernel checks permissions, then talks to the disk and collects the data.'}},
+{t:'Back to user mode',w:3400,a:'handing the papers over the counter.',h:'Press Next step.',f:()=>{hold(2000);mv(.2,3.3,600);at(650,()=>mv(-1.9,3.2,900));at(1700,()=>{gate(false);md(0)});return 'The data goes back to the app. The gate closes and the CPU returns to USER mode.'}},
+{t:'Why two modes?',a:'only staff may enter the vault.',h:'Click Try cheat again.',f:()=>{rqs(false);return 'Modes protect the system: a buggy or evil app cannot crash the OS or read other programs\' data.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

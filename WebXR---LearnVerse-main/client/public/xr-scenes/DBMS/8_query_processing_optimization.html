@@ -1,0 +1,45 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Query Processing and Optimization</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0b1d33"></a-sky><a-circle rotation="-90 0 0" radius="7" color="#12304f"></a-circle>
+<a-light type="ambient" intensity=".9"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity position="0 0 0"><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+<a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-1.45 0 -4">
+<a-text value="Query Processing and Optimization" align="center" position="1.45 3.9 0" width="7.5" color="#ffd36b"></a-text>
+<a-plane position="4.5 2.2 -.02" width="3.4" height="3.7" color="#10263f"></a-plane>
+<a-text id="i" value="Look at the scene and click any item or button (mouse, or controller trigger in VR)." position="2.95 2.2 0" width="3.1" wrap-count="31" anchor="left" align="left" baseline="center" color="#fff"></a-text>
+<a-entity id="e0"></a-entity><a-entity id="e1"></a-entity><a-entity id="e2"></a-entity><a-entity id="e3"></a-entity><a-box id="n_p" position="0 3.3 0" width="1.5" height="0.45" depth=".15" color="#2a6db0"><a-text value="Project name" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-box id="n_s" position="0 2.6 0" width="1.5" height="0.45" depth=".15" color="#d9822b"><a-text value="Select dept=10" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-box id="n_j" position="0 1.9 0" width="1.5" height="0.45" depth=".15" color="#8a5cc4"><a-text value="JOIN" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-box id="n_r" position="-1.3 1.3 0" width="1" height="0.45" depth=".15" color="#2e9e6b"><a-text value="R 10000" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-box id="n_t" position="1.3 1.3 0" width="1" height="0.45" depth=".15" color="#2e9e6b"><a-text value="S 500" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="n" data-t="UNOPTIMIZED PLAN
+SELECT name FROM R, S WHERE R.dept_id=S.dept_id AND R.dept_id=10
+Join ALL 10000 R rows with S first, then filter: a huge intermediate result." position="-2.525 0.75 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Naive plan" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="o" data-t="OPTIMIZED PLAN (query equivalence)
+sigma c (R JOIN S) = (sigma c (R)) JOIN S when c uses only R&#x27;s attributes.
+Push selection down: far fewer rows reach the join. Also push projections down, reorder joins, use indexes. Cost-based optimizers pick the cheapest plan." position="-0.875 0.75 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Optimize" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="l" data-t="NESTED-LOOP JOIN
+for each r in R: for each s in S: if match, output.
+Cost ~ b_R + n_R x b_S block reads. Simple; index version uses an index on S." position="-2.0 0.15 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Nested loop" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="m" data-t="SORT-MERGE JOIN
+Sort R and S on the join key, then merge with two pointers.
+Cost ~ sort(R)+sort(S)+b_R+b_S. Good if already sorted." position="-0.35 0.15 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Sort-merge" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="h" data-t="HASH JOIN
+Build a hash table on the smaller table S, probe it with each R row.
+Cost ~ 3(b_R+b_S). Best for large equi-joins." position="1.2999999999999998 0.15 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Hash join" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-text  value="" align="center" anchor="center" position="1.3 0.75 0" width="1" wrap-count="11" color="#cfe3ff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const P={p:[0,3.3],s:[0,2.6],j:[0,1.9],r:[-1.3,1.3],t:[1.3,1.3]};
+function draw(ed){for(const k in P)$('#n_'+k).setAttribute('position',P[k][0]+' '+P[k][1]+' 0');
+ ed.forEach((e,i)=>$('#e'+i).setAttribute('line','start:'+P[e[0]][0]+' '+(P[e[0]][1]-.22)+' 0;end:'+P[e[1]][0]+' '+(P[e[1]][1]+.22)+' 0;color:#cfe3ff'))}
+draw([['p','s'],['s','j'],['j','r'],['j','t']]);
+function X(k){if(k=='n'){P.s=[0,2.6];P.j=[0,1.9];P.r=[-1.3,1.3];draw([['p','s'],['s','j'],['j','r'],['j','t']])}
+ if(k=='o'){P.j=[0,2.6];P.s=[-1.3,1.9];P.r=[-1.3,1.3];draw([['p','j'],['j','s'],['j','t'],['s','r']])}}
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{
+ if(b.classList.contains('btn')){document.querySelectorAll('.btn').forEach(x=>x.setAttribute('color','#2a6db0'));b.setAttribute('color','#f90')}
+ T('#i',b.dataset.t);if(window.X)X(b.dataset.x||'')}));
+</script></body></html>

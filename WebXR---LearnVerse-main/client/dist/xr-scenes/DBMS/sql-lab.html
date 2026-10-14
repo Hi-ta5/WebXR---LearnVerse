@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SQL Command Center VR Lab</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    overflow:hidden;
+    background:#020617;
+}
+
+/* =========================================
+   CONTROL PANEL
+========================================= */
+
+.panel{
+
+    position:absolute;
+
+    z-index:20;
+
+    top:18px;
+    left:18px;
+
+    width:335px;
+
+    padding:20px;
+
+    background:rgba(2,6,23,.96);
+
+    color:white;
+
+    border-radius:18px;
+
+    border:1px solid #38bdf8;
+
+    box-shadow:
+        0 0 30px rgba(56,189,248,.25),
+        inset 0 0 20px rgba(56,189,248,.05);
+
+    backdrop-filter:blur(10px);
+}
+
+.panel h2{
+
+    margin:0;
+
+    color:#38bdf8;
+
+}
+
+.subtitle{
+
+    margin-top:5px;
+
+    color:#94a3b8;
+
+    font-size:13px;
+
+    line-height:1.4;
+}
+
+
+/* =========================================
+   INFO
+========================================= */
+
+#query{
+
+    margin-top:15px;
+
+    min-height:100px;
+
+    padding:13px;
+
+    background:#0f172a;
+
+    border-radius:10px;
+
+    color:#e2e8f0;
+
+    font-size:14px;
+
+    line-height:1.5;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+button{
+
+    width:100%;
+
+    padding:11px;
+
+    margin-top:7px;
+
+    border:0;
+
+    border-radius:9px;
+
+    background:#38bdf8;
+
+    color:#020617;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+button:hover{
+
+    background:#7dd3fc;
+
+    transform:translateY(-2px);
+
+}
+
+.demo{
+
+    background:#8b5cf6;
+
+    color:white;
+}
+
+.reset{
+
+    background:#334155;
+
+    color:white;
+}
+
+
+/* =========================================
+   PROGRESS
+========================================= */
+
+.progress{
+
+    margin-top:14px;
+
+    height:8px;
+
+    background:#1e293b;
+
+    border-radius:20px;
+
+    overflow:hidden;
+}
+
+#progressBar{
+
+    width:0%;
+
+    height:100%;
+
+    background:#38bdf8;
+
+    transition:.5s;
+}
+
+.stage{
+
+    text-align:center;
+
+    margin-top:7px;
+
+    font-size:12px;
+
+    color:#94a3b8;
+}
+
+
+/* =========================================
+   LEGEND
+========================================= */
+
+.legend{
+
+    position:absolute;
+
+    right:18px;
+
+    bottom:18px;
+
+    z-index:20;
+
+    padding:13px 16px;
+
+    background:rgba(2,6,23,.93);
+
+    border:1px solid #334155;
+
+    border-radius:12px;
+
+    color:white;
+
+    font-size:12px;
+}
+
+.legend div{
+
+    margin:5px 0;
+
+}
+
+.dot{
+
+    display:inline-block;
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+    margin-right:6px;
+
+}
+
+.blue{
+    background:#38bdf8;
+}
+
+.green{
+    background:#22c55e;
+}
+
+.purple{
+    background:#8b5cf6;
+}
+
+.orange{
+    background:#f59e0b;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width:700px){
+
+    .panel{
+
+        width:285px;
+
+        max-height:92vh;
+
+        overflow:auto;
+    }
+
+    .legend{
+
+        display:none;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =================================================
+     CONTROL PANEL
+================================================= -->
+
+<div class="panel">
+
+    <h2>💻 SQL Command Center</h2>
+
+    <div class="subtitle">
+
+        Execute SQL commands and observe how the database responds.
+
+    </div>
+
+
+    <div id="query">
+
+        <b>Welcome to the SQL Laboratory!</b>
+        <br><br>
+
+        Select a SQL command to interact with the virtual database.
+
+    </div>
+
+
+    <button onclick="runQuery('SELECT')">
+
+        🔍 SELECT
+
+    </button>
+
+
+    <button onclick="runQuery('INSERT')">
+
+        ➕ INSERT
+
+    </button>
+
+
+    <button onclick="runQuery('UPDATE')">
+
+        ✏️ UPDATE
+
+    </button>
+
+
+    <button onclick="runQuery('DELETE')">
+
+        🗑️ DELETE
+
+    </button>
+
+
+    <button
+        class="demo"
+        onclick="runDemo()">
+
+        ▶ Run SQL Demo
+
+    </button>
+
+
+    <button
+        class="reset"
+        onclick="resetLab()">
+
+        ↻ Reset Database
+
+    </button>
+
+
+    <div class="progress">
+
+        <div id="progressBar"></div>
+
+    </div>
+
+
+    <div
+        id="stage"
+        class="stage">
+
+        DATABASE READY
+
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     LEGEND
+================================================= -->
+
+<div class="legend">
+
+    <div>
+        <span class="dot blue"></span>
+        SQL Terminal
+    </div>
+
+    <div>
+        <span class="dot purple"></span>
+        Database
+    </div>
+
+    <div>
+        <span class="dot green"></span>
+        Successful Operation
+    </div>
+
+    <div>
+        <span class="dot orange"></span>
+        Data Movement
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     A-FRAME
+================================================= -->
+
+<a-scene
+    background="color:#020617"
+    renderer="antialias:true"
+    cursor="rayOrigin:mouse"
+    raycaster="objects:.clickable">
+
+
+    <!-- CAMERA -->
+
+    <a-camera position="0 3.2 14">
+
+        <a-cursor
+            color="#38bdf8"
+            fuse="false">
+        </a-cursor>
+
+    </a-camera>
+
+
+    <!-- LIGHTS -->
+
+    <a-light
+        type="ambient"
+        intensity="1.5">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="0 8 4"
+        intensity="2.5"
+        color="#38bdf8">
+    </a-light>
+
+
+    <a-light
+        type="point"
+        position="-7 5 -5"
+        intensity="1.5"
+        color="#8b5cf6">
+    </a-light>
+
+
+    <!-- FLOOR -->
+
+    <a-plane
+        rotation="-90 0 0"
+        width="40"
+        height="40"
+        color="#0f172a">
+    </a-plane>
+
+
+    <!-- FLOOR GRID -->
+
+    <a-plane
+        rotation="-90 0 0"
+        position="0 .01 -5"
+        width="30"
+        height="30"
+        material="
+            color:#111827;
+            wireframe:true;
+            transparent:true;
+            opacity:.55">
+    </a-plane>
+
+
+    <a-sky color="#020617"></a-sky>
+
+
+    <!-- =================================================
+         TITLE
+    ================================================= -->
+
+    <a-text
+        value="SQL COMMAND CENTER"
+        position="-4.1 7.5 -9"
+        color="#38bdf8"
+        scale="2 2 2">
+    </a-text>
+
+
+    <a-text
+        value="QUERY → DATABASE → RESULT"
+        position="-2.8 6.8 -9"
+        color="#94a3b8"
+        scale=".9 .9 .9">
+    </a-text>
+
+
+    <!-- =================================================
+         SQL TERMINAL
+    ================================================= -->
+
+    <a-box
+        position="0 4 -8"
+        width="8"
+        height="4.2"
+        depth=".6"
+        color="#1e293b">
+
+    </a-box>
+
+
+    <!-- TERMINAL SCREEN -->
+
+    <a-plane
+        position="0 4 -7.65"
+        width="7.2"
+        height="3.4"
+        color="#020617">
+
+    </a-plane>
+
+
+    <!-- TERMINAL HEADER -->
+
+    <a-sphere
+        position="-3.2 5.35 -7.45"
+        radius=".12"
+        color="#ef4444">
+    </a-sphere>
+
+
+    <a-sphere
+        position="-2.85 5.35 -7.45"
+        radius=".12"
+        color="#facc15">
+    </a-sphere>
+
+
+    <a-sphere
+        position="-2.5 5.35 -7.45"
+        radius=".12"
+        color="#22c55e">
+    </a-sphere>
+
+
+    <a-text
+        value="SQL TERMINAL"
+        position="-1.1 5.2 -7.45"
+        color="#64748b"
+        scale=".6 .6 .6">
+    </a-text>
+
+
+    <!-- SQL QUERY -->
+
+    <a-text
+        id="sqlText"
+        value="SELECT * FROM STUDENT;"
+        position="-3.15 4.55 -7.45"
+        color="#22c55e"
+        width="6.5">
+    </a-text>
+
+
+    <!-- CURSOR -->
+
+    <a-text
+        value="▌"
+        position="-3.15 4.15 -7.45"
+        color="#22c55e"
+        animation="
+            property:visible;
+            from:true;
+            to:false;
+            loop:true;
+            dur:700">
+    </a-text>
+
+
+    <!-- RESULT LABEL -->
+
+    <a-text
+        value="QUERY RESULT"
+        position="-3.15 3.6 -7.45"
+        color="#38bdf8"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- RESULT -->
+
+    <a-text
+        id="result"
+        value="3 records found"
+        position="-3.15 3.15 -7.45"
+        color="white"
+        width="6.5">
+    </a-text>
+
+
+    <!-- =================================================
+         DATABASE
+    ================================================= -->
+
+    <a-cylinder
+        id="database"
+        position="0 0.8 -8"
+        radius="2"
+        height="2.3"
+        color="#7c3aed">
+
+        <a-animation
+            attribute="rotation"
+            to="0 360 0"
+            loop="true"
+            dur="9000">
+        </a-animation>
+
+    </a-cylinder>
+
+
+    <a-cylinder
+        position="0 1.95 -8"
+        radius="2"
+        height=".15"
+        color="#a78bfa">
+    </a-cylinder>
+
+
+    <a-text
+        value="DATABASE"
+        align="center"
+        position="0 .65 -5.95"
+        color="white"
+        scale="1.1 1.1 1.1">
+    </a-text>
+
+
+    <a-text
+        value="STUDENT"
+        align="center"
+        position="0 1.05 -5.95"
+        color="#c4b5fd"
+        scale=".7 .7 .7">
+    </a-text>
+
+
+    <!-- DATABASE LIGHT -->
+
+    <a-sphere
+        position="0 2.25 -8"
+        radius=".15"
+        color="#22c55e"
+
+        animation="
+            property:scale;
+            from:1 1 1;
+            to:1.8 1.8 1.8;
+            direction:alternate;
+            loop:true;
+            dur:800">
+
+    </a-sphere>
+
+
+    <!-- =================================================
+         DATA STREAM LEFT
+    ================================================= -->
+
+    <a-sphere
+        id="dataLeft"
+        position="-6 3 -7"
+        radius=".65"
+        color="#8b5cf6">
+
+        <a-animation
+            attribute="position"
+            from="-6 3 -7"
+            to="-1 3 -7"
+            dur="3000"
+            repeat="indefinite">
+        </a-animation>
+
+    </a-sphere>
+
+
+    <a-text
+        value="QUERY"
+        position="-6.65 2.1 -7"
+        color="#a78bfa"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- =================================================
+         DATA STREAM RIGHT
+    ================================================= -->
+
+    <a-sphere
+        id="dataRight"
+        position="6 3 -7"
+        radius=".65"
+        color="#14b8a6">
+
+        <a-animation
+            attribute="position"
+            from="6 3 -7"
+            to="1 3 -7"
+            dur="3000"
+            repeat="indefinite">
+        </a-animation>
+
+    </a-sphere>
+
+
+    <a-text
+        value="DATA"
+        position="5.75 2.1 -7"
+        color="#2dd4bf"
+        scale=".65 .65 .65">
+    </a-text>
+
+
+    <!-- =================================================
+         DATA TABLE
+    ================================================= -->
+
+    <a-box
+        id="tableBox"
+        position="7 0.8 -8"
+        width="5"
+        height="3"
+        depth=".5"
+        color="#0f766e">
+    </a-box>
+
+
+    <a-text
+        value="STUDENT TABLE"
+        position="5.6 1.8 -7.65"
+        color="#5eead4"
+        scale=".8 .8 .8">
+    </a-text>
+
+
+    <a-text
+        id="tableData"
+        value="ID     NAME
+1      Divya
+2      Riya
+3      Aman"
+        position="5.65 1.25 -7.65"
+        color="white"
+        scale=".7 .7 .7">
+    </a-text>
+
+
+    <!-- =================================================
+         DATA FLOW ARROWS
+    ================================================= -->
+
+    <a-cylinder
+        id="flow1"
+        position="-3.5 3 -7"
+        radius=".06"
+        height="2"
+        rotation="0 0 90"
+        color="#38bdf8">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.4 1.4 1.4"
+            direction="alternate"
+            loop="true"
+            dur="600">
+        </a-animation>
+
+    </a-cylinder>
+
+
+    <a-cylinder
+        id="flow2"
+        position="3.5 2.2 -7"
+        radius=".06"
+        height="2"
+        rotation="0 0 90"
+        color="#22c55e">
+
+        <a-animation
+            attribute="scale"
+            from="1 1 1"
+            to="1.4 1.4 1.4"
+            direction="alternate"
+            loop="true"
+            dur="600">
+        </a-animation>
+
+    </a-cylinder>
+
+
+    <!-- =================================================
+         STATUS
+    ================================================= -->
+
+    <a-text
+        id="status"
+        value="DATABASE READY"
+        align="center"
+        position="0 5.95 -8"
+        color="#22c55e"
+        scale=".8 .8 .8">
+    </a-text>
+
+
+</a-scene>
+
+
+<script>
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let currentCommand = "";
+
+let demoRunning = false;
+
+
+/* =====================================================
+   SQL COMMAND DATA
+===================================================== */
+
+const commands = {
+
+    SELECT: {
+
+        sql:
+        "SELECT * FROM STUDENT;",
+
+        result:
+        "RESULT: 3 student records returned.",
+
+        explanation:
+        "<b>SELECT</b> retrieves data from a table.<br><br>" +
+        "Example: SELECT * FROM STUDENT;",
+
+        progress:25
+
+    },
+
+
+    INSERT: {
+
+        sql:
+        "INSERT INTO STUDENT VALUES (4,'Aman');",
+
+        result:
+        "RESULT: New student 'Aman' inserted.",
+
+        explanation:
+        "<b>INSERT</b> adds a new record to a table.<br><br>" +
+        "A new student is added to the database.",
+
+        progress:50
+
+    },
+
+
+    UPDATE: {
+
+        sql:
+        "UPDATE STUDENT SET NAME='Aman' WHERE ID=1;",
+
+        result:
+        "RESULT: Student record updated.",
+
+        explanation:
+        "<b>UPDATE</b> modifies existing records.<br><br>" +
+        "The NAME value of the selected student is changed.",
+
+        progress:75
+
+    },
+
+
+    DELETE: {
+
+        sql:
+        "DELETE FROM STUDENT WHERE ID=1;",
+
+        result:
+        "RESULT: Student record deleted.",
+
+        explanation:
+        "<b>DELETE</b> removes records from a table.<br><br>" +
+        "The student whose ID is 1 is removed.",
+
+        progress:100
+
+    }
+
+};
+
+
+/* =====================================================
+   RUN QUERY
+===================================================== */
+
+function runQuery(type){
+
+    if(demoRunning)
+        return;
+
+
+    currentCommand = type;
+
+
+    const data =
+        commands[type];
+
+
+    /* PANEL */
+
+    document
+        .getElementById("query")
+        .innerHTML =
+        data.explanation;
+
+
+    /* SQL TERMINAL */
+
+    document
+        .getElementById("sqlText")
+        .setAttribute(
+            "value",
+            data.sql
+        );
+
+
+    /* RESULT */
+
+    document
+        .getElementById("result")
+        .setAttribute(
+            "value",
+            data.result
+        );
+
+
+    /* STATUS */
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            type + " EXECUTED ✓"
+        );
+
+
+    /* PROGRESS */
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        data.progress + "%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        type + " COMMAND";
+
+
+    /* DATABASE ANIMATION */
+
+    animateDatabase(type);
+
+
+    /* UPDATE TABLE VISUAL */
+
+    updateTable(type);
+
+}
+
+
+/* =====================================================
+   DATABASE ANIMATION
+===================================================== */
+
+function animateDatabase(type){
+
+    const database =
+        document.getElementById(
+            "database"
+        );
+
+
+    database.setAttribute(
+        "animation__pulse",
+        "property:scale;" +
+        "from:1 1 1;" +
+        "to:1.3 1.3 1.3;" +
+        "dur:500;" +
+        "dir:alternate;" +
+        "loop:3"
+    );
+
+
+    const status =
+        document.getElementById(
+            "status"
+        );
+
+
+    status.setAttribute(
+        "color",
+        "#22c55e"
+    );
+
+
+    if(type === "INSERT"){
+
+        database.setAttribute(
+            "color",
+            "#059669"
+        );
+
+    }
+
+
+    if(type === "UPDATE"){
+
+        database.setAttribute(
+            "color",
+            "#0891b2"
+        );
+
+    }
+
+
+    if(type === "DELETE"){
+
+        database.setAttribute(
+            "color",
+            "#dc2626"
+        );
+
+    }
+
+
+    if(type === "SELECT"){
+
+        database.setAttribute(
+            "color",
+            "#7c3aed"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   UPDATE TABLE
+===================================================== */
+
+function updateTable(type){
+
+    const table =
+        document.getElementById(
+            "tableData"
+        );
+
+
+    if(type === "SELECT"){
+
+        table.setAttribute(
+            "value",
+
+            "ID     NAME\n" +
+            "1      Divya\n" +
+            "2      Riya\n" +
+            "3      Aman"
+        );
+
+    }
+
+
+    if(type === "INSERT"){
+
+        table.setAttribute(
+            "value",
+
+            "ID     NAME\n" +
+            "1      Divya\n" +
+            "2      Riya\n" +
+            "3      Aman\n" +
+            "4      Aman  ← NEW"
+        );
+
+    }
+
+
+    if(type === "UPDATE"){
+
+        table.setAttribute(
+            "value",
+
+            "ID     NAME\n" +
+            "1      Aman  ← UPDATED\n" +
+            "2      Riya\n" +
+            "3      Aman"
+        );
+
+    }
+
+
+    if(type === "DELETE"){
+
+        table.setAttribute(
+            "value",
+
+            "ID     NAME\n" +
+            "1      [DELETED]\n" +
+            "2      Riya\n" +
+            "3      Aman"
+        );
+
+    }
+
+
+    const box =
+        document.getElementById(
+            "tableBox"
+        );
+
+
+    box.setAttribute(
+        "animation__pulse",
+        "property:scale;" +
+        "from:1 1 1;" +
+        "to:1.08 1.08 1.08;" +
+        "dur:400;" +
+        "dir:alternate;" +
+        "loop:3"
+    );
+
+}
+
+
+/* =====================================================
+   COMPLETE SQL DEMO
+===================================================== */
+
+async function runDemo(){
+
+    if(demoRunning)
+        return;
+
+
+    demoRunning = true;
+
+
+    const sequence = [
+
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+
+    ];
+
+
+    for(let command of sequence){
+
+        runQuery(command);
+
+        await wait(2500);
+
+    }
+
+
+    document
+        .getElementById("query")
+        .innerHTML =
+
+        "<b>🎉 SQL Demo Complete</b><br><br>" +
+
+        "You have successfully explored the four basic SQL commands:<br>" +
+        "SELECT → INSERT → UPDATE → DELETE";
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "SQL LAB COMPLETE ✓"
+        );
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "DEMO COMPLETE";
+
+
+    demoRunning = false;
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetLab(){
+
+    demoRunning = false;
+
+    currentCommand = "";
+
+
+    document
+        .getElementById("query")
+        .innerHTML =
+
+        "<b>Welcome to the SQL Laboratory!</b><br><br>" +
+
+        "Select a SQL command to interact with the virtual database.";
+
+
+    document
+        .getElementById("sqlText")
+        .setAttribute(
+            "value",
+            "SELECT * FROM STUDENT;"
+        );
+
+
+    document
+        .getElementById("result")
+        .setAttribute(
+            "value",
+            "3 records found"
+        );
+
+
+    document
+        .getElementById("status")
+        .setAttribute(
+            "value",
+            "DATABASE READY"
+        );
+
+
+    document
+        .getElementById("progressBar")
+        .style.width =
+        "0%";
+
+
+    document
+        .getElementById("stage")
+        .innerText =
+        "DATABASE READY";
+
+
+    document
+        .getElementById("database")
+        .setAttribute(
+            "color",
+            "#7c3aed"
+        );
+
+
+    document
+        .getElementById("tableData")
+        .setAttribute(
+            "value",
+
+            "ID     NAME\n" +
+            "1      Divya\n" +
+            "2      Riya\n" +
+            "3      Aman"
+        );
+
+}
+
+
+/* =====================================================
+   WAIT
+===================================================== */
+
+function wait(ms){
+
+    return new Promise(
+
+        resolve =>
+        setTimeout(resolve,ms)
+
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

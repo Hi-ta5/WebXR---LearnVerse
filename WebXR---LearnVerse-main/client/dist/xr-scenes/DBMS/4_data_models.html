@@ -1,0 +1,54 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Data Models: Network, Relational, Object-Oriented</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0b1d33"></a-sky><a-circle rotation="-90 0 0" radius="7" color="#12304f"></a-circle>
+<a-light type="ambient" intensity=".9"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity position="0 0 0"><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+<a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-1.45 0 -4">
+<a-text value="Data Models: Network, Relational, Object-Oriented" align="center" position="1.45 3.9 0" width="7.5" color="#ffd36b"></a-text>
+<a-plane position="4.5 2.2 -.02" width="3.4" height="3.7" color="#10263f"></a-plane>
+<a-text id="i" value="Look at the scene and click any item or button (mouse, or controller trigger in VR)." position="2.95 2.2 0" width="3.1" wrap-count="31" anchor="left" align="left" baseline="center" color="#fff"></a-text>
+<a-entity id="m1"><a-entity  line="start:-0.8 3.2 0;end:-2 2.2 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:-0.8 3.2 0;end:0.4 2.2 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:-2 2.2 0;end:-1.4 1.2 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:-2 2.2 0;end:0.4 1.2 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:0.4 2.2 0;end:-1.4 1.2 0;color:#cfe3ff"></a-entity>
+<a-entity  line="start:0.4 2.2 0;end:0.4 1.2 0;color:#cfe3ff"></a-entity>
+<a-sphere position="-0.8 3.2 0" radius=".32" color="#d9822b"></a-sphere><a-text  value="Dept" align="center" anchor="center" position="-0.8 2.7 0" width="1" wrap-count="11" color="#cfe3ff"></a-text>
+<a-sphere position="-2 2.2 0" radius=".32" color="#2a6db0"></a-sphere><a-text  value="Stu 1" align="center" anchor="center" position="-2 1.7000000000000002 0" width="1" wrap-count="11" color="#cfe3ff"></a-text>
+<a-sphere position="0.4 2.2 0" radius=".32" color="#2a6db0"></a-sphere><a-text  value="Stu 2" align="center" anchor="center" position="0.4 1.7000000000000002 0" width="1" wrap-count="11" color="#cfe3ff"></a-text>
+<a-sphere position="-1.4 1.2 0" radius=".32" color="#2e9e6b"></a-sphere><a-text  value="Course A" align="center" anchor="center" position="-1.4 0.7 0" width="1" wrap-count="11" color="#cfe3ff"></a-text>
+<a-sphere position="0.4 1.2 0" radius=".32" color="#2e9e6b"></a-sphere><a-text  value="Course B" align="center" anchor="center" position="0.4 0.7 0" width="1" wrap-count="11" color="#cfe3ff"></a-text>
+</a-entity><a-entity id="m2" visible="false"><a-plane position="-.35 2.45 -.02" width="5.3" height="2.3" color="#0e2238"></a-plane><a-text id="t1" value="STUDENT
+id | name | dept_id
+1 | Asha | 10
+2 | Ravi | 20
+
+DEPT
+dept_id | dname
+10 | CSE   20 | IT
+
+(dept_id links the tables: FK -&gt; PK)" align="left" anchor="left" position="-2.85 2.45 0" width="5" wrap-count="55" color="#fff"></a-text>
+</a-entity><a-entity id="m3" visible="false"><a-box position="-0.8 2.9 0" width="2.4" height="1" depth=".15" color="#2a6db0"><a-text value="Person
+- name
++ getName()" align="center" position="0 0 .09" width="2.2" color="#fff"></a-text></a-box>
+<a-box position="-0.8 1.4 0" width="2.4" height="1.2" depth=".15" color="#2e9e6b"><a-text value="Student (inherits)
+- roll_no, marks
++ result()" align="center" position="0 0 .09" width="2.2" color="#fff"></a-text></a-box>
+<a-entity  line="start:-0.8 1.9 0;end:-0.8 2.4 0;color:#ffd36b"></a-entity>
+<a-text  value="is-a" align="center" anchor="center" position="1 2.15 0" width="1" wrap-count="11" color="#cfe3ff"></a-text>
+</a-entity><a-box class="btn" data-x="m1" data-t="NETWORK MODEL
+Records (nodes) linked by sets (links) in a graph. A record may have MANY parents, so M:N fits naturally. Access by navigating pointers (CODASYL). Fast navigation, but complex." position="-2.0 0.75 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Network" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="m2" data-t="RELATIONAL MODEL
+Tables of rows (tuples) and columns (attributes). Links by key values (PK/FK), not pointers. Queried with SQL / relational algebra. Used by MySQL, Oracle, DB2, SQL Server." position="-0.35 0.75 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Relational" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="m3" data-t="OBJECT-ORIENTED MODEL
+Data stored as objects: attributes + methods, grouped in classes with inheritance, encapsulation and object IDs. Good for complex data (CAD, multimedia)." position="1.2999999999999998 0.75 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Object-Oriented" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+function X(k){['m1','m2','m3'].forEach(m=>$('#'+m).setAttribute('visible',m==k))}
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{
+ if(b.classList.contains('btn')){document.querySelectorAll('.btn').forEach(x=>x.setAttribute('color','#2a6db0'));b.setAttribute('color','#f90')}
+ T('#i',b.dataset.t);if(window.X)X(b.dataset.x||'')}));
+</script></body></html>

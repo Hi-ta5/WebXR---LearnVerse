@@ -1,0 +1,68 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Deadlock</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#2a0f14"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#3d1a20"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-3.7 2.35 -2.7" rotation="0 28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d5" position="-0.20 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d6" position="0.06 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d7" position="0.32 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="1.2 0 -3.6">
+<a-box id="q1"  position="-1.8 3.7 0" width="1.4" height="0.7" depth="0.2" color="#b8921a"></a-box>
+<a-text value="R1 printer" align="center" anchor="center" baseline="center" position="-1.8 3.7 0.12" width="1.20" wrap-count="10" color="#fff"></a-text>
+<a-box id="q2"  position="1.8 3.7 0" width="1.4" height="0.7" depth="0.2" color="#b8921a"></a-box>
+<a-text value="R2 scanner" align="center" anchor="center" baseline="center" position="1.8 3.7 0.12" width="1.20" wrap-count="10" color="#fff"></a-text>
+<a-sphere id="p1" position="-1.8 2.1 0" radius=".4" color="#3b82c4"><a-text value="P1" align="center" position="0 0 .42" width=".6" wrap-count="2" color="#fff"></a-text></a-sphere><a-sphere id="p2" position="1.8 2.1 0" radius=".4" color="#3b82c4"><a-text value="P2" align="center" position="0 0 .42" width=".6" wrap-count="2" color="#fff"></a-text></a-sphere><a-entity id="a1" visible="false"><a-box position="-1.80 2.92 0" rotation="0 0 -90.0" width="0.60" height=".07" depth=".07" color="#2e9e6b"></a-box><a-cone position="-1.80 2.55 0" rotation="0 0 -180.0" radius=".14" height=".3" color="#2e9e6b"></a-cone></a-entity><a-entity id="a2" visible="false"><a-box position="1.80 2.92 0" rotation="0 0 -90.0" width="0.60" height=".07" depth=".07" color="#2e9e6b"></a-box><a-cone position="1.80 2.55 0" rotation="0 0 -180.0" radius=".14" height=".3" color="#2e9e6b"></a-cone></a-entity><a-entity id="r1" visible="false"><a-box position="0.00 2.90 0" rotation="0 0 18.4" width="3.01" height=".07" depth=".07" color="#ff9d3d"></a-box><a-cone position="1.50 3.40 0" rotation="0 0 -71.6" radius=".14" height=".3" color="#ff9d3d"></a-cone></a-entity><a-entity id="r2" visible="false"><a-box position="0.00 2.90 0" rotation="0 0 161.6" width="3.01" height=".07" depth=".07" color="#ff9d3d"></a-box><a-cone position="-1.50 3.40 0" rotation="0 0 71.6" radius=".14" height=".3" color="#ff9d3d"></a-cone></a-entity><a-entity id="a3" visible="false"><a-box position="0.00 2.90 0" rotation="0 0 -161.6" width="3.01" height=".07" depth=".07" color="#2e9e6b"></a-box><a-cone position="-1.50 2.40 0" rotation="0 0 -251.6" radius=".14" height=".3" color="#2e9e6b"></a-cone></a-entity><a-text id="ban" value="" align="center" anchor="center" baseline="center" position="0 4.65 0" width="3.52" wrap-count="16" color="#ff6b6b"></a-text>
+<a-text value="green arrow = holds     orange arrow = waits for" align="center" anchor="center" baseline="center" position="0 1.5 0" width="5.52" wrap-count="46" color="#cfe3ff"></a-text>
+<a-box id="cn0"  position="-2.25 0.95 0" width="1.45" height="0.65" depth="0.1" color="#334"></a-box>
+<a-text value="Mutual
+exclusion" align="center" anchor="center" baseline="center" position="-2.25 0.95 0.08" width="1.32" wrap-count="11" color="#fff"></a-text>
+<a-box id="cn1"  position="-0.75 0.95 0" width="1.45" height="0.65" depth="0.1" color="#334"></a-box>
+<a-text value="Hold
+and wait" align="center" anchor="center" baseline="center" position="-0.75 0.95 0.08" width="1.32" wrap-count="11" color="#fff"></a-text>
+<a-box id="cn2"  position="0.75 0.95 0" width="1.45" height="0.65" depth="0.1" color="#334"></a-box>
+<a-text value="No
+preemption" align="center" anchor="center" baseline="center" position="0.75 0.95 0.08" width="1.32" wrap-count="11" color="#fff"></a-text>
+<a-box id="cn3"  position="2.25 0.95 0" width="1.45" height="0.65" depth="0.1" color="#334"></a-box>
+<a-text value="Circular
+wait" align="center" anchor="center" baseline="center" position="2.25 0.95 0.08" width="1.32" wrap-count="11" color="#fff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+const at=(ms,f)=>tm.push(setTimeout(f,ms)),hold=ms=>{busy=1;at(ms,()=>busy=0)};
+const vs=(a,v)=>a.forEach(i=>$('#'+i).setAttribute('visible',v));
+
+const bn=(t,c)=>{T('#ban',t);$('#ban').setAttribute('color',c||'#ff6b6b')};
+const col=(id,c)=>$('#'+id).setAttribute('color',c);
+const EDG=['a1','a2','r1','r2','a3'];
+function reset(){vs(EDG,false);['p1','p2'].forEach(i=>col(i,'#3b82c4'));['q1','q2'].forEach(i=>col(i,'#b8921a'));bn('');for(let i=0;i<4;i++)col('cn'+i,'#334')}
+const INTRO=['DEADLOCK','Deadlock is when processes wait for each other forever and nobody can move.','two cars blocking each other on a narrow bridge.','Press Next step.'];
+function rst0(){reset()}
+const X={};
+const STEPS=[
+{t:'Meet the players',a:'two kids and two toys.',h:'Press Next step.',f:()=>{reset();return 'Two processes (P1, P2) and two resources (R1 printer, R2 scanner). A resource can be used by only one process at a time.'}},
+{t:'P1 takes R1',a:'a kid grabs the first toy.',h:'Press Next step.',f:()=>{vs(['a1'],true);return 'P1 asks for R1 and gets it. The green arrow means: R1 is held by P1.'}},
+{t:'P2 takes R2',a:'the other kid grabs the second toy.',h:'Press Next step.',f:()=>{vs(['a2'],true);return 'P2 asks for R2 and gets it. R2 is held by P2. So far, so good.'}},
+{t:'P1 wants R2',a:'wanting the toy the other kid holds.',h:'Press Next step.',f:()=>{vs(['r1'],true);return 'P1 now asks for R2, but P2 holds it. The orange arrow means P1 must WAIT while keeping R1.'}},
+{t:'P2 wants R1',w:3600,a:'two cars facing each other on a bridge.',h:'Look at the circle of arrows.',f:()=>{vs(['r2'],true);['p1','p2','q1','q2'].forEach(i=>col(i,'#c4423b'));bn('DEADLOCK!');return 'P2 asks for R1, held by P1. Both wait forever for each other. The arrows form a circle: DEADLOCK.'}},
+{t:'Four conditions',w:4500,a:'a recipe: remove one ingredient and it fails.',h:'Press Next step.',f:()=>{for(let i=0;i<4;i++)at(i*700,()=>col('cn'+i,'#c4423b'));return 'Deadlock needs ALL four: mutual exclusion, hold and wait, no preemption, circular wait. Break one and it cannot happen.'}},
+{t:'Fix: prevention',a:'everyone queues at door 1 before door 2.',h:'Press Next step.',f:()=>{reset();vs(['a1','a3','r2'],true);bn('NO DEADLOCK','#9bffb0');return 'Rule: always ask for R1 before R2. P2 waits for R1 without holding R2, so P1 gets both, finishes, and P2 goes next.'}},
+{t:'Fix: recovery',w:4500,a:'a tow truck removes one car.',h:'Press Reset to replay.',f:()=>{reset();vs(['a1','a2','r1','r2'],true);bn('DEADLOCK!');hold(2600);at(1500,()=>{col('p2','#555');vs(['a2','r2','r1'],false);vs(['a3'],true);bn('P1 FINISHES','#9bffb0')});return 'The OS ends P2 and takes back R2. P1 gets R2 and finishes. Other fixes: take a resource away (preempt) or roll back.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

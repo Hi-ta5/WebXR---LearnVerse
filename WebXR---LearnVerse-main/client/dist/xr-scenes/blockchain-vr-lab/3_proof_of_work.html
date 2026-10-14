@@ -1,0 +1,71 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Proof of Work and Mining</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#2b1208"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#3d1c0c"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-3.7 2.35 -2.7" rotation="0 28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="d" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Difficulty" align="center" position="0 0 .07" width="1.60" wrap-count="12" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="dat" data-v="" position="3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="New data" align="center" position="0 0 .07" width="1.50" wrap-count="10" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="1.2 0 -3.6">
+<a-box  position="0 3.95 0" width="5.7" height="0.6" depth="0.15" color="#5a2a12"></a-box>
+<a-text id="dat" value="" align="center" anchor="center" baseline="center" position="0 3.95 0.1" width="5.32" wrap-count="38" color="#fff"></a-text>
+<a-text id="tgt" value="" align="center" anchor="center" baseline="center" position="0 3.4 0" width="5.44" wrap-count="34" color="#ffd36b"></a-text>
+<a-text value="HASH RESULT (the reels)" align="center" anchor="center" baseline="center" position="0 3.0 0" width="3.36" wrap-count="24" color="#cfe3ff"></a-text>
+<a-box id="r0"  position="-2.45 2.5 0" width="0.6" height="0.9" depth="0.15" color="#334"></a-box>
+<a-text id="rt0" value="-" align="center" anchor="center" baseline="center" position="-2.45 2.5 0.1" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-box id="r1"  position="-1.7500000000000002 2.5 0" width="0.6" height="0.9" depth="0.15" color="#334"></a-box>
+<a-text id="rt1" value="-" align="center" anchor="center" baseline="center" position="-1.7500000000000002 2.5 0.1" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-box id="r2"  position="-1.0500000000000003 2.5 0" width="0.6" height="0.9" depth="0.15" color="#334"></a-box>
+<a-text id="rt2" value="-" align="center" anchor="center" baseline="center" position="-1.0500000000000003 2.5 0.1" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-box id="r3"  position="-0.35000000000000053 2.5 0" width="0.6" height="0.9" depth="0.15" color="#334"></a-box>
+<a-text id="rt3" value="-" align="center" anchor="center" baseline="center" position="-0.35000000000000053 2.5 0.1" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-box id="r4"  position="0.34999999999999964 2.5 0" width="0.6" height="0.9" depth="0.15" color="#334"></a-box>
+<a-text id="rt4" value="-" align="center" anchor="center" baseline="center" position="0.34999999999999964 2.5 0.1" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-box id="r5"  position="1.0499999999999998 2.5 0" width="0.6" height="0.9" depth="0.15" color="#334"></a-box>
+<a-text id="rt5" value="-" align="center" anchor="center" baseline="center" position="1.0499999999999998 2.5 0.1" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-box id="r6"  position="1.7499999999999991 2.5 0" width="0.6" height="0.9" depth="0.15" color="#334"></a-box>
+<a-text id="rt6" value="-" align="center" anchor="center" baseline="center" position="1.7499999999999991 2.5 0.1" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-box id="r7"  position="2.4499999999999993 2.5 0" width="0.6" height="0.9" depth="0.15" color="#334"></a-box>
+<a-text id="rt7" value="-" align="center" anchor="center" baseline="center" position="2.4499999999999993 2.5 0.1" width="0.50" wrap-count="1" color="#fff"></a-text>
+<a-box  position="0 1.5 0" width="4.6" height="0.6" depth="0.15" color="#5a2a12"></a-box>
+<a-text id="non" value="" align="center" anchor="center" baseline="center" position="0 1.5 0.1" width="4.42" wrap-count="26" color="#fff"></a-text>
+<a-torus id="fan0" position="-2.95 1.5 .1" radius=".35" radius-tubular=".07" color="#ffd36b" animation="property:rotation;to:0 0 360;dur:700;easing:linear;loop:true;enabled:false"></a-torus><a-torus id="fan1" position="2.95 1.5 .1" radius=".35" radius-tubular=".07" color="#ffd36b" animation="property:rotation;to:0 0 360;dur:700;easing:linear;loop:true;enabled:false"></a-torus></a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const DS=['Alice pays Bob 5','Bob pays Carol 2','Carol pays Dan 1'];let di=0,z=2,nonce,att,iv=0;
+const key=n=>DS[di]+'#'+n,N=()=>T('#non','guess: '+nonce+'    tries: '+att);
+const tg=(t,c)=>{T('#tgt',t);$('#tgt').setAttribute('color',c||'#ffd36b')};
+function show(h){for(let k=0;k<8;k++){T('#rt'+k,h?h[k]:'-');$('#r'+k).setAttribute('color',!h?'#334':k<z&&h.slice(0,k+1)=='0'.repeat(k+1)?'#2e9e6b':'#a8421c')}}
+const fan=on=>[0,1].forEach(i=>$('#fan'+i).setAttribute('animation','enabled',!!on));
+function mine(done){busy=1;fan(1);const t='0'.repeat(z),batch=Math.max(1,Math.ceil(Math.pow(16,z)/70));let n=0;iv=setInterval(()=>{let h;for(let j=0;j<batch;j++){h=hx(key(n));if(h.startsWith(t)){clearInterval(iv);nonce=n;att=n+1;show(h);N();fan(0);busy=0;done(n,h);return}n++}show(h);nonce=n;att=n;N()},40)}
+const INTRO=['MINING = A GUESSING GAME','Miners guess numbers until the block hash starts with zeros. That takes real work.','a lottery: keep buying tickets until one wins.','Press Next step.'];
+function rst0(){clearInterval(iv);fan(0);nonce=0;att=0;T('#dat','BLOCK: '+DS[di]+' + guess');tg('');show(null);N()}
+const X={d:()=>{z=z%3+1;ACT.rst();T('#inf','Rule changed: the hash must start with '+z+' zero(s). Press Next step.')},dat:()=>{di=(di+1)%3;ACT.rst()}};
+const STEPS=[
+{t:'The goal',a:'rolling dice until you get a six.',h:'Click Difficulty to change the rule.',f:()=>{tg('GOAL: first '+z+' digit(s) must be 0');return 'To seal this block, find a guess number (nonce) whose hash starts with '+'0'.repeat(z)+'. Only guessing works.'}},
+{t:'Make one guess',a:'buying one lottery ticket.',h:'Press Next step.',f:()=>{nonce=0;att=1;const h=hx(key(0));show(h);N();return 'Guess 0 gives hash '+h+'. '+(h.startsWith('0'.repeat(z))?'Lucky, it works already!':'It does not start with zeros, so it is not good enough.')}},
+{t:'Keep guessing',w:7000,a:'buying tickets until one wins.',h:'Wait for green reels.',f:()=>{mine((n,h)=>{tg('FOUND IT! Block sealed','#9bffb0');T('#inf','FOUND! Guess '+n+' worked after '+(n+1)+' tries. Its hash starts with zeros (green reels).')});return 'The rig tries guess after guess, very fast. Watch the reels and the tries counter.'}},
+{t:'Block sealed',a:'the winning ticket stapled to the page.',h:'Press Next step.',f:()=>'The winning guess ('+nonce+') is saved in the block, and the block is shared with everyone.'},
+{t:'Checking is easy',a:'checking a winning ticket takes seconds.',h:'Click Difficulty, then Run all.',f:()=>'Anyone can check it with ONE hash. Finding it took '+att+' tries. Each extra zero needs about 16 times more tries.'}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

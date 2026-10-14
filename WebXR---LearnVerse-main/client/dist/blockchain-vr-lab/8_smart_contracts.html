@@ -1,0 +1,71 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Smart Contracts</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#1b2a0a"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#2b3f10"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="3.7 2.35 -2.7" rotation="0 -28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="goal" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="New goal" align="center" position="0 0 .07" width="1.50" wrap-count="10" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="fin" data-v="" position="3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Finish" align="center" position="0 0 .07" width="1.20" wrap-count="8" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="-1.2 0 -3.6">
+<a-entity id="mc" visible="false"><a-box  position="0 2.8 0" width="2.6" height="3.0" depth="0.7" color="#3a4a5a"></a-box>
+<a-box  position="0 3.45 0.38" width="2.2" height="1.0" depth="0.05" color="#0b1220"></a-box>
+<a-text id="tot" value="" align="center" anchor="center" baseline="center" position="0 3.75 0.45" width="2.21" wrap-count="17" color="#fff"></a-text>
+<a-box  position="0 3.25 0.42" width="2.0" height="0.25" depth="0.05" color="#334"></a-box>
+<a-box id="fill"  position="-0.99 3.25 0.46" width="0.02" height="0.25" depth="0.06" color="#2e9e6b"></a-box>
+<a-sphere id="lamp" position="0 2.45 .42" radius=".22" color="#555"></a-sphere><a-text id="lt" value="LOCKED" align="center" anchor="center" baseline="center" position="0 2.1 0.45" width="1.68" wrap-count="12" color="#fff"></a-text>
+<a-box id="door"  position="0 1.7 0.4" width="1.7" height="0.6" depth="0.1" color="#8a6d1a"></a-box>
+<a-box  position="0 4.35 0" width="1.0" height="0.12" depth="0.5" color="#111"></a-box>
+<a-text value="COIN SLOT" align="center" anchor="center" baseline="center" position="0 4.7 0" width="1.30" wrap-count="10" color="#cfe3ff"></a-text>
+<a-text value="Click a coin
+to pledge it" align="center" anchor="center" baseline="center" position="-2.5 4.5 0" width="1.56" wrap-count="12" color="#cfe3ff"></a-text>
+<a-cylinder id="cn0" class="hit" data-a="coin" data-v="0" position="-2.5 3.9 0" rotation="90 0 0" radius=".42" height=".1" color="#d4a017"></a-cylinder><a-text value="Alice
++60" align="center" anchor="center" baseline="center" position="-2.5 3.9 0.1" width="0.84" wrap-count="6" color="#fff"></a-text>
+<a-cylinder id="cn1" class="hit" data-a="coin" data-v="1" position="-2.5 3.0999999999999996 0" rotation="90 0 0" radius=".42" height=".1" color="#d4a017"></a-cylinder><a-text value="Bob
++30" align="center" anchor="center" baseline="center" position="-2.5 3.0999999999999996 0.1" width="0.84" wrap-count="6" color="#fff"></a-text>
+<a-cylinder id="cn2" class="hit" data-a="coin" data-v="2" position="-2.5 2.3 0" rotation="90 0 0" radius=".42" height=".1" color="#d4a017"></a-cylinder><a-text value="Carol
++20" align="center" anchor="center" baseline="center" position="-2.5 2.3 0.1" width="0.84" wrap-count="6" color="#fff"></a-text>
+<a-cylinder id="cn3" class="hit" data-a="coin" data-v="3" position="-2.5 1.4999999999999996 0" rotation="90 0 0" radius=".42" height=".1" color="#8a2a2a"></a-cylinder><a-text value="Dan
++0" align="center" anchor="center" baseline="center" position="-2.5 1.4999999999999996 0.1" width="0.84" wrap-count="6" color="#fff"></a-text>
+<a-box  position="2.0 2.9 0" width="2.1" height="2.4" depth="0.05" color="#0e2238"></a-box>
+<a-text id="code" value="" align="left" anchor="left" baseline="top" position="1.0 3.95 0.05" width="1.92" wrap-count="16" color="#d7ffd7"></a-text>
+</a-entity></a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const GL=[100,150,60],PL=[['Alice',60],['Bob',30],['Carol',20],['Dan',0]];let gi=0,tot,done,pls;
+const lamp=(c,t)=>{$('#lamp').setAttribute('color',c);T('#lt',t)};
+function draw(){const g=GL[gi],f=Math.min(1,tot/g),w=Math.max(.02,2*f);T('#tot','total '+tot+' / goal '+g);const e=$('#fill');e.setAttribute('width',w);e.setAttribute('position',(-1+w/2)+' 3.25 .46');e.setAttribute('color',tot>=g?'#2e9e6b':'#d9822b');T('#code','contract Fund\ngoal = '+g+'\npledge(amt):\n require amt>0\n total += amt\nfinish():\n total>=goal ?\n  pay owner\n  : refund all')}
+function pledge(i){const[n,a]=PL[i];if(done){T('#inf','The contract is closed. Its code cannot be changed.');return}
+ const c=document.createElement('a-sphere');c.setAttribute('radius',.18);c.setAttribute('color',a?'#ffd36b':'#c4423b');c.setAttribute('position','-2.5 '+(3.9-i*.8)+' .2');$('#mc').appendChild(c);c.setAttribute('animation','property:position;to:0 4.4 .2;dur:700;easing:easeInQuad');
+ busy=1;setTimeout(()=>{c.remove();busy=0;if(a>0){tot+=a;pls.push([n,a]);draw();lamp('#2e9e6b','OK: '+n);T('#inf',n+' pledges '+a+' coins. Rule "amount > 0" passed. Total is now '+tot+' of '+GL[gi]+'.')}else{lamp('#c4423b','REJECTED');T('#inf',n+' pledges 0 coins. Rule "amount > 0" failed, so the contract rejects it. Total stays '+tot+'.')}},760)}
+function finish(){if(done)return;done=1;const g=GL[gi],ok=tot>=g;if(ok){$('#door').setAttribute('animation','property:scale;to:1 .05 1;dur:900');lamp('#2e9e6b','PAID OUT')}else lamp('#c4423b','REFUNDED');return ok?'Deadline: '+tot+' reached the goal of '+g+'. The contract pays the owner by itself (door opens). No bank needed.':'Deadline: '+tot+' is below the goal of '+g+'. The contract refunds everyone by itself: '+(pls.map(p=>p[0]+' '+p[1]).join(', ')||'nobody pledged')+'.'}
+const INTRO=['SMART CONTRACT','A smart contract is a program on the blockchain that follows its rules exactly, with no boss.','a vending machine: right coins in, it just works.','Press Next step.'];
+function rst0(){tot=0;done=0;pls=[];$('#mc').setAttribute('visible',false);$('#door').removeAttribute('animation');$('#door').setAttribute('scale','1 1 1');lamp('#555','LOCKED');draw()}
+const X={coin:i=>{if(!$('#mc').getAttribute('visible')||busy)return;pledge(+i)},goal:()=>{gi=(gi+1)%3;ACT.rst();T('#inf','New goal: '+GL[gi]+' coins. Press Next step.')},fin:()=>{if(!$('#mc').getAttribute('visible'))return;T('#inf',finish()||'')}};
+const STEPS=[
+{t:'Install the contract',a:'plugging in a vending machine.',h:'Click a coin to pledge.',f:()=>{$('#mc').setAttribute('visible',true);return 'The contract goes live on the blockchain. Rule: reach '+GL[gi]+' coins and the owner is paid, otherwise everyone is refunded.'}},
+{t:'Alice pledges 60',w:3400,a:'putting coins in the machine.',h:'Press Next step.',f:()=>{pledge(0);return 'Alice drops 60 coins into the contract...'}},
+{t:'Bob pledges 30',w:3400,a:'another person adds coins.',h:'Press Next step.',f:()=>{pledge(1);return 'Bob drops 30 coins into the contract...'}},
+{t:'Carol pledges 20',w:3400,a:'one more person adds coins.',h:'Press Next step.',f:()=>{pledge(2);return 'Carol drops 20 coins into the contract...'}},
+{t:'Deadline arrives',a:'the machine dispenses by itself.',h:'Click New goal, then Run all.',f:()=>finish()}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

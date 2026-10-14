@@ -1,0 +1,69 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Consensus: Proof of Stake</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#2a2208"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#3d3310"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="0 1.35 -3.3"><a-plane width="9.0" height="1.7" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="3.26 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="3.52 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="3.78 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="4.04 .7 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="4.30 .7 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="center" position="-4.35 0.7 0" width="5.78" wrap-count="34" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-4.35 0.4 0" width="4.20" wrap-count="30" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="0.2 0.4 0" width="4.20" wrap-count="30" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="0.2 -0.35 0" width="4.20" wrap-count="30" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="sk" data-v="" position="2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Stakes" align="center" position="0 0 .07" width="1.20" wrap-count="8" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="0 0 -3.7">
+<a-entity id="wh" position="-2 3.2 0"><a-circle id="sg0" radius="1.2" theta-start="0" theta-length="1" color="#3b82c4" visible="false"></a-circle><a-circle id="sg1" radius="1.2" theta-start="0" theta-length="1" color="#2e9e6b" visible="false"></a-circle><a-circle id="sg2" radius="1.2" theta-start="0" theta-length="1" color="#d9822b" visible="false"></a-circle><a-circle id="sg3" radius="1.2" theta-start="0" theta-length="1" color="#8a5cc4" visible="false"></a-circle><a-ring radius-inner="1.2" radius-outer="1.3" color="#ddd"></a-ring></a-entity><a-cone position="-2 4.62 0" rotation="0 0 180" radius=".22" height=".45" color="#fff"></a-cone><a-box id="pl0" class="hit" data-a="vote" data-v="0" position="0.7 3 0" width="0.85" height="1" depth="0.5" color="#3b82c4"></a-box>
+<a-text id="pn0" value="" align="center" anchor="center" baseline="center" position="0.7 2.8 0.3" width="0.78" wrap-count="6" color="#fff"></a-text>
+<a-text id="ps0" value="" align="center" anchor="center" baseline="center" position="0.7 3.8 0" width="0.60" wrap-count="3" color="#ffd36b"></a-text>
+<a-sphere id="lp0" position="0.7 4.3 0" radius=".22" color="#555" visible="false"></a-sphere><a-box id="pl1" class="hit" data-a="vote" data-v="1" position="1.8499999999999999 3 0" width="0.85" height="1" depth="0.5" color="#2e9e6b"></a-box>
+<a-text id="pn1" value="" align="center" anchor="center" baseline="center" position="1.8499999999999999 2.8 0.3" width="0.78" wrap-count="6" color="#fff"></a-text>
+<a-text id="ps1" value="" align="center" anchor="center" baseline="center" position="1.8499999999999999 3.8 0" width="0.60" wrap-count="3" color="#ffd36b"></a-text>
+<a-sphere id="lp1" position="1.8499999999999999 4.3 0" radius=".22" color="#555" visible="false"></a-sphere><a-box id="pl2" class="hit" data-a="vote" data-v="2" position="3.0 3 0" width="0.85" height="1" depth="0.5" color="#d9822b"></a-box>
+<a-text id="pn2" value="" align="center" anchor="center" baseline="center" position="3.0 2.8 0.3" width="0.78" wrap-count="6" color="#fff"></a-text>
+<a-text id="ps2" value="" align="center" anchor="center" baseline="center" position="3.0 3.8 0" width="0.60" wrap-count="3" color="#ffd36b"></a-text>
+<a-sphere id="lp2" position="3.0 4.3 0" radius=".22" color="#555" visible="false"></a-sphere><a-box id="pl3" class="hit" data-a="vote" data-v="3" position="4.1499999999999995 3 0" width="0.85" height="1" depth="0.5" color="#8a5cc4"></a-box>
+<a-text id="pn3" value="" align="center" anchor="center" baseline="center" position="4.1499999999999995 2.8 0.3" width="0.78" wrap-count="6" color="#fff"></a-text>
+<a-text id="ps3" value="" align="center" anchor="center" baseline="center" position="4.1499999999999995 3.8 0" width="0.60" wrap-count="3" color="#ffd36b"></a-text>
+<a-sphere id="lp3" position="4.1499999999999995 4.3 0" radius=".22" color="#555" visible="false"></a-sphere><a-box id="mb"  position="2.5 2.25 0" width="4.1" height="0.2" depth="0.05" color="#334"></a-box>
+<a-box id="mf"  position="0.45 2.25 0.02" width="0.02" height="0.2" depth="0.06" color="#2e9e6b"></a-box>
+<a-box id="mk"  position="3.18 2.25 0" width="0.07" height="0.45" depth="0.07" color="#fff"></a-box>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const SK=[[40,40,20],[30,30,40],[50,25,15,10]],NM=['Asha','Ravi','Meera','Dan'],CL=['#3b82c4','#2e9e6b','#d9822b','#8a5cc4'];
+let sk=0,vis,vt,win;
+const stk=()=>SK[sk],tot=()=>stk().reduce((a,b)=>a+b,0);
+const yes=()=>stk().reduce((a,v,k)=>a+(vt[k]?v:0),0);
+const fin=()=>{const y=yes(),t=tot(),ok=y*3>=t*2;return 'YES votes hold '+y+' of '+t+' coins ('+Math.round(100*y/t)+'%). The white line marks 2/3. '+(ok?'ACCEPTED.':'REJECTED.')};
+const vs=(a,v)=>a.forEach(e=>e.setAttribute('visible',v));
+function draw(){const s=stk(),T0=tot();let a=0;
+ for(let k=0;k<4;k++){const on=k<s.length,h=on?Math.max(.3,s[k]/50*1.3):.3,x=.7+k*1.15,pl=$('#pl'+k),sg=$('#sg'+k),lp=$('#lp'+k);
+  vs([pl,$('#pn'+k),$('#ps'+k)],on&&vis>=1);vs([sg],on&&vis>=2);vs([lp],on&&vis>=4);
+  if(on){pl.setAttribute('height',h);pl.setAttribute('position',x+' '+(2.55+h/2)+' 0');pl.setAttribute('color',win==k?'#ffd36b':CL[k]);$('#ps'+k).setAttribute('position',x+' '+(2.55+h+.25)+' 0');T('#ps'+k,String(s[k]));T('#pn'+k,NM[k]);
+   sg.setAttribute('theta-start',a/T0*360);sg.setAttribute('theta-length',s[k]/T0*360);a+=s[k];lp.setAttribute('color',vt[k]?'#2e9e6b':'#c4423b')}}
+ const f=yes()/T0,w=Math.max(.02,4.1*f);vs([$('#mb'),$('#mf'),$('#mk')],vis>=4);$('#mf').setAttribute('width',w);$('#mf').setAttribute('position',(.45+w/2)+' 2.25 .02');$('#mf').setAttribute('color',f*3>=2?'#2e9e6b':'#c4423b')}
+const INTRO=['PROOF OF STAKE','Validators put coins at stake. A lottery picks one to propose a block and the others vote.','a raffle where more tickets (coins) give more chances.','Press Next step.'];
+function rst0(){vis=0;vt=stk().map((_,k)=>k<stk().length-1);win=-1;$('#wh').setAttribute('rotation','0 0 0');draw()}
+const X={vote:i=>{i=+i;if(i>=stk().length||vis<4)return;vt[i]=!vt[i];draw();T('#inf',NM[i]+' now votes '+(vt[i]?'YES':'NO')+'. '+fin())},sk:()=>{sk=(sk+1)%3;ACT.rst()}};
+const STEPS=[
+{t:'Put coins at stake',a:'a security deposit.',h:'Click Stakes for other sizes.',f:()=>{vis=1;draw();return 'Each validator locks some coins as a deposit. A taller pillar means more coins. Cheating loses the deposit.'}},
+{t:'Raffle slices',a:'more raffle tickets, more chances.',h:'Press Next step.',f:()=>{vis=2;draw();return 'Each validator gets a slice of the wheel as big as its share of the coins.'}},
+{t:'Spin the wheel',w:4200,a:'drawing the raffle.',h:'Wait for the wheel.',f:()=>{const T0=tot(),r=parseInt(hx(JSON.stringify(stk())),16)%T0,phi=r/T0*360;let c=0;win=0;stk().forEach((v,k)=>{if(r>=c&&r<c+v)win=k;c+=v});vis=3;busy=1;const w=$('#wh');w.setAttribute('rotation','0 0 0');w.setAttribute('animation__s',{property:'rotation',from:'0 0 0',to:'0 0 '+(810-phi),dur:2600,easing:'easeOutCubic'});tm.push(setTimeout(()=>{busy=0;draw();T('#inf','The pointer lands on '+NM[win]+' (gold pillar). '+NM[win]+' proposes the next block.')},2700));return 'Spinning the wheel...'}},
+{t:'Everyone votes',a:'a jury votes on the block.',h:'Click a pillar to flip a vote.',f:()=>{vis=4;draw();return 'The others check the block and vote. In this demo the last validator is faulty and votes NO.'}},
+{t:'Count the votes',a:'a two-thirds majority rule.',h:'Flip votes and watch the bar.',f:()=>fin()}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

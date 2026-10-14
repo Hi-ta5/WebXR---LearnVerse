@@ -1,0 +1,78 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Merkle Trees</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#1a0f33"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#261648"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-3.7 2.35 -2.7" rotation="0 28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="tam" data-v="" position="2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#8a2a2a"><a-text value="Tamper" align="center" position="0 0 .07" width="1.20" wrap-count="8" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="1.2 0 -3.6">
+<a-box id="m0" class="hit" data-a="sel" data-v="0" position="-2.25 1.85 0" width="1.4" height="0.7" depth="0.15" color="#2a6db0"></a-box>
+<a-text id="mt0" value="" align="center" anchor="center" baseline="center" position="-2.25 1.85 0.1" width="1.36" wrap-count="8" color="#fff"></a-text>
+<a-text id="ml0" value="" align="center" anchor="center" baseline="center" position="-2.25 1.12 0" width="1.44" wrap-count="12" color="#cfe3ff"></a-text>
+<a-box id="m1" class="hit" data-a="sel" data-v="1" position="-0.75 1.85 0" width="1.4" height="0.7" depth="0.15" color="#2a6db0"></a-box>
+<a-text id="mt1" value="" align="center" anchor="center" baseline="center" position="-0.75 1.85 0.1" width="1.36" wrap-count="8" color="#fff"></a-text>
+<a-text id="ml1" value="" align="center" anchor="center" baseline="center" position="-0.75 1.12 0" width="1.44" wrap-count="12" color="#cfe3ff"></a-text>
+<a-box id="m2" class="hit" data-a="sel" data-v="2" position="0.75 1.85 0" width="1.4" height="0.7" depth="0.15" color="#2a6db0"></a-box>
+<a-text id="mt2" value="" align="center" anchor="center" baseline="center" position="0.75 1.85 0.1" width="1.36" wrap-count="8" color="#fff"></a-text>
+<a-text id="ml2" value="" align="center" anchor="center" baseline="center" position="0.75 1.12 0" width="1.44" wrap-count="12" color="#cfe3ff"></a-text>
+<a-box id="m3" class="hit" data-a="sel" data-v="3" position="2.25 1.85 0" width="1.4" height="0.7" depth="0.15" color="#2a6db0"></a-box>
+<a-text id="mt3" value="" align="center" anchor="center" baseline="center" position="2.25 1.85 0.1" width="1.36" wrap-count="8" color="#fff"></a-text>
+<a-text id="ml3" value="" align="center" anchor="center" baseline="center" position="2.25 1.12 0" width="1.44" wrap-count="12" color="#cfe3ff"></a-text>
+<a-box id="p0"  position="-1.5 2.95 0" width="1.4" height="0.7" depth="0.15" color="#2a6db0"></a-box>
+<a-text id="pt0" value="" align="center" anchor="center" baseline="center" position="-1.5 2.95 0.1" width="1.36" wrap-count="8" color="#fff"></a-text>
+<a-box id="p1"  position="1.5 2.95 0" width="1.4" height="0.7" depth="0.15" color="#2a6db0"></a-box>
+<a-text id="pt1" value="" align="center" anchor="center" baseline="center" position="1.5 2.95 0.1" width="1.36" wrap-count="8" color="#fff"></a-text>
+<a-box id="rt"  position="0 4.05 0" width="1.4" height="0.7" depth="0.15" color="#2a6db0"></a-box>
+<a-text id="rtt" value="" align="center" anchor="center" baseline="center" position="0 4.05 0.1" width="1.36" wrap-count="8" color="#fff"></a-text>
+<a-text id="rl" value="ROOT = fingerprint of all" align="center" anchor="center" baseline="center" position="0 4.55 0" width="3.64" wrap-count="26" color="#ffd36b"></a-text>
+<a-entity id="e0" line="start:-2.25 2.2 0;end:-1.5 2.6 0;color:#cfe3ff"></a-entity>
+<a-entity id="e1" line="start:-0.75 2.2 0;end:-1.5 2.6 0;color:#cfe3ff"></a-entity>
+<a-entity id="e2" line="start:0.75 2.2 0;end:1.5 2.6 0;color:#cfe3ff"></a-entity>
+<a-entity id="e3" line="start:2.25 2.2 0;end:1.5 2.6 0;color:#cfe3ff"></a-entity>
+<a-entity id="e4" line="start:-1.5 3.3 0;end:0 3.7 0;color:#cfe3ff"></a-entity>
+<a-entity id="e5" line="start:1.5 3.3 0;end:0 3.7 0;color:#cfe3ff"></a-entity>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const TX=['A pays B 5','B pays C 2','C pays D 1','D pays A 3'];let tam,sel,lvl;
+const cmp=t=>{const l=TX.map((x,i)=>hx(t[i]?x+'9':x)),p=[hx(l[0]+l[1]),hx(l[2]+l[3])];return{l,p,r:hx(p[0]+p[1])}};
+const SEAL=cmp([0,0,0,0]);
+const col=(h,s,path,sib)=>h!=s?'#c4423b':path?'#2e9e6b':sib?'#d9822b':'#2a6db0';
+const vs=(a,v)=>a.forEach(i=>$('#'+i).setAttribute('visible',v));
+function draw(){const c=cmp(tam),pi=sel>>1;
+ for(let i=0;i<4;i++){vs(['m'+i,'mt'+i,'ml'+i],lvl>=1);$('#m'+i).setAttribute('color',col(c.l[i],SEAL.l[i],sel==i,sel>=0&&(sel^1)==i));T('#mt'+i,c.l[i]);T('#ml'+i,'T'+(i+1)+'\n'+TX[i]+(tam[i]?'9':''))}
+ for(let j=0;j<2;j++){vs(['p'+j,'pt'+j],lvl>=2);$('#p'+j).setAttribute('color',col(c.p[j],SEAL.p[j],sel>=0&&pi==j,sel>=0&&pi!=j));T('#pt'+j,c.p[j])}
+ vs(['rt','rtt','rl'],lvl>=3);$('#rt').setAttribute('color',col(c.r,SEAL.r,sel>=0,0));T('#rtt',c.r);
+ for(let e=0;e<6;e++)vs(['e'+e],e<4?lvl>=2:lvl>=3)}
+const INTRO=['MERKLE TREE','A Merkle tree squeezes many payments into one short fingerprint called the root.','a tournament bracket where only the final winner is announced.','Press Next step.'];
+function rst0(){tam=[0,0,0,0];sel=-1;lvl=0;draw()}
+const X={sel:i=>{if(lvl<1)return;sel=+i;draw();T('#inf','T'+(sel+1)+' selected. Green = its path up to the root. Orange = the only other hashes you need as proof.')},
+ tam:()=>{if(lvl<3)return;if(sel<0)sel=1;tam[sel]^=1;draw();T('#inf',tam[sel]?'T'+(sel+1)+' was edited. Its hash, its parent and the root all changed (red). Cheating is spotted.':'T'+(sel+1)+' is restored. All hashes match again.')}};
+const STEPS=[
+{t:'Hash each payment',a:'one fingerprint per student.',h:'Press Next step.',f:()=>{lvl=1;draw();return 'Every payment gets its own fingerprint. These four are the bottom row of the tree.'}},
+{t:'Join in pairs',a:'the first round of matches.',h:'Press Next step.',f:()=>{lvl=2;draw();return 'Two fingerprints are joined and fingerprinted again. Four become two.'}},
+{t:'The root',a:'the tournament winner.',h:'Press Next step.',f:()=>{lvl=3;draw();return 'Joining the last two gives ONE root fingerprint that stands for all four payments. It goes in the block.'}},
+{t:'Prove T2 is inside',a:'proving your result using only two other results.',h:'Click other bottom boxes.',f:()=>{sel=1;draw();return 'To prove T2 is in the block you only need the orange hashes, not every payment. Green is the path to the root.'}},
+{t:'Try to cheat',a:'a changed score changes the final winner.',h:'Click Tamper to toggle.',f:()=>{sel=1;tam[1]=1;draw();return 'T2 is edited. Its hash, its parent and the root all change (red). The root no longer matches, so cheating is spotted.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

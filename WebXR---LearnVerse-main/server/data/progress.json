@@ -1,0 +1,564 @@
+[
+  {
+    "userId": "1791106959339",
+    "streak": 2,
+    "lastActiveDate": "2026-10-11",
+    "completedTopics": {
+      "data-structures": [
+        "arrays",
+        "stacks"
+      ],
+      "computer-networks": [
+        "osi-model",
+        "physical-layer",
+        "network-topologies",
+        "tcp-udp"
+      ]
+    },
+    "activities": [
+      {
+        "id": "1791700154605",
+        "type": "completed",
+        "subjectId": "computer-networks",
+        "topicId": "tcp-udp",
+        "title": "TCP/UDP Protocols",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-11T06:29:14.605Z"
+      },
+      {
+        "id": "1791699994055",
+        "type": "completed",
+        "subjectId": "computer-networks",
+        "topicId": "network-topologies",
+        "title": "Different Network Topologies",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-11T06:26:34.055Z"
+      },
+      {
+        "id": "1791699818183",
+        "type": "completed",
+        "subjectId": "computer-networks",
+        "topicId": "physical-layer",
+        "title": "Physical Line Encoding Lab",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-11T06:23:38.183Z"
+      },
+      {
+        "id": "1791699652097",
+        "type": "completed",
+        "subjectId": "computer-networks",
+        "topicId": "osi-model",
+        "title": "OSI Model Layers",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-11T06:20:52.097Z"
+      },
+      {
+        "id": "1791653213233",
+        "type": "completed",
+        "subjectId": "data-structures",
+        "topicId": "stacks",
+        "title": "LIFO Stack Register",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-10T17:26:53.233Z"
+      },
+      {
+        "id": "1791653084470",
+        "type": "completed",
+        "subjectId": "data-structures",
+        "topicId": "arrays",
+        "title": "Contiguous Array Lab",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-10T17:24:44.470Z"
+      }
+    ],
+    "activeDays": [
+      "2026-10-10",
+      "2026-10-11"
+    ],
+    "lastActiveTopic": {
+      "subjectId": "computer-networks",
+      "topicId": "tcp-udp",
+      "title": "TCP/UDP Protocols",
+      "timestamp": "2026-10-11T06:29:14.605Z"
+    }
+  },
+  {
+    "userId": "1791128457738",
+    "streak": 0,
+    "lastActiveDate": null,
+    "completedTopics": {},
+    "activities": [],
+    "activeDays": []
+  },
+  {
+    "userId": "1791154311554",
+    "streak": 2,
+    "lastActiveDate": "2026-10-05",
+    "completedTopics": {
+      "computer-networks": [
+        "osi-model"
+      ],
+      "nlp": [
+        "nlp-intro"
+      ]
+    },
+    "activities": [
+      {
+        "id": "1791194300354",
+        "type": "completed",
+        "subjectId": "nlp",
+        "topicId": "nlp-intro",
+        "title": "Introduction to NLP & Pipeline",
+        "score": 3,
+        "totalQuestions": 5,
+        "percentage": 60,
+        "date": "2026-10-05T09:58:20.354Z"
+      },
+      {
+        "id": "1791154531605",
+        "type": "completed",
+        "subjectId": "computer-networks",
+        "topicId": "osi-model",
+        "title": "OSI Model Layers",
+        "score": 3,
+        "totalQuestions": 5,
+        "percentage": 60,
+        "date": "2026-10-04T22:55:31.605Z"
+      }
+    ],
+    "activeDays": [
+      "2026-10-04",
+      "2026-10-05"
+    ],
+    "lastActiveTopic": {
+      "subjectId": "nlp",
+      "topicId": "nlp-intro",
+      "title": "Introduction to NLP & Pipeline",
+      "timestamp": "2026-10-05T09:58:20.354Z"
+    }
+  },
+  {
+    "userId": "1791190359323",
+    "streak": 0,
+    "lastActiveDate": null,
+    "completedTopics": {},
+    "activities": [],
+    "activeDays": []
+  },
+  {
+    "userId": "1791578063891",
+    "streak": 0,
+    "lastActiveDate": null,
+    "completedTopics": {},
+    "activities": [],
+    "activeDays": []
+  },
+  {
+    "userId": "1791633971002",
+    "streak": 2,
+    "lastActiveDate": "2026-10-11",
+    "completedTopics": {
+      "dbms": [
+        "data-abstraction-independence",
+        "ddl-dml"
+      ],
+      "nlp": [
+        "nlp-intro"
+      ],
+      "blockchain": [
+        "transactions-network",
+        "merkle-trees",
+        "consensus-proof-of-stake",
+        "smart-contracts"
+      ],
+      "computer-networks": [
+        "osi-model"
+      ]
+    },
+    "activities": [
+      {
+        "id": "1791742063810",
+        "type": "completed",
+        "subjectId": "computer-networks",
+        "topicId": "osi-model",
+        "title": "OSI Model Layers",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-11T18:07:43.810Z"
+      },
+      {
+        "id": "1791730142654",
+        "type": "completed",
+        "subjectId": "blockchain",
+        "topicId": "smart-contracts",
+        "title": "Smart Contracts & Autonomous Execution",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-11T14:49:02.654Z"
+      },
+      {
+        "id": "1791729931042",
+        "type": "completed",
+        "subjectId": "blockchain",
+        "topicId": "consensus-proof-of-stake",
+        "title": "Consensus: Proof of Stake and Voting",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-11T14:45:31.042Z"
+      },
+      {
+        "id": "1791729741403",
+        "type": "completed",
+        "subjectId": "blockchain",
+        "topicId": "merkle-trees",
+        "title": "Merkle Trees & Cryptographic Proofs",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-11T14:42:21.403Z"
+      },
+      {
+        "id": "1791729520832",
+        "type": "completed",
+        "subjectId": "blockchain",
+        "topicId": "transactions-network",
+        "title": "Transactions and the Network",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-11T14:38:40.832Z"
+      },
+      {
+        "id": "1791651790528",
+        "type": "completed",
+        "subjectId": "nlp",
+        "topicId": "nlp-intro",
+        "title": "Introduction to NLP & Pipeline",
+        "score": 3,
+        "totalQuestions": 5,
+        "percentage": 60,
+        "date": "2026-10-10T17:03:10.529Z"
+      },
+      {
+        "id": "1791634271462",
+        "type": "completed",
+        "subjectId": "dbms",
+        "topicId": "ddl-dml",
+        "title": "DDL and DML Commands",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-10T12:11:11.462Z"
+      },
+      {
+        "id": "1791634143021",
+        "type": "completed",
+        "subjectId": "dbms",
+        "topicId": "data-abstraction-independence",
+        "title": "Data Abstraction & Data Independence",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-10T12:09:03.022Z"
+      }
+    ],
+    "activeDays": [
+      "2026-10-10",
+      "2026-10-11"
+    ],
+    "lastActiveTopic": {
+      "subjectId": "computer-networks",
+      "topicId": "osi-model",
+      "title": "OSI Model Layers",
+      "timestamp": "2026-10-11T18:07:43.810Z"
+    }
+  },
+  {
+    "userId": "G8R3Z7bkuFcHUn5jxkUwPkPMI342",
+    "streak": 2,
+    "lastActiveDate": "2026-10-14",
+    "completedTopics": {
+      "computer-networks": [
+        "osi-model"
+      ],
+      "data-structures": [
+        "arrays"
+      ],
+      "nlp": [
+        "nlp-intro",
+        "tokenization",
+        "text-preprocessing"
+      ],
+      "dbms": [
+        "data-abstraction-independence",
+        "ddl-dml"
+      ]
+    },
+    "activities": [
+      {
+        "id": "1791957482149",
+        "type": "completed",
+        "subjectId": "nlp",
+        "topicId": "text-preprocessing",
+        "title": "Text Preprocessing & Cleaning",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-14T05:58:02.149Z"
+      },
+      {
+        "id": "1791942004434",
+        "type": "completed",
+        "subjectId": "nlp",
+        "topicId": "tokenization",
+        "title": "Tokenization Techniques",
+        "score": 3,
+        "totalQuestions": 5,
+        "percentage": 60,
+        "date": "2026-10-14T01:40:04.435Z"
+      },
+      {
+        "id": "1791904474798",
+        "type": "completed",
+        "subjectId": "dbms",
+        "topicId": "ddl-dml",
+        "title": "DDL and DML Commands",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-13T15:14:34.799Z"
+      },
+      {
+        "id": "1791901382262",
+        "type": "completed",
+        "subjectId": "dbms",
+        "topicId": "data-abstraction-independence",
+        "title": "Data Abstraction & Data Independence",
+        "score": 3,
+        "totalQuestions": 5,
+        "percentage": 60,
+        "date": "2026-10-13T14:23:02.262Z"
+      },
+      {
+        "id": "1791901252702",
+        "type": "completed",
+        "subjectId": "nlp",
+        "topicId": "nlp-intro",
+        "title": "Introduction to NLP & Pipeline",
+        "score": 3,
+        "totalQuestions": 5,
+        "percentage": 60,
+        "date": "2026-10-13T14:20:52.703Z"
+      },
+      {
+        "id": "1791900850621",
+        "type": "completed",
+        "subjectId": "data-structures",
+        "topicId": "arrays",
+        "title": "Contiguous Array Lab",
+        "score": 3,
+        "totalQuestions": 5,
+        "percentage": 60,
+        "date": "2026-10-13T14:14:10.621Z"
+      },
+      {
+        "id": "1791900512335",
+        "type": "completed",
+        "subjectId": "computer-networks",
+        "topicId": "osi-model",
+        "title": "OSI Model Layers",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-13T14:08:32.335Z"
+      }
+    ],
+    "activeDays": [
+      "2026-10-13",
+      "2026-10-14"
+    ],
+    "lastActiveTopic": {
+      "subjectId": "nlp",
+      "topicId": "text-preprocessing",
+      "title": "Text Preprocessing & Cleaning",
+      "timestamp": "2026-10-14T05:58:02.149Z"
+    }
+  },
+  {
+    "userId": "yN7Vrc1uFHTCTeSggPsZRw4IPAU2",
+    "streak": 2,
+    "lastActiveDate": "2026-10-14",
+    "completedTopics": {
+      "data-structures": [
+        "arrays"
+      ],
+      "computer-networks": [
+        "osi-model"
+      ]
+    },
+    "activities": [
+      {
+        "id": "1791965289091",
+        "type": "completed",
+        "subjectId": "computer-networks",
+        "topicId": "osi-model",
+        "title": "OSI Model Layers",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-14T08:08:09.092Z"
+      },
+      {
+        "id": "1791919024376",
+        "type": "completed",
+        "subjectId": "data-structures",
+        "topicId": "arrays",
+        "title": "Contiguous Array Lab",
+        "score": 4,
+        "totalQuestions": 5,
+        "percentage": 80,
+        "date": "2026-10-13T19:17:04.377Z"
+      }
+    ],
+    "activeDays": [
+      "2026-10-13",
+      "2026-10-14"
+    ],
+    "lastActiveTopic": {
+      "subjectId": "computer-networks",
+      "topicId": "osi-model",
+      "title": "OSI Model Layers",
+      "timestamp": "2026-10-14T08:08:09.092Z"
+    }
+  },
+  {
+    "userId": "Sn8YQ05ZPrgegsoocJqlP5Pb0wp2",
+    "streak": 0,
+    "lastActiveDate": null,
+    "completedTopics": {},
+    "activities": [],
+    "activeDays": []
+  },
+  {
+    "userId": "uRN73zq9kiSQNb9M1cvOG4MwPc23",
+    "streak": 0,
+    "lastActiveDate": null,
+    "completedTopics": {},
+    "activities": [],
+    "activeDays": []
+  },
+  {
+    "userId": "r9DgN4xeFcYKFgjypT1Pe0UQZtb2",
+    "streak": 1,
+    "lastActiveDate": "2026-10-14",
+    "completedTopics": {
+      "data-structures": [
+        "arrays"
+      ],
+      "computer-networks": [
+        "osi-model"
+      ],
+      "operating-systems": [
+        "user-kernel-mode",
+        "process-states",
+        "cpu-scheduling",
+        "critical-section-mutex",
+        "deadlocks",
+        "paging-address-translation",
+        "page-replacement"
+      ]
+    },
+    "activities": [
+      {
+        "id": "1791990406422",
+        "type": "completed",
+        "subjectId": "operating-systems",
+        "topicId": "critical-section-mutex",
+        "title": "Critical Section and Mutex",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-14T15:06:46.422Z"
+      },
+      {
+        "id": "1791990043087",
+        "type": "completed",
+        "subjectId": "operating-systems",
+        "topicId": "cpu-scheduling",
+        "title": "CPU Scheduling Algorithms",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-14T15:00:43.087Z"
+      },
+      {
+        "id": "1791989750371",
+        "type": "completed",
+        "subjectId": "operating-systems",
+        "topicId": "process-states",
+        "title": "Process States & Lifecycle",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-14T14:55:50.371Z"
+      },
+      {
+        "id": "1791989414971",
+        "type": "completed",
+        "subjectId": "operating-systems",
+        "topicId": "user-kernel-mode",
+        "title": "User Mode and Kernel Mode",
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "date": "2026-10-14T14:50:14.971Z"
+      },
+      {
+        "id": "1791988877953",
+        "type": "completed",
+        "subjectId": "computer-networks",
+        "topicId": "osi-model",
+        "title": "OSI Model Layers",
+        "score": 3,
+        "totalQuestions": 5,
+        "percentage": 60,
+        "date": "2026-10-14T14:41:17.953Z"
+      },
+      {
+        "id": "1791988661832",
+        "type": "completed",
+        "subjectId": "data-structures",
+        "topicId": "arrays",
+        "title": "Contiguous Array Lab",
+        "score": 3,
+        "totalQuestions": 5,
+        "percentage": 60,
+        "date": "2026-10-14T14:37:41.832Z"
+      }
+    ],
+    "activeDays": [
+      "2026-10-14"
+    ],
+    "lastActiveTopic": {
+      "subjectId": "operating-systems",
+      "topicId": "critical-section-mutex",
+      "title": "Critical Section and Mutex",
+      "timestamp": "2026-10-14T15:06:46.422Z"
+    }
+  }
+]

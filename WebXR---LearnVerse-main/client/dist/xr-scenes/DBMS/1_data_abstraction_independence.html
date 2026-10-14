@@ -1,0 +1,34 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Data Abstraction and Data Independence</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0b1d33"></a-sky><a-circle rotation="-90 0 0" radius="7" color="#12304f"></a-circle>
+<a-light type="ambient" intensity=".9"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity position="0 0 0"><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+<a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="-1.45 0 -4">
+<a-text value="Data Abstraction and Data Independence" align="center" position="1.45 3.9 0" width="7.5" color="#ffd36b"></a-text>
+<a-plane position="4.5 2.2 -.02" width="3.4" height="3.7" color="#10263f"></a-plane>
+<a-text id="i" value="Look at the scene and click any item or button (mouse, or controller trigger in VR)." position="2.95 2.2 0" width="3.1" wrap-count="31" anchor="left" align="left" baseline="center" color="#fff"></a-text>
+<a-box id="v" class="hit" data-t="VIEW (EXTERNAL) LEVEL
+What each user sees: only the part of the DB they need, e.g. a student sees marks but not salaries.
+Many views per database. Gives security and simplicity." data-x="v" position="-0.5 3 0" width="3.6" height="0.65" depth=".15" color="#3b82c4"><a-text value="VIEW LEVEL (external)" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-box id="l" class="hit" data-t="LOGICAL (CONCEPTUAL) LEVEL
+What data is stored and how it is related: tables, attributes, keys, constraints. One per database, designed by the DBA. Hides storage details." data-x="l" position="-0.5 2.2 0" width="3.6" height="0.65" depth=".15" color="#2e9e6b"><a-text value="LOGICAL LEVEL (conceptual)" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-box id="p" class="hit" data-t="PHYSICAL (INTERNAL) LEVEL
+How data is really stored: files, blocks, indexes, B+ trees, compression. Lowest level of abstraction." data-x="p" position="-0.5 1.4 0" width="3.6" height="0.65" depth=".15" color="#8a5cc4"><a-text value="PHYSICAL LEVEL (internal)" align="center" position="0 0 .09" width="2.4" color="#fff"></a-text></a-box>
+<a-text  value="^ mapping" align="center" anchor="center" position="-2.9 2.6 0" width="1.2" wrap-count="13" color="#cfe3ff"></a-text>
+<a-text  value="^ mapping" align="center" anchor="center" position="-2.9 1.8 0" width="1.2" wrap-count="13" color="#cfe3ff"></a-text>
+<a-box class="btn" data-x="p" data-t="PHYSICAL DATA INDEPENDENCE
+Change: add an index or move files to another disk.
+Logical schema and views are NOT affected - only the logical/physical mapping is updated." position="-1.1749999999999998 0.75 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Change physical" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+<a-box class="btn" data-x="l" data-t="LOGICAL DATA INDEPENDENCE
+Change: add a column or split a table.
+User views and applications keep working - only the view/logical mapping is updated. Harder to achieve than physical." position="0.475 0.75 0" width="1.5" height=".5" depth=".1" color="#2a6db0"><a-text value="Change logical" align="center" position="0 0 .06" width="2.6" color="#fff"></a-text></a-box>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const C={v:'#3b82c4',l:'#2e9e6b',p:'#8a5cc4'};function X(k){for(const i in C)$('#'+i).setAttribute('color',C[i]);if(C[k])$('#'+k).setAttribute('color','#f90')}
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{
+ if(b.classList.contains('btn')){document.querySelectorAll('.btn').forEach(x=>x.setAttribute('color','#2a6db0'));b.setAttribute('color','#f90')}
+ T('#i',b.dataset.t);if(window.X)X(b.dataset.x||'')}));
+</script></body></html>

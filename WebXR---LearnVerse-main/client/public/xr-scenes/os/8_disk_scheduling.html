@@ -1,0 +1,92 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Disk Scheduling</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#06232a"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#0b3a44"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="3.7 2.35 -2.7" rotation="0 -28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.93 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rep" data-v="" position="2.78 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Replay" align="center" position="0 0 .07" width="1.20" wrap-count="8" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="-1.2 0 -3.6">
+<a-entity id="pgp" visible="false"><a-box  position="0 4.55 0" width="5.6" height="0.05" depth="0.15" color="#aaa"></a-box>
+<a-text value="0" align="center" anchor="center" baseline="center" position="-2.8 4.78 0" width="0.52" wrap-count="4" color="#cfe3ff"></a-text>
+<a-text value="50" align="center" anchor="center" baseline="center" position="-1.3929648241206027 4.78 0" width="0.52" wrap-count="4" color="#cfe3ff"></a-text>
+<a-text value="100" align="center" anchor="center" baseline="center" position="0.014070351758794342 4.78 0" width="0.52" wrap-count="4" color="#cfe3ff"></a-text>
+<a-text value="150" align="center" anchor="center" baseline="center" position="1.4211055276381908 4.78 0" width="0.52" wrap-count="4" color="#cfe3ff"></a-text>
+<a-text value="199" align="center" anchor="center" baseline="center" position="2.8 4.78 0" width="0.52" wrap-count="4" color="#cfe3ff"></a-text>
+<a-box id="pn0"  position="-0.04221105527638214 4.4 0" width="0.08" height="0.3" depth="0.08" color="#ffd36b"></a-box>
+<a-box id="pn1"  position="2.3497487437185933 4.4 0" width="0.08" height="0.3" depth="0.08" color="#ffd36b"></a-box>
+<a-box id="pn2"  position="-1.758793969849246 4.4 0" width="0.08" height="0.3" depth="0.08" color="#ffd36b"></a-box>
+<a-box id="pn3"  position="0.6331658291457285 4.4 0" width="0.08" height="0.3" depth="0.08" color="#ffd36b"></a-box>
+<a-box id="pn4"  position="-2.406030150753769 4.4 0" width="0.08" height="0.3" depth="0.08" color="#ffd36b"></a-box>
+<a-box id="pn5"  position="0.6894472361809045 4.4 0" width="0.08" height="0.3" depth="0.08" color="#ffd36b"></a-box>
+<a-box id="pn6"  position="-0.9708542713567838 4.4 0" width="0.08" height="0.3" depth="0.08" color="#ffd36b"></a-box>
+<a-box id="pn7"  position="-0.914572864321608 4.4 0" width="0.08" height="0.3" depth="0.08" color="#ffd36b"></a-box>
+</a-entity><a-sphere id="tp0" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl0" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts0" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp1" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl1" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts1" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp2" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl2" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts2" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp3" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl3" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts3" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp4" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl4" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts4" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp5" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl5" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts5" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp6" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl6" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts6" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp7" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl7" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts7" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp8" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl8" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts8" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp9" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl9" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts9" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="tp10" radius=".07" color="#ffd36b" visible="false"></a-sphere><a-text id="tl10" value="" align="center" anchor="center" baseline="center" position="0 0 0" width="0.48" wrap-count="4" color="#fff"></a-text>
+<a-box id="ts10" visible="false" position="0 0 0" width="1" height="0.05" depth="0.05" color="#7fe3ff"></a-box>
+<a-sphere id="hd" radius=".14" color="#ff3d3d" position="0 4.1 .1" visible="false"></a-sphere><a-text id="tot" value="" align="center" anchor="center" baseline="center" position="0 1.2 0" width="6.08" wrap-count="38" color="#fff"></a-text>
+<a-text value="requests: 98 183 37 122 14 124 65 67   head starts at 50" align="center" anchor="center" baseline="center" position="0 0.85 0" width="6.40" wrap-count="64" color="#cfe3ff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+const at=(ms,f)=>tm.push(setTimeout(f,ms)),hold=ms=>{busy=1;at(ms,()=>busy=0)};
+const vs=(a,v)=>a.forEach(i=>$('#'+i).setAttribute('visible',v));
+
+const RQ=[98,183,37,122,14,124,65,67],HD=50,TXf=t=>-2.8+t*5.6/199,Y0=4.1,DY=.3;
+function pathOf(a){if(a=='fcfs')return[HD,...RQ];if(a=='sstf'){const l=RQ.slice(),p=[HD];let c=HD;while(l.length){let b=0;l.forEach((v,i)=>{if(Math.abs(v-c)<Math.abs(l[b]-c))b=i});c=l.splice(b,1)[0];p.push(c)}return p}
+ const up=RQ.filter(v=>v>=HD).sort((x,y)=>x-y),dn=RQ.filter(v=>v<HD).sort((x,y)=>y-x);return[HD,...up,199,...dn]}
+const totOf=p=>p.slice(1).reduce((s,v,i)=>s+Math.abs(v-p[i]),0);
+const NAME={fcfs:'FCFS',sstf:'SSTF',scan:'SCAN'};
+function clr(){for(let i=0;i<11;i++){vs(['tp'+i,'ts'+i],false);T('#tl'+i,'')}for(let i=0;i<8;i++)$('#pn'+i).setAttribute('color','#ffd36b');$('#hd').setAttribute('visible',false);T('#tot','')}
+function point(P,i,run,tot){const x=TXf(P[i]),y=Y0-DY*i;const tp=$('#tp'+i);tp.setAttribute('position',x+' '+y+' 0');tp.setAttribute('visible',true);$('#tl'+i).setAttribute('position',(x+.25)+' '+y+' 0');T('#tl'+i,String(P[i]));
+ if(i){const px=TXf(P[i-1]),py=Y0-DY*(i-1),L=Math.hypot(x-px,y-py),s=$('#ts'+i);s.setAttribute('visible',true);s.setAttribute('width',L);s.setAttribute('position',(x+px)/2+' '+(y+py)/2+' 0');s.setAttribute('rotation','0 0 '+Math.atan2(y-py,x-px)*180/Math.PI)}
+ const h=$('#hd');h.setAttribute('visible',true);h.setAttribute('animation__m',{property:'position',to:x+' '+y+' .1',dur:600,easing:'linear'});const k=RQ.indexOf(P[i]);if(k>=0)$('#pn'+k).setAttribute('color','#2e9e6b');T('#tot',NAME[run]+': head moved '+tot+' tracks so far')}
+function play(a,msg){clr();const P=pathOf(a);busy=1;let t=0;P.forEach((v,i)=>at(i*700,()=>{if(i)t+=Math.abs(v-P[i-1]);point(P,i,a,t)}));at(P.length*700,()=>{busy=0;T('#inf',msg(totOf(P)))})}
+const INTRO=['DISK SCHEDULING','A hard disk head must move to each requested track. Moving is slow, so the order of requests matters.','a delivery driver planning a route.','Press Next step.'];
+function rst0(){vs(['pgp'],false);clr();$('#hd').removeAttribute('animation__m')}
+const X={rep:()=>{if(si>=0&&!busy)go(si)}};
+const STEPS=[
+{t:'Disk and requests',a:'a delivery driver with 8 addresses.',h:'Press Next step.',f:()=>{vs(['pgp'],true);const h=$('#hd');h.setAttribute('visible',true);h.setAttribute('position',TXf(HD)+' '+Y0+' .1');return 'The head starts at track 50. Yellow pins are the requested tracks (0 to 199). Time runs downwards in the chart.'}},
+{t:'FCFS',w:6600,a:'visiting houses in the order the orders arrived.',h:'Watch the zigzag.',f:()=>{play('fcfs',n=>'FCFS moved the head '+n+' tracks. Fair, but it zigzags a lot.');return 'First Come, First Served: visit the requests in the order they arrived.'}},
+{t:'SSTF',w:6600,a:'always driving to the nearest house.',h:'Compare the total.',f:()=>{play('sstf',n=>'SSTF moved '+n+' tracks. Very short, but far requests may wait forever (starvation).');return 'Shortest Seek Time First: always go to the nearest unserved request.'}},
+{t:'SCAN (elevator)',w:7400,a:'an elevator sweeping up, then down.',h:'Watch it reach the end.',f:()=>{play('scan',n=>'SCAN moved '+n+' tracks. Fair to everyone: no request waits forever.');return 'SCAN: the head sweeps to one end (199), serving requests on the way, then comes back.'}},
+{t:'Compare',a:'choosing the best delivery route.',h:'Click Replay to watch again.',f:()=>{return 'Head movement: FCFS '+totOf(pathOf('fcfs'))+', SSTF '+totOf(pathOf('sstf'))+', SCAN '+totOf(pathOf('scan'))+' tracks. Less movement means a faster disk.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>

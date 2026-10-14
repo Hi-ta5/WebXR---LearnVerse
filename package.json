@@ -1,0 +1,14 @@
+{
+  "name": "learnverse-root",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev --prefix WebXR---LearnVerse-main",
+    "build": "npm run build --prefix WebXR---LearnVerse-main",
+    "setup": "npm run setup --prefix WebXR---LearnVerse-main",
+    "install-all": "npm run install-all --prefix WebXR---LearnVerse-main",
+    "client": "npm run dev --prefix WebXR---LearnVerse-main/client",
+    "server": "npm run dev --prefix WebXR---LearnVerse-main/server"
+  }
+}

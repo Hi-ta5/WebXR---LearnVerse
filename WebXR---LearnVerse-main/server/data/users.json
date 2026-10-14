@@ -1,0 +1,79 @@
+[
+  {
+    "id": "1791106959339",
+    "name": "Divya Vishwakarma",
+    "email": "dipeshvishwakarma09@gmail.com",
+    "password": "$2a$10$1jYm7jjkWc5x6ij8ijMsnuXQ4MTh5qySIrkDwHHP2H/6q9yxaTHAS",
+    "createdAt": "2026-10-04T09:42:39.339Z"
+  },
+  {
+    "id": "1791128457738",
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "$2a$10$BG2W5I4MPI4jmVmHGzor1e3lKdvoaMaXXbNPOxqthBxzAk2Q50ZWG",
+    "createdAt": "2026-10-04T15:40:57.738Z"
+  },
+  {
+    "id": "1791154311554",
+    "name": "vanshika",
+    "email": "vanshug19@gmail.com",
+    "password": "$2a$10$TzhKGDRKgMSnCNXySXzXTudh1okvHALtdaVwYxadRKz/bh1XbXQGi",
+    "createdAt": "2026-10-04T22:51:51.554Z"
+  },
+  {
+    "id": "1791190359323",
+    "name": "divya vishwakarma",
+    "email": "1458_vanshika@katalystindia.org",
+    "password": "$2a$10$zAYTCpqXkplybCKXDnyaO.c.bC6SPkuNrHLlRuHrNrZpVjIJGM.oG",
+    "createdAt": "2026-10-05T08:52:39.323Z"
+  },
+  {
+    "id": "1791578063891",
+    "name": "Test User",
+    "email": "admin@learnverse.com",
+    "password": "$2a$10$nSTp77RMIzMJUxJySMknQ.fRzQRlfJd47/kzmMgD4dNxWnL/jJsKe",
+    "createdAt": "2026-10-09T20:34:23.891Z"
+  },
+  {
+    "id": "1791633971002",
+    "name": "Test User",
+    "email": "test@test.com",
+    "password": "$2a$10$FX1guRVfI10PsBM3fyvFIOVdbHk5.oj9Ne46swLac8AxDkk6CbVBe",
+    "createdAt": "2026-10-10T12:06:11.002Z"
+  },
+  {
+    "id": "G8R3Z7bkuFcHUn5jxkUwPkPMI342",
+    "firebaseUid": "G8R3Z7bkuFcHUn5jxkUwPkPMI342",
+    "name": "Hita",
+    "email": "hita@gmail.com",
+    "createdAt": "2026-10-13T14:00:30.980Z"
+  },
+  {
+    "id": "yN7Vrc1uFHTCTeSggPsZRw4IPAU2",
+    "firebaseUid": "yN7Vrc1uFHTCTeSggPsZRw4IPAU2",
+    "name": "hita",
+    "email": "hita8262@gmail.com",
+    "createdAt": "2026-10-13T19:08:21.638Z"
+  },
+  {
+    "id": "Sn8YQ05ZPrgegsoocJqlP5Pb0wp2",
+    "firebaseUid": "Sn8YQ05ZPrgegsoocJqlP5Pb0wp2",
+    "name": "CE56 Hita Prajapati",
+    "email": "hitaprajapati1025@gmail.com",
+    "createdAt": "2026-10-14T01:53:15.540Z"
+  },
+  {
+    "id": "uRN73zq9kiSQNb9M1cvOG4MwPc23",
+    "firebaseUid": "uRN73zq9kiSQNb9M1cvOG4MwPc23",
+    "name": "Hita Prajapati",
+    "email": "prajapatihita3@gmail.com",
+    "createdAt": "2026-10-14T05:49:51.046Z"
+  },
+  {
+    "id": "r9DgN4xeFcYKFgjypT1Pe0UQZtb2",
+    "firebaseUid": "r9DgN4xeFcYKFgjypT1Pe0UQZtb2",
+    "name": "Divya Vishwakarma",
+    "email": "divya.j.vishwakarma@gmail.com",
+    "createdAt": "2026-10-14T14:18:19.970Z"
+  }
+]

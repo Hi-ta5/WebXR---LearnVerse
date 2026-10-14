@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebXR Stack Visualization</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+    body{
+      margin:0;
+      overflow:hidden;
+      font-family:Arial, sans-serif;
+    }
+
+    .ui{
+      position:absolute;
+      top:20px;
+      left:20px;
+      z-index:999;
+      width:280px;
+      background:rgba(0,0,0,0.85);
+      color:white;
+      padding:15px;
+      border-radius:12px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .ui h2{
+      margin-top:0;
+      color:#00ffff;
+    }
+
+    input{
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      border:none;
+      border-radius:8px;
+      box-sizing:border-box;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    button{
+      width:100%;
+      margin-top:10px;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:14px;
+      background:#00ffff;
+      color:black;
+      font-weight:bold;
+      transition: background 0.2s;
+    }
+
+    button:hover{
+      background: #00cccc;
+    }
+
+    #peekText{
+      margin-top:12px;
+      color:#00ff99;
+      font-weight:bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="ui">
+
+  <h2>STACK VR LAB</h2>
+
+  <input type="number" id="valueInput" placeholder="Enter Value">
+
+  <button onclick="pushStack()">Push</button>
+  <button onclick="popStack()">Pop</button>
+  <button onclick="peekStack()">Peek</button>
+
+  <div id="peekText">Top Element: None</div>
+
+</div>
+
+<a-scene background="color:#020617" vr-mode-ui="enabled:true">
+
+  <!-- Assets -->
+  <a-assets>
+
+    <!-- Robot Model -->
+    <a-asset-item
+      id="robotModel"
+      src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/RobotExpressive/glTF/RobotExpressive.gltf">
+    </a-asset-item>
+
+  </a-assets>
+
+  <!-- Camera -->
+  <a-camera position="0 3 12"></a-camera>
+
+  <!-- Lights -->
+  <a-light type="ambient" intensity="1"></a-light>
+
+  <a-light
+    type="point"
+    intensity="2"
+    position="0 10 5">
+  </a-light>
+
+  <!-- Floor -->
+  <a-plane
+    rotation="-90 0 0"
+    width="50"
+    height="50"
+    color="#111827">
+  </a-plane>
+
+  <!-- Sky -->
+  <a-sky color="#020617"></a-sky>
+
+  <!-- Title -->
+  <a-text
+    value="WEBXR STACK VISUALIZATION"
+    position="-6 7 -12"
+    scale="3 3 3"
+    color="#00ffff">
+  </a-text>
+
+  <!-- Decorative Robots -->
+
+  <a-gltf-model
+    src="#robotModel"
+    position="-8 0 -8"
+    scale="0.7 0.7 0.7"
+    animation="
+      property: rotation;
+      to: 0 360 0;
+      loop: true;
+      dur: 20000">
+  </a-gltf-model>
+
+  <a-gltf-model
+    src="#robotModel"
+    position="8 0 -8"
+    scale="0.7 0.7 0.7"
+    animation="
+      property: rotation;
+      to: 0 -360 0;
+      loop: true;
+      dur: 20000">
+  </a-gltf-model>
+
+  <!-- Stack Base -->
+  <a-box
+    position="0 0.5 -6"
+    width="3"
+    height="0.5"
+    depth="3"
+    color="#374151">
+  </a-box>
+
+  <!-- Stack Container -->
+  <a-entity id="stackContainer"></a-entity>
+
+</a-scene>
+
+<script>
+
+let stack = [10, 20, 30];
+
+const container = document.querySelector('#stackContainer');
+
+function renderStack(highlightTop = false){
+
+  container.innerHTML = '';
+
+  stack.forEach((value, index) => {
+
+    let color = '#3b82f6';
+
+    if(highlightTop && index === stack.length - 1){
+      color = '#22c55e';
+    }
+
+    // STACK BLOCK
+    const block = document.createElement('a-box');
+
+    block.setAttribute(
+      'position',
+      `0 ${index * 1.2 + 1.2} -6`
+    );
+
+    block.setAttribute('width', '2');
+    block.setAttribute('height', '1');
+    block.setAttribute('depth', '2');
+
+    block.setAttribute('color', color);
+
+    // Glow effect
+    block.setAttribute(
+      'material',
+      'emissive: #00ffff; emissiveIntensity: 0.4'
+    );
+
+    // Floating animation
+    block.setAttribute(
+      'animation',
+      `property: position;
+       dir: alternate;
+       dur: 1200;
+       loop: true;
+       to: 0 ${index * 1.2 + 1.35} -6`
+    );
+
+    // VALUE TEXT
+    const text = document.createElement('a-text');
+
+    text.setAttribute('value', value);
+
+    text.setAttribute('align', 'center');
+
+    text.setAttribute('color', 'white');
+
+    text.setAttribute('position', '0 0.8 1.1');
+
+    text.setAttribute('scale', '2.5 2.5 2.5');
+
+    block.appendChild(text);
+
+    container.appendChild(block);
+  });
+}
+
+function pushStack(){
+
+  const value = parseInt(
+    document.getElementById('valueInput').value
+  );
+
+  if(!isNaN(value)){
+
+    stack.push(value);
+
+    renderStack();
+  }
+}
+
+function popStack(){
+
+  if(stack.length > 0){
+
+    stack.pop();
+
+    renderStack();
+
+    document.getElementById('peekText').innerHTML =
+      'Top Element: None';
+  }
+}
+
+function peekStack(){
+
+  if(stack.length > 0){
+
+    const top = stack[stack.length - 1];
+
+    renderStack(true);
+
+    document.getElementById('peekText').innerHTML =
+      'Top Element: ' + top;
+  }
+}
+
+renderStack();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Network Topologies</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script></head><body>
+<a-scene cursor="rayOrigin:mouse" raycaster="objects:.btn,.hit" vr-mode-ui="enabled:true">
+<a-sky color="#0a2814"></a-sky><a-circle rotation="-90 0 0" radius="8" color="#123a20"></a-circle>
+<a-light type="ambient" intensity="1"></a-light><a-light type="directional" position="1 4 2" intensity=".6"></a-light>
+<a-entity><a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity><a-entity laser-controls="hand:right" raycaster="objects:.btn,.hit;far:20"></a-entity></a-entity>
+<a-entity position="3.7 2.35 -2.7" rotation="0 -28 0"><a-plane width="3.5" height="4.1" color="#0c1a2a" opacity=".94"></a-plane><a-sphere id="d0" position="-1.50 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d1" position="-1.24 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d2" position="-0.98 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d3" position="-0.72 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d4" position="-0.46 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d5" position="-0.20 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d6" position="0.06 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d7" position="0.32 1.95 .05" radius=".09" color="#555"></a-sphere><a-sphere id="d8" position="0.58 1.95 .05" radius=".09" color="#555"></a-sphere><a-text id="ttl" value="" align="left" anchor="left" baseline="top" position="-1.55 1.8 0" width="3.11" wrap-count="23" color="#ffd36b"></a-text>
+<a-text id="inf" value="" align="left" anchor="left" baseline="top" position="-1.55 1.15 0" width="3.11" wrap-count="23" color="#fff"></a-text>
+<a-text id="ana" value="" align="left" anchor="left" baseline="top" position="-1.55 -0.3 0" width="3.11" wrap-count="23" color="#7fe3ff"></a-text>
+<a-text id="hnt" value="" align="left" anchor="left" baseline="top" position="-1.55 -1.2 0" width="3.11" wrap-count="23" color="#9bffb0"></a-text>
+</a-entity>
+<a-entity position="0 0 -3.3"><a-box class="btn" data-a="next" data-v="" position="-3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Next step" align="center" position="0 0 .07" width="1.60" wrap-count="11" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="run" data-v="" position="-1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#d9822b"><a-text value="Run all" align="center" position="0 0 .07" width="1.35" wrap-count="9" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="rst" data-v="" position="0.00 0.25 0" width="1.75" height=".48" depth=".12" color="#7a4a2a"><a-text value="Reset" align="center" position="0 0 .07" width="1.05" wrap-count="7" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="tp" data-v="" position="1.85 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Topology" align="center" position="0 0 .07" width="1.50" wrap-count="10" color="#fff"></a-text></a-box>
+<a-box class="btn" data-a="send" data-v="" position="3.70 0.25 0" width="1.75" height=".48" depth=".12" color="#3b6a8a"><a-text value="Send" align="center" position="0 0 .07" width="0.90" wrap-count="6" color="#fff"></a-text></a-box>
+</a-entity>
+<a-entity id="m" position="-1.2 0 -3.6">
+<a-sphere id="n0" class="hit" data-a="down" data-v="0" radius=".3" color="#3b82c4" position="0 3 0"><a-text value="PC1" align="center" position="0 0 .32" width=".5" wrap-count="3" color="#fff"></a-text></a-sphere><a-sphere id="n1" class="hit" data-a="down" data-v="1" radius=".3" color="#3b82c4" position="0 3 0"><a-text value="PC2" align="center" position="0 0 .32" width=".5" wrap-count="3" color="#fff"></a-text></a-sphere><a-sphere id="n2" class="hit" data-a="down" data-v="2" radius=".3" color="#3b82c4" position="0 3 0"><a-text value="PC3" align="center" position="0 0 .32" width=".5" wrap-count="3" color="#fff"></a-text></a-sphere><a-sphere id="n3" class="hit" data-a="down" data-v="3" radius=".3" color="#3b82c4" position="0 3 0"><a-text value="PC4" align="center" position="0 0 .32" width=".5" wrap-count="3" color="#fff"></a-text></a-sphere><a-sphere id="n4" class="hit" data-a="down" data-v="4" radius=".3" color="#3b82c4" position="0 3 0"><a-text value="PC5" align="center" position="0 0 .32" width=".5" wrap-count="3" color="#fff"></a-text></a-sphere><a-sphere id="n5" class="hit" data-a="down" data-v="5" radius=".3" color="#3b82c4" position="0 3 0"><a-text value="PC6" align="center" position="0 0 .32" width=".5" wrap-count="3" color="#fff"></a-text></a-sphere><a-sphere id="n6" class="hit" data-a="down" data-v="6" radius=".4" color="#d9822b" position="0 3 0" visible="false"><a-text value="HUB" align="center" position="0 0 .42" width=".6" wrap-count="3" color="#fff"></a-text></a-sphere><a-box id="e0" class="hit" data-a="cut" data-v="0" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e1" class="hit" data-a="cut" data-v="1" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e2" class="hit" data-a="cut" data-v="2" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e3" class="hit" data-a="cut" data-v="3" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e4" class="hit" data-a="cut" data-v="4" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e5" class="hit" data-a="cut" data-v="5" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e6" class="hit" data-a="cut" data-v="6" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e7" class="hit" data-a="cut" data-v="7" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e8" class="hit" data-a="cut" data-v="8" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e9" class="hit" data-a="cut" data-v="9" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e10" class="hit" data-a="cut" data-v="10" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e11" class="hit" data-a="cut" data-v="11" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e12" class="hit" data-a="cut" data-v="12" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e13" class="hit" data-a="cut" data-v="13" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-box id="e14" class="hit" data-a="cut" data-v="14" visible="false" position="0 0 0" width="1" height="0.07" depth="0.07" color="#9fb4d6"></a-box>
+<a-cone id="a0" radius=".12" height=".26" color="#ffd36b" visible="false"></a-cone><a-cone id="a1" radius=".12" height=".26" color="#ffd36b" visible="false"></a-cone><a-cone id="a2" radius=".12" height=".26" color="#ffd36b" visible="false"></a-cone><a-cone id="a3" radius=".12" height=".26" color="#ffd36b" visible="false"></a-cone><a-cone id="a4" radius=".12" height=".26" color="#ffd36b" visible="false"></a-cone><a-cone id="a5" radius=".12" height=".26" color="#ffd36b" visible="false"></a-cone><a-sphere id="pk" radius=".16" color="#ffd36b" position="0 3 .2" visible="false"></a-sphere><a-text id="ttp" value="" align="center" anchor="center" baseline="center" position="0 4.7 0" width="4.00" wrap-count="20" color="#ffd36b"></a-text>
+<a-text id="ban" value="" align="center" anchor="center" baseline="center" position="0 1.45 0" width="5.70" wrap-count="38" color="#fff"></a-text>
+<a-text value="Click a cable or a PC to break it. Click again to repair it." align="center" anchor="center" baseline="center" position="0 1.0 0" width="6.72" wrap-count="56" color="#cfe3ff"></a-text>
+</a-entity></a-scene>
+<script>
+const $=s=>document.querySelector(s),T=(s,v)=>$(s).setAttribute('value',v);
+const hx=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')};
+const pc=n=>n.toString(2).split('1').length-1;
+let si=-1,busy=0,tm=[];
+
+const NM=['BUS','STAR','RING','MESH'];let tp=0,cut=new Set(),down=new Set(),E=[],POS=[];
+const layout=t=>{const P=[];for(let i=0;i<6;i++){if(t==0)P.push([-2.5+i,3.0]);else{const a=(180-60*i)*Math.PI/180;P.push([1.5*Math.cos(a),3.0+1.25*Math.sin(a)])}}P.push([0,3.0]);return P};
+const edges=t=>{const e=[];if(t==0)for(let i=0;i<5;i++)e.push([i,i+1,0]);if(t==1)for(let i=0;i<6;i++)e.push([i,6,0]);if(t==2)for(let i=0;i<6;i++)e.push([i,(i+1)%6,1]);if(t==3)for(let i=0;i<6;i++)for(let j=i+1;j<6;j++)e.push([i,j,0]);return e};
+const bn=c=>$('#ban').setAttribute('color',c);
+function paint(){for(let i=0;i<7;i++)$('#n'+i).setAttribute('color',down.has(i)?'#c4423b':i==6?'#d9822b':'#3b82c4');
+ for(let k=0;k<15;k++){const e=$('#e'+k);if(k<E.length){const[a,b,d]=E[k],p=POS[a],q=POS[b],L=Math.hypot(q[0]-p[0],q[1]-p[1]),ang=Math.atan2(q[1]-p[1],q[0]-p[0])*180/Math.PI;e.setAttribute('visible',true);e.setAttribute('width',L);e.setAttribute('position',(p[0]+q[0])/2+' '+(p[1]+q[1])/2+' 0');e.setAttribute('rotation','0 0 '+ang);e.setAttribute('color',cut.has(k)?'#c4423b':'#9fb4d6');
+  if(d){const c=$('#a'+(k%6));c.setAttribute('visible',true);c.setAttribute('position',(p[0]+q[0])/2+' '+(p[1]+q[1])/2+' .08');c.setAttribute('rotation','0 0 '+(ang-90))}}else e.setAttribute('visible',false)}
+ if(tp!=2)for(let k=0;k<6;k++)$('#a'+k).setAttribute('visible',false)}
+function show(t,anim){tp=t;POS=layout(t);E=edges(t);T('#ttp',NM[t]+' TOPOLOGY');$('#n6').setAttribute('visible',t==1);for(let k=0;k<15;k++)$('#e'+k).setAttribute('visible',false);for(let k=0;k<6;k++)$('#a'+k).setAttribute('visible',false);
+ for(let i=0;i<7;i++)$('#n'+i).setAttribute('animation__p',{property:'position',to:POS[i][0]+' '+POS[i][1]+' 0',dur:anim?800:1,easing:'easeInOutQuad'});
+ tm.push(setTimeout(paint,anim?850:50))}
+const ok=(k)=>{const[a,b]=E[k];return !cut.has(k)&&!down.has(a)&&!down.has(b)};
+function bfs(ign){const prev={0:-1},q=[0];while(q.length){const u=q.shift();if(u==3)break;E.forEach((e,k)=>{if(!ign&&!ok(k))return;[[e[0],e[1]],[e[1],e[0]]].forEach(([s,d],j)=>{if(j==1&&e[2])return;if(s==u&&!(d in prev)){prev[d]=u;q.push(d)}})})}
+ if(!(3 in prev))return null;const p=[];let x=3;while(x!=-1){p.unshift(x);x=prev[x]}return p}
+const nm=n=>n==6?'HUB':'PC'+(n+1);
+function send(){const pk=$('#pk');pk.setAttribute('visible',true);pk.setAttribute('position',POS[0][0]+' '+POS[0][1]+' .2');busy=1;T('#ban','');
+ const p=bfs(false),hop=n=>pk.setAttribute('animation__m',{property:'position',to:POS[n][0]+' '+POS[n][1]+' .2',dur:450,easing:'linear'});
+ if(p){p.slice(1).forEach((n,i)=>tm.push(setTimeout(()=>hop(n),i*500)));tm.push(setTimeout(()=>{busy=0;T('#ban','DELIVERED: '+p.map(nm).join(' > ')+'  ('+(p.length-1)+' hops)');bn('#9bffb0')},p.length*500));return}
+ const w=bfs(true)||[0],find=()=>{for(let i=0;i<w.length-1;i++){const k=E.findIndex(e=>(e[0]==w[i]&&e[1]==w[i+1])||(!e[2]&&e[0]==w[i+1]&&e[1]==w[i]));if(k<0||!ok(k))return i}return w.length-2};
+ const f=Math.max(0,find());w.slice(1,f+1).forEach((n,i)=>tm.push(setTimeout(()=>hop(n),i*500)));
+ tm.push(setTimeout(()=>{pk.setAttribute('color','#ff3d3d');busy=0;T('#ban','STOPPED at '+nm(w[f])+': '+(tp==0?'the cable is cut, the bus is split in two':tp==1?'the hub is down, no PC can reach another':'the one-way ring is broken, the token cannot pass'));bn('#ff8a80')},(f+1)*500));tm.push(setTimeout(()=>pk.setAttribute('color','#ffd36b'),(f+1)*500+50)) }
+function sc(t,c,d){cut.clear();down.clear();if(c!=null)cut.add(c);if(d!=null)down.add(d);$('#pk').setAttribute('visible',false);show(t,true);busy=1;tm.push(setTimeout(()=>{busy=0;send()},900))}
+const INTRO=['NETWORK TOPOLOGIES','A topology is the shape of a network: how the computers are connected. PC1 will send a packet to PC4.','different road layouts for a city.','Press Next step. Click a cable or PC to break it.'];
+function rst0(){cut.clear();down.clear();tp=0;show(0,false);$('#pk').setAttribute('visible',false);T('#ban','')}
+const X={tp:()=>{sc((tp+1)%4)},send:()=>{if(!busy)send()},cut:k=>{k=+k;if(cut.has(k))cut.delete(k);else cut.add(k);paint();T('#inf',cut.has(k)?'Cable cut. Press Send to see what happens.':'Cable repaired. Press Send.')},down:i=>{i=+i;if(down.has(i))down.delete(i);else down.add(i);paint();T('#inf',down.has(i)?nm(i)+' switched off. Press Send to see what happens.':nm(i)+' is back on. Press Send.')}};
+const STEPS=[
+{t:'Bus: one shared cable',a:'one hallway with many doors.',h:'Click any cable to cut it.',f:()=>{sc(0);return 'All PCs share ONE cable. PC1 sends to PC4 along it. Cheap and simple, but only one PC can talk at a time.'}},
+{t:'Bus: the cable breaks',a:'a blocked hallway.',h:'Click the cable to repair it.',f:()=>{sc(0,2);return 'The cable is cut between PC3 and PC4. The bus splits in two, so PC1 can no longer reach PC4.'}},
+{t:'Star: a central hub',a:'an airport hub: flights go through the middle.',h:'Click the hub to switch it off.',f:()=>{sc(1);return 'Every PC connects to a hub in the middle. PC1 sends via the hub to PC4. One bad cable only hurts one PC.'}},
+{t:'Star: the hub fails',a:'closing the airport.',h:'Click the hub to repair it.',f:()=>{sc(1,null,6);return 'The hub is down, so no PC can reach any other PC. The hub is a single point of failure.'}},
+{t:'Ring: pass it around',a:'passing a note around a circle.',h:'Press Next step.',f:()=>{sc(2);return 'PCs form a circle. Data travels one way around the ring, hop by hop: PC1, PC2, PC3, PC4.'}},
+{t:'Ring: one break',a:'a broken chain of people.',h:'Click the cable to repair it.',f:()=>{sc(2,1);return 'One cable in the one-way ring breaks and the token cannot pass. A dual ring fixes this.'}},
+{t:'Mesh: many paths',a:'a city grid with many roads.',h:'Click cables to cut them.',f:()=>{sc(3);return 'Every PC links to every other PC. PC1 reaches PC4 directly in 1 hop. Very reliable, but costly.'}},
+{t:'Mesh: reroute',a:'taking a detour around a closed road.',h:'Cut more links and Send.',f:()=>{sc(3,2);return 'The direct link is cut, but the packet finds another path and still arrives. Meshes heal themselves.'}},
+{t:'Compare them',a:'choosing a road network for a city.',h:'Click Topology to switch.',f:()=>{sc(0);return 'Bus: cheap, easy to break. Star: easy to manage, hub risk. Ring: fair, one break hurts. Mesh: reliable, costly.'}}];
+function dots(){for(let i=0;i<STEPS.length;i++)$('#d'+i).setAttribute('color',i<si?'#2e9e6b':i==si?'#f90':'#555')}
+function go(i){if(busy)return;si=i;const s=STEPS[i];T('#ttl','Step '+(i+1)+'/'+STEPS.length+': '+s.t);T('#inf',s.f()||'');T('#ana','Think of it like: '+(s.a||''));T('#hnt','Try this: '+(s.h||'Press Next step'));dots()}
+const ACT=Object.assign({
+ next:()=>{if(si<STEPS.length-1)go(si+1)},
+ run:()=>{ACT.rst();const n=()=>{if(si>=STEPS.length-1)return;if(busy){tm.push(setTimeout(n,300));return}go(si+1);tm.push(setTimeout(n,STEPS[si].w||3600))};n()},
+ rst:()=>{tm.forEach(clearTimeout);tm=[];busy=0;si=-1;rst0();T('#ttl',INTRO[0]);T('#inf',INTRO[1]);T('#ana',INTRO[2]);T('#hnt',INTRO[3]);dots()}},X);
+document.querySelectorAll('.btn,.hit').forEach(b=>b.addEventListener('click',()=>{const f=ACT[b.dataset.a];if(f)f(b.dataset.v)}));
+ACT.rst();
+</script></body></html>
